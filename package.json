@@ -1,0 +1,25 @@
+{
+  "name": "shot-timer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shot Timer für Live Fire und Dry Fire mit akustischer Schusserkennung.",
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/dev-server.mjs 8080",
+    "icons": "node tools/make-icons.mjs",
+    "assets": "capacitor-assets generate --ios --android --iconBackgroundColor \"#090b0c\" --iconBackgroundColorDark \"#090b0c\" --splashBackgroundColor \"#080a0b\" --splashBackgroundColorDark \"#080a0b\"",
+    "sync": "cap sync",
+    "android": "cap sync android && cap open android",
+    "ios": "cap sync ios && cap open ios",
+    "build": "node tools/make-icons.mjs && npm run assets && cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
+  }
+}

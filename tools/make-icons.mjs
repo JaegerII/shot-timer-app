@@ -1,23 +1,26 @@
-// Erzeugt die App-Icons aus einer einzigen Geometrie-Definition.
+// Erzeugt alle Bild-Assets aus einer einzigen Geometrie-Definition.
 // Start: node tools/make-icons.mjs
-// Ausgabe: dist/assets/icon-{192,512,1024}.png und dist/assets/icon-maskable-512.png
+//
+// dist/assets/  -> Icons für die Web-App und das Manifest
+// assets/       -> Quellbilder für `npm run assets` (@capacitor/assets),
+//                  das daraus die nativen Icon- und Splash-Varianten ableitet.
 import { deflateSync } from 'node:zlib';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const OUT = resolve(fileURLToPath(new URL('../dist/assets', import.meta.url)));
+const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const BG = [0x09, 0x0b, 0x0c];
 const ACCENT = [0xc8, 0xff, 0x24];
 const SS = 4; // Supersampling-Faktor für weiche Kanten
 
 /* ---------- Geometrie in Einheitskoordinaten (0..1) ---------- */
-// `safe` verkleinert das Motiv, damit es im maskable-Icon innerhalb des
-// sicheren Kreises (80 % der Fläche) bleibt.
-function shapes(safe) {
+// `scale` verkleinert das Motiv um den Mittelpunkt: 1 = formatfüllend,
+// 0.76 = innerhalb der Android-Maske, 0.2 = kleines Logo auf dem Splash.
+function shapes(scale) {
   const c = 0.5;
-  const s = (v) => c + (v - c) * safe;
-  const k = (v) => v * safe;
+  const s = (v) => c + (v - c) * scale;
+  const k = (v) => v * scale;
   return {
     ring: { x: c, y: s(0.565), r: k(0.255), w: k(0.09) },
     stem: { x0: c - k(0.043), x1: c + k(0.043), y0: s(0.175), y1: s(0.325) },
@@ -42,46 +45,60 @@ function inCapsule(x, y, x0, y0, x1, y1, w) {
   return dist2(x, y, x0 + t * dx, y0 + t * dy) <= (w / 2) ** 2;
 }
 
-// Liefert null (Hintergrund) oder ACCENT für einen Punkt in Einheitskoordinaten.
-function sample(x, y, g) {
+function onGlyph(x, y, g) {
   const { ring, stem, crown, hand } = g;
-  const d = Math.sqrt(dist2(x, y, ring.x, ring.y));
-  if (Math.abs(d - ring.r) <= ring.w / 2) return ACCENT;
-  if (inRoundRect(x, y, stem.x0, stem.y0, stem.x1, stem.y1, (stem.x1 - stem.x0) / 2)) return ACCENT;
-  if (inRoundRect(x, y, crown.x0, crown.y0, crown.x1, crown.y1, (crown.y1 - crown.y0) / 2)) return ACCENT;
-  if (inCapsule(x, y, hand.x0, hand.y0, hand.x1, hand.y1, hand.w)) return ACCENT;
-  return null;
+  if (Math.abs(Math.sqrt(dist2(x, y, ring.x, ring.y)) - ring.r) <= ring.w / 2) return true;
+  if (inRoundRect(x, y, stem.x0, stem.y0, stem.x1, stem.y1, (stem.x1 - stem.x0) / 2)) return true;
+  if (inRoundRect(x, y, crown.x0, crown.y0, crown.x1, crown.y1, (crown.y1 - crown.y0) / 2)) return true;
+  if (inCapsule(x, y, hand.x0, hand.y0, hand.x1, hand.y1, hand.w)) return true;
+  return false;
 }
 
 /* ---------- Rasterung ---------- */
-// `maskable`: Android-Maske, Motiv auf 76 % verkleinert, keine Rundung.
-// `square`:   App-Store-Vorgabe – volle Fläche, keine Rundung, keine Transparenz.
-function render(size, { maskable = false, square = false } = {}) {
-  const flat = maskable || square;
-  const g = shapes(maskable ? 0.76 : 1);
-  const corner = flat ? 0 : size * 0.225;
+// rounded:     abgerundete Ecken (sonst formatfüllendes Quadrat)
+// glyph:       Motivgröße relativ zur Kantenlänge, 0 = nur Fläche
+// transparent: Hintergrund freistellen (für Android-Adaptive-Icons)
+function render(size, { rounded = false, glyph = 1, transparent = false } = {}) {
+  const g = glyph > 0 ? shapes(glyph) : null;
+  const corner = rounded ? size * 0.225 : 0;
   const rgba = Buffer.alloc(size * size * 4);
+  // Begrenzungsrahmen des Motivs, damit große Flächen nicht supergesampelt werden.
+  const pad = 0.42 * glyph;
+  const box = { x0: (0.5 - pad) * size, x1: (0.5 + pad) * size, y0: (0.5 - pad) * size, y1: (0.5 + pad) * size };
+  const total = SS * SS;
 
   for (let py = 0; py < size; py++) {
+    const farY = py + 1 < box.y0 || py > box.y1;
     for (let px = 0; px < size; px++) {
+      const i = (py * size + px) * 4;
+      const plain = !rounded && (!g || farY || px + 1 < box.x0 || px > box.x1);
+
+      if (plain) { // reine Hintergrundfläche – ein Sample genügt
+        if (transparent) continue;
+        rgba[i] = BG[0]; rgba[i + 1] = BG[1]; rgba[i + 2] = BG[2]; rgba[i + 3] = 255;
+        continue;
+      }
+
       let bgHits = 0, fgHits = 0;
       for (let sy = 0; sy < SS; sy++) {
         for (let sx = 0; sx < SS; sx++) {
           const fx = px + (sx + 0.5) / SS;
           const fy = py + (sy + 0.5) / SS;
-          const inside = flat || inRoundRect(fx, fy, 0, 0, size, size, corner);
-          if (!inside) continue;
+          if (rounded && !inRoundRect(fx, fy, 0, 0, size, size, corner)) continue;
           bgHits++;
-          if (sample(fx / size, fy / size, g)) fgHits++;
+          if (g && onGlyph(fx / size, fy / size, g)) fgHits++;
         }
       }
-      const total = SS * SS;
-      const i = (py * size + px) * 4;
-      if (!bgHits) continue; // transparent außerhalb der Rundung
-      const fg = fgHits / bgHits;
-      for (let ch = 0; ch < 3; ch++) {
-        rgba[i + ch] = Math.round(BG[ch] * (1 - fg) + ACCENT[ch] * fg);
+      if (!bgHits) continue; // außerhalb der Rundung: transparent
+
+      if (transparent) {
+        // Nur das Motiv bleibt stehen, die Fläche wird freigestellt.
+        rgba[i] = ACCENT[0]; rgba[i + 1] = ACCENT[1]; rgba[i + 2] = ACCENT[2];
+        rgba[i + 3] = Math.round((fgHits / total) * 255);
+        continue;
       }
+      const fg = fgHits / bgHits;
+      for (let ch = 0; ch < 3; ch++) rgba[i + ch] = Math.round(BG[ch] * (1 - fg) + ACCENT[ch] * fg);
       rgba[i + 3] = Math.round((bgHits / total) * 255);
     }
   }
@@ -141,16 +158,24 @@ function png(size, rgba, alpha = true) {
 }
 
 /* ---------- Ausgabe ---------- */
-mkdirSync(OUT, { recursive: true });
 const targets = [
-  ['icon-192.png', 192, {}],
-  ['icon-512.png', 512, {}],
-  ['icon-1024.png', 1024, {}],
-  ['icon-maskable-512.png', 512, { maskable: true }],
-  ['icon-appstore-1024.png', 1024, { square: true }]
+  // Web-App und Manifest
+  ['dist/assets/icon-192.png', 192, { rounded: true }, true],
+  ['dist/assets/icon-512.png', 512, { rounded: true }, true],
+  ['dist/assets/icon-maskable-512.png', 512, { glyph: 0.76 }, true],
+  ['dist/assets/icon-appstore-1024.png', 1024, {}, false],
+  // Quellbilder für @capacitor/assets
+  ['assets/icon-only.png', 1024, {}, false],
+  ['assets/icon-foreground.png', 1024, { glyph: 0.62, transparent: true }, true],
+  ['assets/icon-background.png', 1024, { glyph: 0 }, false],
+  ['assets/splash.png', 2732, { glyph: 0.2 }, false],
+  ['assets/splash-dark.png', 2732, { glyph: 0.2 }, false]
 ];
-for (const [name, size, opts] of targets) {
-  const file = resolve(OUT, name);
-  writeFileSync(file, png(size, render(size, opts), !opts.square));
-  console.log('geschrieben:', name, size + 'px', opts.square ? '(RGB, ohne Alpha)' : '');
+
+for (const [rel, size, opts, alpha] of targets) {
+  const file = resolve(ROOT, rel);
+  mkdirSync(resolve(file, '..'), { recursive: true });
+  const started = Date.now();
+  writeFileSync(file, png(size, render(size, opts), alpha));
+  console.log(`${rel.padEnd(36)} ${size}px ${alpha ? 'RGBA' : 'RGB '} ${Date.now() - started}ms`);
 }

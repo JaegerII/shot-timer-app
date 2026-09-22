@@ -1,0 +1,17 @@
+{
+  "appId": "de.wemacon.shottimer",
+  "appName": "Shot Timer",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#080a0b"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#080a0b",
+    "limitsNavigationsToAppBoundDomains": true
+  }
+}
