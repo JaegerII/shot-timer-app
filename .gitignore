@@ -1,0 +1,24 @@
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Capacitor: Build-Ausgaben der nativen Projekte
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/src/main/assets/public/
+android/app/src/main/res/xml/config.xml
+ios/App/build/
+ios/App/Pods/
+ios/App/App/public/
+ios/App/output/
+ios/DerivedData/
+
+# Signaturmaterial niemals einchecken
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.cer
+keystore.properties
