@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node tools/dev-server.mjs 8080",
     "icons": "node tools/make-icons.mjs",
-    "assets": "capacitor-assets generate --ios --android --iconBackgroundColor \"#090b0c\" --iconBackgroundColorDark \"#090b0c\" --splashBackgroundColor \"#080a0b\" --splashBackgroundColorDark \"#080a0b\"",
+    "assets": "capacitor-assets generate --ios --android --iconBackgroundColor \"#0f1010\" --iconBackgroundColorDark \"#0f1010\" --splashBackgroundColor \"#0f1010\" --splashBackgroundColorDark \"#0f1010\"",
     "sync": "cap sync",
     "android": "cap sync android && cap open android",
     "ios": "cap sync ios && cap open ios",

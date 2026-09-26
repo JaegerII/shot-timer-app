@@ -7,11 +7,11 @@
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#080a0b"
+    "backgroundColor": "#0f1010"
   },
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#080a0b",
+    "backgroundColor": "#0f1010",
     "limitsNavigationsToAppBoundDomains": true
   }
 }

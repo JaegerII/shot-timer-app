@@ -46,6 +46,10 @@ Schützenliste der Score-Ansicht und der Inhalt langer Sheets.
 
 ### Farben, Textur und Schrift
 
+Die Farben stammen aus dem **FORTH TRACE Design System** (Schwarzgruen-Basis,
+Bone als Textfarbe, Alert als einzige Semantikfarbe). Abweichend davon bleibt
+der Akzent auf Wunsch `#ff3131` statt der System-Signalfarbe Sage `#A3A398`.
+
 Akzentfarbe ist `#ff3131`. Sie steckt an drei Stellen und muss bei einer
 Aenderung ueberall nachgezogen werden: in den Token `--accent*` im Stylesheet,
 im Favicon-Data-URI im `<head>` und in `ACCENT` in `tools/make-icons.mjs`

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" id="themeColor" content="#080a0b">
+  <meta name="theme-color" id="themeColor" content="#0f1010">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <meta name="description" content="Shot Timer für Live Fire und Dry Fire.">
   <title>Shot Timer</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23090b0c'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23ff3131' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%23ff3131' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1010'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23ff3131' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%23ff3131' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
   <style>
     /* Lokal gebuendelt, damit die App ohne Netz laeuft. SIL OFL 1.1,
        Lizenztext in assets/fonts/OFL.txt. Holen: node tools/fetch-fonts.mjs */
@@ -23,34 +23,35 @@
        Dunkel aus derselben Formatvorlage entstehen. */
     :root{
       color-scheme:dark;
-      /* Intro für Auszeichnung, Raleway für Fließtext; siehe assets/fonts. */
+      /* Lokal gebuendelt, damit die App ohne Netz laeuft. SIL OFL 1.1,
+         Lizenztext in assets/fonts/OFL.txt. Holen: node tools/fetch-fonts.mjs */
       --font-display:'Montserrat',ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
       --font-text:'Montserrat',ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
       --accent:#ff3131;
       --accent-fill:#ff3131;
       --accent-dark:#c2201f;
       --accent-ink:#ffffff;
-      --accent-soft:#241312;
-      --accent-line:#5f2422;
-      --danger:#ff8a87;
-      --danger-soft:#5a3130;
-      --warm:#ffb347;
-      --bg:#080a0b;
-      --bg-glow:#2a1517;
-      --surface:#121619;
-      --surface-2:#0f1315;
-      --surface-3:#1a1f22;
-      --sunken:#090b0c;
-      --line:#272d31;
-      --line-soft:#242a2e;
-      --line-strong:#47525a;
-      --text:#f5f7f8;
-      --muted:#8b959c;
-      --faint:#6c767b;
-      --shadow:0 24px 70px #0008;
-      --shadow-soft:0 12px 45px #000b;
-      --nav-bg:#111518ee;
-      --scrim:#000b;
+      --accent-soft:rgba(255,49,49,.14);
+      --accent-line:rgba(255,49,49,.34);
+      --danger:#de6c51;
+      --danger-soft:rgba(180,74,50,.42);
+      --warm:#de6c51;
+      --bg:#0f1010;
+      --bg-glow:#141715;
+      --surface:#171a18;
+      --surface-2:#0f110f;
+      --surface-3:#272c2a;
+      --sunken:#0a0b0a;
+      --line:rgba(237,237,230,.12);
+      --line-soft:rgba(237,237,230,.08);
+      --line-strong:rgba(237,237,230,.32);
+      --text:#edede6;
+      --muted:#949888;
+      --faint:#5a625b;
+      --shadow:0 32px 80px -24px rgba(0,0,0,.85);
+      --shadow-soft:0 18px 40px -14px rgba(0,0,0,.72);
+      --nav-bg:rgba(23,26,24,.94);
+      --scrim:rgba(10,11,10,.72);
     }
     :root[data-theme="light"]{
       color-scheme:light;
@@ -58,27 +59,27 @@
       --accent-fill:#ff3131;
       --accent-dark:#a81818;
       --accent-ink:#ffffff;
-      --accent-soft:#ffe8e7;
-      --accent-line:#f2b9b7;
-      --danger:#b3302d;
-      --danger-soft:#e3b7b5;
-      --warm:#9a5a00;
-      --bg:#eef1f3;
-      --bg-glow:#f7dedd;
+      --accent-soft:rgba(214,31,31,.1);
+      --accent-line:rgba(214,31,31,.36);
+      --danger:#b44a32;
+      --danger-soft:rgba(180,74,50,.4);
+      --warm:#b44a32;
+      --bg:#f1f1ec;
+      --bg-glow:#f1f1ec;
       --surface:#ffffff;
-      --surface-2:#f5f7f8;
-      --surface-3:#e8edf0;
-      --sunken:#e7ebee;
-      --line:#dce1e5;
-      --line-soft:#e3e8eb;
-      --line-strong:#9aa5ad;
-      --text:#10151a;
-      --muted:#5b666d;
-      --faint:#78838a;
-      --shadow:0 18px 50px #16202a14;
-      --shadow-soft:0 10px 34px #16202a1a;
-      --nav-bg:#fffffff0;
-      --scrim:#1b232a73;
+      --surface-2:#f4f4ef;
+      --surface-3:#e9e9e3;
+      --sunken:#eaeae4;
+      --line:rgba(10,11,10,.1);
+      --line-soft:rgba(10,11,10,.07);
+      --line-strong:rgba(10,11,10,.32);
+      --text:#0a0b0a;
+      --muted:#5a625b;
+      --faint:#8a9188;
+      --shadow:0 32px 80px -24px rgba(10,11,10,.18);
+      --shadow-soft:0 18px 40px -14px rgba(10,11,10,.14);
+      --nav-bg:rgba(255,255,255,.94);
+      --scrim:rgba(10,11,10,.45);
     }
 
     /* ============ Grundgerüst ============
@@ -758,7 +759,7 @@
       function applyTheme(){
         const mode=settings.theme==='auto'?(LIGHT_QUERY&&LIGHT_QUERY.matches?'light':'dark'):settings.theme;
         document.documentElement.dataset.theme=mode;
-        $('#themeColor')?.setAttribute('content',mode==='light'?'#eef1f3':'#080a0b');
+        $('#themeColor')?.setAttribute('content',mode==='light'?'#f1f1ec':'#0f1010');
         $$('#themeSwitch button').forEach(b=>b.classList.toggle('selected',b.dataset.themeOpt===settings.theme));
       }
       if(LIGHT_QUERY?.addEventListener)LIGHT_QUERY.addEventListener('change',()=>{if(settings.theme==='auto')applyTheme()});

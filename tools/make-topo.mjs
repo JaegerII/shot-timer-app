@@ -136,7 +136,7 @@ function svg(stroke, opacity) {
 }
 
 mkdirSync(OUT, { recursive: true });
-for (const [name, stroke, opacity] of [['topo.svg', '#ffffff', '0.055'], ['topo-light.svg', '#1b2a33', '0.07']]) {
+for (const [name, stroke, opacity] of [['topo.svg', '#edede6', '0.085'], ['topo-light.svg', '#0a0b0a', '0.075']]) {
   const content = svg(stroke, opacity);
   writeFileSync(resolve(OUT, name), content, 'utf8');
   console.log(name.padEnd(16), paths.length, 'Linien,', (content.length / 1024).toFixed(1) + ' KB');

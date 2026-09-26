@@ -10,7 +10,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const BG = [0x09, 0x0b, 0x0c];
+const BG = [0x0f, 0x10, 0x10];
 const ACCENT = [0xff, 0x31, 0x31];
 const SS = 4; // Supersampling-Faktor für weiche Kanten
 
