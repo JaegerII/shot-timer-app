@@ -18,14 +18,9 @@ const OUT = resolve(fileURLToPath(new URL('../dist/assets/fonts', import.meta.ur
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
 
 const FAMILIES = [
-  { css: 'Big+Shoulders+Display:wght@500..800', name: 'Big Shoulders Display', slug: 'big-shoulders', ofl: 'bigshouldersdisplay' },
-  { css: 'Archivo:wght@400..700', name: 'Archivo', slug: 'archivo', ofl: 'archivo' },
-  // Laufende Ziffern brauchen gleiche Breiten. Big Shoulders hat keine
-  // Tabellenziffern, deshalb traegt die Mono-Schrift des Systems alle Zahlen.
-  { css: 'IBM+Plex+Mono:wght@500;600', name: 'IBM Plex Mono', slug: 'plex-mono', ofl: 'ibmplexmono' },
-  // Nur fuer die Wortmarke im Kopf. Big Shoulders ist dort zu schmal und
-  // laeuft auf einer Zeile unruhig; Montserrat stand vorher da und bleibt.
-  { css: 'Montserrat:wght@700..900', name: 'Montserrat', slug: 'montserrat', ofl: 'montserrat', subsets: ['latin'] }
+  // Eine Familie fuer alles. Montserrat ist variabel (100-900) und hat
+  // Tabellenziffern, die die laufende Zeitanzeige braucht.
+  { css: 'Montserrat:wght@100..900', name: 'Montserrat', slug: 'montserrat', ofl: 'montserrat' }
 ];
 // Deutsch braucht nur "latin"; "latin-ext" kommt dazu, weil Schützennamen
 // frei eingegeben werden und osteuropäische Zeichen enthalten können.
