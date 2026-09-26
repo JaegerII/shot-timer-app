@@ -233,7 +233,11 @@ ein neues Keystore anlegen.
 
 **Voraussetzungen**
 
-- Apple Developer Program, 99 USD pro Jahr
+- **Kostenpflichtiges Apple Developer Program**, 99 EUR pro Jahr. Der
+  kostenlose Apple-Entwicklerzugang genuegt nicht: mit ihm gibt es weder
+  Verteilungszertifikate noch App Store Connect, TestFlight oder den Store.
+  Er erlaubt nur, die App per Xcode auf ein eigenes Geraet zu legen – mit
+  sieben Tagen Gueltigkeit und einem Mac als Voraussetzung.
 - Eine macOS-Maschine für den Build – entweder ein eigener Mac oder eine
   gemietete in der Cloud. Der Zwang kommt von Apple: `xcodebuild` und
   `codesign` laufen ausschließlich unter macOS. Das gilt für **jedes**

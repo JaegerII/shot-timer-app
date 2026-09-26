@@ -1,17 +1,38 @@
 # Build-Konfiguration für Codemagic (macOS-Maschinen in der Cloud).
 # Damit entsteht der iOS-Build ohne eigenen Mac.
 #
-# Vorher einmalig in der Codemagic-Oberfläche einrichten:
-#   1. Repository verbinden (GitHub, GitLab, Bitbucket oder eigenes Git)
-#   2. Teams → Integrations → App Store Connect: API-Schlüssel hinterlegen,
-#      den Namen unten bei `app_store_connect:` eintragen
-#   3. Im Apple-Developer-Portal die App-ID de.wemacon.shottimer anlegen und
-#      in App Store Connect einen App-Eintrag erstellen
-#   4. Für Android: Keystore unter Teams → Code signing identities hochladen
-#      und den Referenznamen unten eintragen
+# VORAUSSETZUNG: kostenpflichtiges Apple Developer Program (99 EUR/Jahr).
+# Der kostenlose Apple-Entwicklerzugang reicht hier NICHT. Er kann weder
+# Verteilungszertifikate erzeugen noch App Store Connect, TestFlight oder
+# den Store nutzen. Ohne die Mitgliedschaft schlaegt dieser Workflow beim
+# Signieren fehl.
 #
-# Die Signaturzertifikate erzeugt Codemagic selbst über den API-Schlüssel –
-# dafür wird kein Mac und kein Keychain-Zugriff auf einem eigenen Gerät nötig.
+# Einmalig einzurichten:
+#
+#   Apple Developer / App Store Connect
+#   1. Zertifikate, IDs & Profile → Identifiers → neue App-ID
+#      de.wemacon.shottimer. Fuer das Mikrofon ist keine eigene Capability
+#      noetig, der Zugriff laeuft ueber NSMicrophoneUsageDescription.
+#   2. Apps → neue App anlegen. ACHTUNG: der Name im Store muss weltweit
+#      eindeutig sein, "Shot Timer" ist mit hoher Wahrscheinlichkeit belegt.
+#      Der Name unter dem Symbol auf dem Geraet ist davon unabhaengig und
+#      steht in ios/App/App/Info.plist als CFBundleDisplayName.
+#   3. Benutzer & Zugriff → Integrationen → App Store Connect API →
+#      Schluessel mit Rolle "App Manager" erzeugen. Notieren: Issuer ID,
+#      Key ID, und die .p8-Datei herunterladen (nur einmal moeglich).
+#
+#   Codemagic
+#   4. Repository verbinden: JaegerII/shot-timer-app
+#   5. Teams → Integrations → App Store Connect: die drei Werte aus
+#      Schritt 3 hinterlegen und die Integration "shot-timer-asc" nennen
+#      (oder hier unten den Namen anpassen).
+#   6. Fuer Android: Keystore unter Teams → Code signing identities
+#      hochladen und den Referenznamen unten eintragen.
+#
+# Der Android-Workflow unten haengt nicht an Apple und laeuft unabhaengig.
+#
+# Signaturzertifikat und Provisioning-Profil erzeugt Codemagic selbst ueber
+# den API-Schluessel. Ein Mac oder Keychain-Zugriff ist dafuer nicht noetig.
 
 workflows:
   ios:
@@ -38,6 +59,11 @@ workflows:
       - name: Signaturprofile einspielen
         script: xcode-project use-profiles
       - name: Buildnummer setzen
+        # $BUILD_NUMBER ist Codemagics eigener Zaehler und steigt je Projekt
+        # monoton. Sollte TestFlight eine Nummer als belegt zurueckweisen,
+        # hier einen festen Versatz addieren, z. B. $(($BUILD_NUMBER + 100)).
+        # Voraussetzung ist VERSIONING_SYSTEM = apple-generic im
+        # Xcode-Projekt, das ist gesetzt.
         script: |
           cd ios/App
           agvtool new-version -all "$BUILD_NUMBER"
