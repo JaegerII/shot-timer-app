@@ -35,10 +35,10 @@ abgelegt:
 
 | Schlüssel | Inhalt | Löschen in der App |
 | --- | --- | --- |
-| `shot-timer-settings-v1` | Einstellungen: Modus, Startverzögerung, Par Time, Durchgänge, Lautstärke, Vibration, Make Ready, Empfindlichkeit und gemessener Rauschpegel je Modus | – |
-| `shot-timer-history-v2` | Bis zu 50 gespeicherte Trainings mit Zeitstempel, Modus, Drill-Name, Gesamtzeit, Anzahl der Signale und Splits | *Mehr → Trainingsdaten → Verlauf löschen* |
+| `shot-timer-settings-v1` | Einstellungen: Modus, Farbschema, Startverzögerung, Par Time, Durchgänge, Lautstärke, Vibration, Make Ready, Testtaste, Empfindlichkeit und gemessener Rauschpegel je Modus | – |
+| `shot-timer-history-v2` | Bis zu 50 gespeicherte Trainings mit Zeitstempel, Modus, Drill-Name, Gesamtzeit, Anzahl der Signale und Splits | *Verlauf → Trainings → Trainings löschen* |
 | `shot-timer-shooters-v1` | Selbst angelegte Schützen der Hit-Factor-Wertung: frei gewählter Name und Power Factor | *Score → Schütze hinzufügen → ×* je Eintrag |
-| `shot-timer-stages-v1` | Bis zu 100 gespeicherte Stages mit Zeitstempel, Stage-Name und je Schütze Zeit, Trefferzonen, Punkten, Hit Factor, Prozent und Platzierung | *Score → Gespeichert → ×* je Stage oder *Alle Stages löschen* |
+| `shot-timer-stages-v1` | Bis zu 100 gespeicherte Stages mit Zeitstempel, Stage-Name und je Schütze Zeit, Trefferzonen, Punkten, Hit Factor, Prozent und Platzierung | *Verlauf → Stages → ×* je Stage oder *Alle Stages löschen* |
 | `shot-timer-stage-draft-v1` | Die gerade laufende, noch nicht gespeicherte Stage, damit sie ein Beenden der App übersteht | wird von *Score → Neue Stage* überschrieben |
 
 Die Namen der Schützen gibt die nutzende Person selbst ein. Es findet kein

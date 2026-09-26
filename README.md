@@ -11,6 +11,47 @@ Die Oberfläche ist eine eigenständige Web-App. Für die Stores wird sie mit
 [Capacitor](https://capacitorjs.com) in ein natives Android- und iOS-Projekt
 verpackt, damit der Mikrofonzugriff über die regulären Systemberechtigungen läuft.
 
+## Oberfläche
+
+Die App scrollt nicht. Jede Ansicht füllt genau eine Bildschirmhöhe, alles
+Weitere öffnet als Sheet von unten. Nur zwei Bereiche scrollen intern: die
+Schützenliste der Score-Ansicht und der Inhalt langer Sheets.
+
+```
+┌────────────────────────────────┐
+│ SHOT TIMER              ?   ⚙  │  Hilfe und Einstellungen
+├────────────────────────────────┤
+│  LIVE FIRE    │    DRY FIRE    │
+│            BEREIT              │
+│             0.00               │
+│         Pegel · Schwelle       │
+│  [#03 +0,24][#02 +0,26]  [+2]  │  letzte Splits, Tipp = ganze Liste
+│   [↺]     START      [🎤]      │  Mikrofonsymbol = Zustand
+│  Verzög. │ Par Time │ Durchg.  │
+│  [ Drills laden ] [ von Hand ] │
+├────────────────────────────────┤
+│   Timer  │  Score  │  Verlauf  │
+└────────────────────────────────┘
+```
+
+- **Oben rechts** liegen Hilfe und Einstellungen, nicht in der Tableiste.
+- **Das Mikrofonsymbol** neben START ist zugleich die Statusanzeige: neutral
+  wenn ungenutzt, grün wenn bereit, orange wenn der Zugriff fehlt. Erst dann
+  erscheint zusätzlich eine Warnzeile. Ein dauerhafter Statustext entfällt.
+- **Drills** sind ein Knopf auf der Timer-Karte, kein eigener Reiter.
+- **Erkennungsprofil, Empfindlichkeit und Kalibrieren** stehen in den
+  Einstellungen, direkt mit der Erklärung dazu.
+- **Verlauf** führt Trainings und gespeicherte Stages in einem Sheet mit zwei
+  Segmenten zusammen.
+
+### Hell und Dunkel
+
+Alle Farben laufen über Token auf `:root`; `:root[data-theme="light"]`
+definiert sie für den Hellmodus neu. Umschalten unter *Einstellungen →
+Darstellung* zwischen **Automatisch** (folgt dem System), **Hell** und
+**Dunkel**. Vorgabe ist Dunkel. Die Wahl wird gespeichert und setzt zugleich
+`<meta name="theme-color">`.
+
 ## Hit Factor
 
 Die Ansicht *Score* rechnet nach IPSC/USPSA-Comstock:
@@ -33,8 +74,8 @@ Die Trefferzonen zählt ein Tipp auf die Kachel hoch, das kleine − wieder heru
 *Aus Timer* übernimmt die zuletzt im Timer gemessene Zeit und trägt – solange noch
 keine Treffer stehen – die gezählten Schüsse als A ein.
 
-*Stage speichern* legt die Wertung im Verlauf ab, *Neue Stage* leert die Zeiten und
-behält die Schützen für den nächsten Durchgang. Das Diagramm-Symbol in jeder
+*Stage speichern* legt die Wertung ab – nachzulesen unter *Verlauf → Stages* –,
+*Neue Stage* leert die Zeiten und behält die Schützen für den nächsten Durchgang. Das Diagramm-Symbol in jeder
 Karte und ein Tipp auf eine Zeile der Rangliste öffnen den Fortschritt eines
 Schützen: bester und durchschnittlicher Hit Factor, Stage-Siege und der Verlauf
 als Kurve.

@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#080a0b">
+  <meta name="theme-color" id="themeColor" content="#080a0b">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,245 +13,344 @@
   <title>Shot Timer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23090b0c'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23c8ff24' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%23c8ff24' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
   <style>
-    :root {
-      --bg:#080a0b;
-      --panel:#111417;
-      --panel-2:#171b1e;
-      --line:#272d31;
-      --muted:#8b959c;
-      --text:#f5f7f8;
+    /* ============ Farbtoken ============
+       Alle Flächen und Texte laufen über diese Variablen, damit Hell und
+       Dunkel aus derselben Formatvorlage entstehen. */
+    :root{
+      color-scheme:dark;
       --accent:#c8ff24;
-      --accent-dark:#8ebd00;
-      --warm:#ffb347;
+      --accent-fill:#c8ff24;
+      --accent-ink:#0b0f02;
+      --accent-soft:#171c14;
+      --accent-line:#4a5a24;
       --danger:#ff625f;
-      --radius:20px;
-      --safe-bottom:max(18px,env(safe-area-inset-bottom));
+      --danger-soft:#5a3130;
+      --warm:#ffb347;
+      --bg:#080a0b;
+      --bg-glow:#202820;
+      --surface:#121619;
+      --surface-2:#0f1315;
+      --surface-3:#1a1f22;
+      --sunken:#090b0c;
+      --line:#272d31;
+      --line-soft:#242a2e;
+      --line-strong:#47525a;
+      --text:#f5f7f8;
+      --muted:#8b959c;
+      --faint:#6c767b;
+      --shadow:0 24px 70px #0008;
+      --shadow-soft:0 12px 45px #000b;
+      --nav-bg:#111518ee;
+      --scrim:#000b;
     }
+    :root[data-theme="light"]{
+      color-scheme:light;
+      --accent:#5f7d00;
+      --accent-fill:#c8ff24;
+      --accent-ink:#141a06;
+      --accent-soft:#eef7d4;
+      --accent-line:#b9d371;
+      --danger:#c0322e;
+      --danger-soft:#e3b7b5;
+      --warm:#9a5a00;
+      --bg:#eef1f3;
+      --bg-glow:#dde9c6;
+      --surface:#ffffff;
+      --surface-2:#f5f7f8;
+      --surface-3:#e8edf0;
+      --sunken:#e7ebee;
+      --line:#dce1e5;
+      --line-soft:#e3e8eb;
+      --line-strong:#9aa5ad;
+      --text:#10151a;
+      --muted:#5b666d;
+      --faint:#78838a;
+      --shadow:0 18px 50px #16202a14;
+      --shadow-soft:0 10px 34px #16202a1a;
+      --nav-bg:#fffffff0;
+      --scrim:#1b232a73;
+    }
+
+    /* ============ Grundgerüst ============
+       Die Seite selbst scrollt nie: .app füllt genau eine Bildschirmhöhe,
+       nur ausgewiesene Bereiche innerhalb der Karten dürfen scrollen. */
     *{box-sizing:border-box}
-    html{background:var(--bg);color-scheme:dark}
-    body{margin:0;background:radial-gradient(circle at 50% -12%,#202820 0,transparent 30rem),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+    html{background:var(--bg)}
+    html,body{height:100%;overflow:hidden}
+    body{margin:0;background:radial-gradient(circle at 50% -14%,var(--bg-glow) 0,transparent 26rem),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
     button,input,select{font:inherit}
     button{color:inherit}
-    .app{width:min(100%,1120px);margin:0 auto;min-height:100vh;padding:22px 20px 108px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}
-    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.12em}
-    .brand-mark{width:37px;height:37px;border-radius:11px;background:var(--accent);display:grid;place-items:center;color:#080a0b;font-size:20px;letter-spacing:-.12em;box-shadow:0 0 30px #c8ff2433}
-    .brand small{display:block;color:var(--muted);font-size:.68rem;font-weight:700;letter-spacing:.2em;margin-top:2px}
-    .status-pill{display:flex;align-items:center;gap:8px;background:#111614;border:1px solid #283129;border-radius:999px;padding:8px 11px;font-size:.78rem;color:#b9c1c4}
-    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
-    .status-dot.ready{background:var(--accent);box-shadow:0 0 12px var(--accent)}
-    .layout{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(310px,.72fr);gap:20px;align-items:start}
-    .timer-card,.side-card,.view-panel{background:linear-gradient(145deg,#121619,#0d1012);border:1px solid var(--line);border-radius:28px;box-shadow:0 24px 70px #0008;overflow:hidden}
-    .timer-card{min-height:650px;position:relative;padding:24px;display:flex;flex-direction:column}
-    .timer-card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,#c8ff2470,transparent)}
-    .mode-switch{display:grid;grid-template-columns:1fr 1fr;background:#090b0c;border:1px solid #23282b;border-radius:15px;padding:4px;gap:4px;width:min(100%,430px);margin:0 auto}
-    .mode-btn{border:0;background:transparent;border-radius:11px;padding:12px 14px;font-weight:800;color:var(--muted);cursor:pointer;transition:.2s ease}
-    .mode-btn.active{background:var(--panel-2);color:var(--text);box-shadow:0 2px 10px #0008}
-    .mode-btn span{display:block;font-size:.68rem;font-weight:600;color:#737d83;margin-top:2px}
-    .mode-btn.active span{color:#aab2b7}
-    .timer-stage{flex:1;display:grid;place-items:center;text-align:center;padding:42px 0 24px;position:relative}
-    .state-label{text-transform:uppercase;letter-spacing:.22em;color:var(--accent);font-size:.78rem;font-weight:900;margin-bottom:10px;min-height:1.2em}
-    .time{font-variant-numeric:tabular-nums;font-size:clamp(5.6rem,14vw,9.1rem);font-weight:850;line-height:.9;letter-spacing:-.075em;margin-left:-.06em}
-    .time .hundredths{color:var(--muted);font-size:.54em;letter-spacing:-.04em}
-    .last-split{margin-top:19px;color:var(--muted);font-size:.9rem;min-height:1.4em}
-    .last-split strong{color:var(--text);font-size:1.08rem;margin-left:7px;font-variant-numeric:tabular-nums}
-    .sound-meter{width:min(100%,320px);height:5px;background:#24292c;border-radius:999px;overflow:hidden;margin:24px auto 0}
-    .sound-meter i{display:block;height:100%;width:3%;background:linear-gradient(90deg,var(--accent-dark),var(--accent));border-radius:inherit;transition:width .06s linear}
-    .meter-caption{display:flex;justify-content:space-between;width:min(100%,320px);margin:7px auto 0;color:#6c767b;font-size:.7rem}
-    .primary-row{display:grid;grid-template-columns:54px minmax(0,1fr) 54px;gap:12px;align-items:center}
-    .icon-btn{width:54px;height:54px;border-radius:17px;border:1px solid var(--line);background:#15191c;display:grid;place-items:center;cursor:pointer}
-    .icon-btn:hover{border-color:#3e474c;background:#1a1f22}
-    .start-btn{border:0;border-radius:19px;background:var(--accent);color:#090b0c;height:64px;font-weight:950;font-size:1.08rem;letter-spacing:.12em;cursor:pointer;box-shadow:0 8px 30px #b8ff1f24;transition:transform .12s ease,background .2s ease}
-    .start-btn:active{transform:scale(.985)}
-    .start-btn.stop{background:var(--danger);color:white;box-shadow:0 8px 30px #ff625f25}
-    .simulate{border:1px dashed #475048;background:transparent;color:#a8b1b5;border-radius:14px;padding:12px;margin-top:12px;cursor:pointer;display:none}
-    .simulate.show{display:block}
-    .simulate b{display:block;font-weight:750;font-size:.9rem}
-    .simulate small{display:block;color:#78828a;font-size:.7rem;margin-top:3px}
-    .quick-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}
-    .quick{background:#0b0e10;border:1px solid #242a2e;border-radius:14px;padding:12px;text-align:left;cursor:pointer}
-    .quick label{display:block;font-size:.69rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;overflow-wrap:break-word;hyphens:auto}
-    .quick b{font-size:.93rem}
-    .side{display:grid;gap:20px}
-    .side-card{padding:22px}
-    .side-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}
-    .side-title h2{font-size:1rem;margin:0;letter-spacing:.03em}
-    .side-title button{border:0;background:transparent;color:var(--accent);cursor:pointer;font-size:.8rem;font-weight:750}
-    .shot-list{display:grid;gap:3px;max-height:267px;overflow:auto;scrollbar-width:thin}
-    .shot-row{display:grid;grid-template-columns:40px 1fr 1fr;align-items:center;padding:11px 10px;border-radius:11px;font-variant-numeric:tabular-nums}
-    .shot-row:nth-child(odd){background:#15191c}
-    .shot-row .n{color:var(--muted);font-size:.75rem}
-    .shot-row .split{text-align:right;color:#adb5b9;font-size:.84rem}
-    .empty{padding:28px 12px;color:#778087;text-align:center;font-size:.88rem;border:1px dashed #30373b;border-radius:14px}
-    .profile{display:flex;align-items:center;gap:14px;border-radius:15px;background:#171b1e;padding:14px;margin-bottom:10px;border:1px solid transparent;cursor:pointer}
-    .profile.selected{border-color:#526225;background:#171c14}
-    .profile-icon{width:40px;height:40px;background:#0d1011;border-radius:12px;display:grid;place-items:center;color:var(--accent);font-weight:900}
-    .profile b{display:block;font-size:.9rem}
-    .profile span{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}
-    .range-line{margin-top:18px}
-    .range-legend{display:flex;justify-content:space-between;gap:10px;color:#6c767b;font-size:.68rem;margin-top:6px}
-    .range-head{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:10px}
-    .range-head span{color:var(--muted)}
-    input[type=range]{width:100%;accent-color:var(--accent)}
-    .tip{display:flex;gap:10px;color:#9ba4a9;font-size:.76rem;line-height:1.45;margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
-    .tip svg{flex:0 0 auto;color:var(--warm)}
-    .bottom-nav{position:fixed;z-index:20;bottom:14px;left:50%;transform:translateX(-50%);width:min(calc(100% - 28px),520px);display:grid;grid-template-columns:repeat(4,1fr);background:#111518ec;border:1px solid #2a3034;border-radius:21px;padding:7px;backdrop-filter:blur(18px);box-shadow:0 12px 45px #000b}
-    .nav-btn{border:0;background:transparent;color:#778188;border-radius:15px;padding:8px 4px 7px;display:grid;justify-items:center;gap:3px;font-size:.65rem;cursor:pointer}
-    .nav-btn svg{width:20px;height:20px}
-    .nav-btn.active{background:#1d221c;color:var(--accent)}
-    .view-panel{display:none;padding:24px;min-height:680px}
-    .view-panel.active{display:block}
-    .view-panel h1{font-size:1.7rem;margin:0 0 6px;letter-spacing:-.03em}
-    .view-panel>p{color:var(--muted);margin:0 0 24px}
-    .drill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .drill{background:#14181a;border:1px solid var(--line);border-radius:18px;padding:18px;cursor:pointer;position:relative;min-height:145px}
-    .drill:hover{border-color:#4b565c}
-    .drill-tag{font-size:.68rem;color:var(--accent);letter-spacing:.12em;font-weight:900;text-transform:uppercase}
-    .drill h3{margin:14px 0 5px;font-size:1rem}
-    .drill p{margin:0;color:var(--muted);font-size:.76rem;line-height:1.4}
-    .drill .go{position:absolute;right:14px;top:14px;border-radius:50%;width:31px;height:31px;background:#202620;display:grid;place-items:center;color:var(--accent)}
-    .history-card{background:#14181a;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:8px}
-    .history-card b{font-size:.92rem}.history-card span{color:var(--muted);font-size:.75rem}.history-card strong{font-variant-numeric:tabular-nums;font-size:1.2rem}
-    .settings-group{border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:14px}
-    .setting-row{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:16px;background:#121618;border-bottom:1px solid var(--line)}
-    .setting-row:last-child{border-bottom:0}.setting-row b{font-size:.88rem}.setting-row span{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}
-    .setting-row select{background:#0a0c0e;border:1px solid #30373b;border-radius:10px;padding:8px;color:var(--text)}
-    .toggle{width:46px;height:26px;border-radius:999px;background:#333a3e;border:0;padding:3px;cursor:pointer}.toggle:after{content:"";display:block;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.toggle.on{background:var(--accent)}.toggle.on:after{transform:translateX(20px);background:#10130c}
-    .modal{position:fixed;z-index:50;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;padding:18px;backdrop-filter:blur(5px)}
-    .modal.show{display:flex}
-    .sheet{width:min(100%,530px);background:#15191b;border:1px solid #30373c;border-radius:26px;padding:22px;box-shadow:0 25px 80px #000;animation:up .22s ease}
-    @keyframes up{from{transform:translateY(30px);opacity:0}}
-    .sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.sheet-head h2{margin:0;font-size:1.08rem}.sheet-head button{border:0;background:#242a2d;width:34px;height:34px;border-radius:11px;cursor:pointer}
-    .sheet-grab{width:42px;height:4px;background:#3d454a;border-radius:999px;margin:-7px auto 17px}
-    .settings-sheet{width:min(100%,610px);padding:18px 20px 20px}
-    .settings-sheet .sheet-head{margin-bottom:14px}
-    .content-sheet{width:min(100%,650px);max-height:min(78vh,700px);padding:18px 20px 20px;display:flex;flex-direction:column;overflow:hidden}
-    .content-sheet .sheet-head{flex:0 0 auto;margin-bottom:14px}.content-sheet .sheet-head small{display:block;color:var(--muted);font-size:.7rem;margin-top:3px}
-    .sheet-body{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
-    .content-sheet .drill{min-height:126px}
-    .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-    .setting-tile{min-height:84px;background:#0f1214;border:1px solid #282f33;border-radius:15px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:9px}
-    .setting-tile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-    .setting-tile b{font-size:.82rem}.setting-tile small{display:block;color:var(--muted);font-size:.68rem;line-height:1.25;margin-top:2px}
-    .tile-control{display:flex;align-items:center;justify-content:flex-end;gap:7px}
-    .tile-control select{min-height:32px;background:#090b0c;border:1px solid #30373b;border-radius:9px;padding:5px 8px;color:var(--text);font-size:.76rem}
-    .danger-link{border:0;background:transparent;color:var(--danger);font-weight:750;cursor:pointer;padding:5px}
-    body.sheet-open{overflow:hidden}
-    .option-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}.option{border:1px solid #333a3e;background:#0e1113;border-radius:13px;padding:11px 8px;cursor:pointer}.option.selected{border-color:var(--accent);color:var(--accent);background:#171d10}
-    .field-label{display:block;color:#929ca2;font-size:.76rem;margin:14px 0 8px}
-    .sheet-action{width:100%;height:51px;border:0;border-radius:15px;background:var(--accent);color:#0b0d0a;font-weight:900;margin-top:8px;cursor:pointer}
-    .toast{position:fixed;z-index:80;top:20px;left:50%;transform:translate(-50%,-20px);background:#eef4e7;color:#10130d;border-radius:13px;padding:11px 15px;font-size:.82rem;font-weight:750;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
-    @media(max-width:820px){.app{padding:16px 14px 105px}.layout{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.timer-card{min-height:610px}.topbar{margin-bottom:16px}}
-    @media(max-width:600px){body{background:var(--bg)}.app{padding-left:10px;padding-right:10px}.brand small{display:none}.status-pill{font-size:.7rem}.timer-card,.view-panel{border-radius:23px;padding:18px}.timer-card{min-height:calc(100vh - 152px)}.side{grid-template-columns:1fr}.side-card{border-radius:22px}.time{font-size:clamp(5.2rem,26vw,7.5rem)}.quick-settings{gap:6px}.quick{padding:10px 8px}.quick label{font-size:.58rem;letter-spacing:.03em;line-height:1.25}.quick b{font-size:.82rem}.drill-grid{grid-template-columns:1fr}.view-panel{min-height:calc(100vh - 150px)}.mode-btn{padding:10px 8px}.primary-row{grid-template-columns:48px minmax(0,1fr) 48px}.icon-btn{width:48px;height:54px}.modal{padding:8px}.settings-sheet,.content-sheet{padding:15px 13px 14px;border-radius:23px}.settings-grid{gap:7px}.setting-tile{min-height:78px;padding:10px}.setting-tile small{display:none}.content-sheet .drill-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.content-sheet .drill{min-height:116px;padding:11px}.content-sheet .drill h3{margin:10px 0 4px;font-size:.88rem}.content-sheet .drill p{font-size:.68rem}.content-sheet .drill .go{width:27px;height:27px;right:9px;top:9px}.content-sheet .drill-tag{font-size:.6rem}}
-    /* ---------- Hit Factor: Ansicht, Eingabe, Wertung ---------- */
-    .view{display:block}
+    .app{height:100dvh;width:min(100%,1120px);margin:0 auto;display:flex;flex-direction:column;gap:11px;padding:max(10px,env(safe-area-inset-top)) 11px max(11px,env(safe-area-inset-bottom))}
+
+    /* ============ Kopfzeile ============ */
+    .topbar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.11em;font-size:.92rem}
+    .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent-fill);display:grid;place-items:center;color:var(--accent-ink);box-shadow:0 0 26px #c8ff2426}
+    .top-tools{display:flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:var(--shadow-soft)}
+    .tool-btn{width:40px;height:40px;border:0;border-radius:999px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+    .tool-btn:hover{background:var(--surface-3);color:var(--text)}
+    .tool-btn svg{width:20px;height:20px}
+
+    /* ============ Ansichten ============ */
+    .view{flex:1;min-height:0;display:flex;flex-direction:column}
     .view.hidden{display:none}
-    .bottom-nav{grid-template-columns:repeat(5,1fr)}
-    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px}
-    .panel-head h1{font-size:1.7rem;margin:0 0 6px;letter-spacing:-.03em}
-    .panel-head p{color:var(--muted);margin:0;font-size:.84rem;line-height:1.4}
-    .ghost-btn{border:1px solid #2e353a;background:#12171a;color:#c4ccd0;border-radius:13px;padding:10px 14px;font-size:.78rem;font-weight:750;cursor:pointer;white-space:nowrap}
-    .ghost-btn:hover{border-color:#47525a;color:var(--text)}
-    .ghost-btn.wide{width:100%;padding:13px;border-style:dashed;color:var(--accent);border-color:#4a5a24}
-    .ghost-btn.wide:hover{border-color:var(--accent);background:#151a10}
-    .stage-bar{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:16px}
-    .text-field{background:#0b0e10;border:1px solid #242a2e;border-radius:13px;padding:11px 13px;color:var(--text);font-weight:750;min-width:0}
-    .text-field:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
-    .text-field::placeholder{color:#5f686d;font-weight:600}
-    #stageName{flex:1 1 170px}
-    .shots-field{display:flex;align-items:center;gap:7px;background:#0b0e10;border:1px solid #242a2e;border-radius:13px;padding:5px 7px}
-    .shots-field>span{color:var(--muted);font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;padding:0 3px}
-    .step{width:34px;height:34px;border-radius:10px;border:1px solid #2e353a;background:#14181b;color:var(--text);font-weight:800;font-size:1.05rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
-    .step:hover{border-color:#47525a}
+    .view-panel{flex:1;min-height:0;display:none;flex-direction:column}
+    .view-panel.active{display:flex}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);position:relative}
+    .timer-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px;padding:14px;overflow:hidden}
+    .timer-card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,var(--accent-line),transparent);border-radius:24px 24px 0 0}
+
+    .mode-switch{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;background:var(--sunken);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+    .mode-btn{border:0;background:transparent;border-radius:10px;padding:9px 10px;font-weight:800;font-size:.9rem;color:var(--muted);cursor:pointer;transition:.18s ease}
+    .mode-btn.active{background:var(--surface-3);color:var(--text);box-shadow:var(--shadow-soft)}
+    .mode-btn span{display:block;font-size:.65rem;font-weight:600;color:var(--faint);margin-top:1px}
+    .mode-btn.active span{color:var(--muted)}
+
+    .timer-stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center}
+    .state-label{text-transform:uppercase;letter-spacing:.2em;color:var(--accent);font-size:.74rem;font-weight:900;min-height:1.1em}
+    .time{font-variant-numeric:tabular-nums;font-size:clamp(3.8rem,19vw,6.4rem);font-weight:850;line-height:.88;letter-spacing:-.07em;margin-left:-.05em}
+    .time .hundredths{color:var(--muted);font-size:.54em;letter-spacing:-.03em}
+    .last-split{color:var(--muted);font-size:.85rem;min-height:1.3em}
+    .last-split strong{color:var(--text);font-size:1.02rem;margin-left:6px;font-variant-numeric:tabular-nums}
+    .sound-meter{width:min(100%,300px);height:5px;background:var(--surface-3);border-radius:999px;overflow:hidden}
+    .sound-meter i{display:block;height:100%;width:3%;background:linear-gradient(90deg,var(--accent-dark,var(--accent)),var(--accent-fill));border-radius:inherit;transition:width .06s linear}
+    .meter-caption{display:flex;justify-content:space-between;width:min(100%,300px);color:var(--faint);font-size:.68rem}
+    .mic-warn{display:none;align-items:center;gap:7px;color:var(--warm);font-size:.72rem;font-weight:700}
+    .mic-warn.show{display:flex}
+    .mic-warn svg{width:15px;height:15px;flex:0 0 auto}
+
+    /* Letzte Splits als Streifen; der volle Verlauf liegt im Sheet dahinter. */
+    .splits{flex:0 0 auto;display:flex;gap:5px;align-items:center;width:100%;border:1px dashed var(--line);background:var(--surface-2);border-radius:13px;padding:7px 8px;cursor:pointer;min-height:44px;text-align:left}
+    .splits:hover{border-color:var(--line-strong)}
+    .splits-empty{color:var(--faint);font-size:.76rem;padding-left:3px}
+    .chip{flex:1 1 0;min-width:0;background:var(--sunken);border:1px solid var(--line-soft);border-radius:9px;padding:5px 4px;text-align:center;font-variant-numeric:tabular-nums}
+    .chip small{display:block;color:var(--faint);font-size:.58rem;font-weight:800;letter-spacing:.05em}
+    .chip b{display:block;font-size:.8rem;margin-top:1px}
+    .chip.first b{color:var(--accent)}
+    .chip.more{flex:0 0 auto;padding:5px 9px;color:var(--muted);font-size:.74rem;font-weight:800;display:grid;place-items:center}
+
+    .primary-row{flex:0 0 auto;display:grid;grid-template-columns:52px minmax(0,1fr) 52px;gap:10px;align-items:center}
+    .icon-btn{width:52px;height:56px;border-radius:16px;border:1px solid var(--line);background:var(--surface-2);display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+    .icon-btn:hover{border-color:var(--line-strong);background:var(--surface-3);color:var(--text)}
+    .icon-btn svg{width:21px;height:21px}
+    /* Das Mikrofonsymbol ist zugleich die Statusanzeige. */
+    .icon-btn.mic.ready{color:var(--accent);border-color:var(--accent-line)}
+    .icon-btn.mic.blocked{color:var(--warm);border-color:var(--warm)}
+    .start-btn{border:0;border-radius:17px;background:var(--accent-fill);color:var(--accent-ink);height:56px;font-weight:950;font-size:1.05rem;letter-spacing:.11em;cursor:pointer;box-shadow:0 8px 26px #b8ff1f24;transition:transform .12s ease,background .2s ease}
+    .start-btn:active{transform:scale(.985)}
+    .start-btn.stop{background:var(--danger);color:#fff}
+
+    .quick-settings{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .quick{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:13px;padding:9px 8px;text-align:left;cursor:pointer}
+    .quick:hover{border-color:var(--line-strong)}
+    .quick label{display:block;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;pointer-events:none}
+    .quick b{font-size:.81rem;pointer-events:none}
+    .card-actions{flex:0 0 auto;display:flex;gap:7px}
+    .card-actions>button{flex:1;min-width:0}
+
+    /* ============ Tableiste ============ */
+    .bottom-nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);background:var(--nav-bg);border:1px solid var(--line);border-radius:19px;padding:6px;backdrop-filter:blur(18px);box-shadow:var(--shadow-soft)}
+    .nav-btn{border:0;background:transparent;color:var(--faint);border-radius:14px;padding:7px 4px 6px;display:grid;justify-items:center;gap:3px;font-size:.66rem;font-weight:700;cursor:pointer}
+    .nav-btn svg{width:20px;height:20px}
+    .nav-btn.active{background:var(--accent-soft);color:var(--accent)}
+
+    /* ============ Schaltflächen ============ */
+    .ghost-btn{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:13px;padding:10px 12px;font-size:.78rem;font-weight:750;cursor:pointer;white-space:nowrap}
+    .ghost-btn:hover{border-color:var(--line-strong);color:var(--text)}
+    .ghost-btn.wide{width:100%;padding:12px;border-style:dashed;color:var(--accent);border-color:var(--accent-line)}
+    .ghost-btn.wide:hover{background:var(--accent-soft)}
+    .sheet-action{width:100%;height:50px;border:0;border-radius:15px;background:var(--accent-fill);color:var(--accent-ink);font-weight:900;margin-top:8px;cursor:pointer}
+    .danger-link{border:0;background:transparent;color:var(--danger);font-weight:750;cursor:pointer;padding:5px}
+    .empty{padding:22px 12px;color:var(--faint);text-align:center;font-size:.85rem;border:1px dashed var(--line);border-radius:14px}
+
+    /* ============ Sheets ============ */
+    .modal{position:fixed;z-index:50;inset:0;background:var(--scrim);display:none;align-items:flex-end;justify-content:center;padding:14px;backdrop-filter:blur(5px)}
+    .modal.show{display:flex}
+    .sheet{width:min(100%,560px);max-height:min(86vh,760px);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:16px 16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;animation:up .22s ease}
+    @keyframes up{from{transform:translateY(26px);opacity:0}}
+    .sheet-grab{flex:0 0 auto;width:40px;height:4px;background:var(--line-strong);border-radius:999px;margin:-6px auto 14px}
+    .sheet-head{flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .sheet-head h2{margin:0;font-size:1.06rem}
+    .sheet-head small{display:block;color:var(--muted);font-size:.7rem;margin-top:3px}
+    .sheet-head button{flex:0 0 auto;border:0;background:var(--surface-3);color:var(--text);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:1.1rem;line-height:1}
+    .sheet-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+    .sheet-foot{flex:0 0 auto;display:flex;justify-content:flex-end;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
+    .field-label{display:block;color:var(--muted);font-size:.74rem;font-weight:700;margin:16px 0 8px}
+    .field-label:first-child{margin-top:0}
+    .option-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .option{border:1px solid var(--line);background:var(--surface-2);border-radius:13px;padding:11px 8px;cursor:pointer;font-weight:700;font-size:.84rem}
+    .option.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+    .segment{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:13px;padding:4px;margin-bottom:14px}
+    .segment button{border:0;background:transparent;border-radius:9px;padding:9px 8px;font-weight:800;font-size:.82rem;color:var(--muted);cursor:pointer}
+    .segment button.selected{background:var(--surface-3);color:var(--text)}
+
+    /* ============ Drills ============ */
+    .drill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .drill{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:13px;cursor:pointer;position:relative;min-height:118px}
+    .drill:hover{border-color:var(--line-strong)}
+    .drill-tag{font-size:.6rem;color:var(--accent);letter-spacing:.1em;font-weight:900;text-transform:uppercase}
+    .drill h3{margin:10px 0 4px;font-size:.9rem}
+    .drill p{margin:0;color:var(--muted);font-size:.7rem;line-height:1.35}
+    .drill .go{position:absolute;right:10px;top:10px;border-radius:50%;width:26px;height:26px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent);font-size:.85rem}
+
+    /* ============ Verlauf ============ */
+    .history-card{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .history-card b{font-size:.89rem}
+    .history-card span{color:var(--muted);font-size:.72rem}
+    .history-card strong{font-variant-numeric:tabular-nums;font-size:1.15rem}
+    .shot-list{display:grid;gap:3px}
+    .shot-row{display:grid;grid-template-columns:40px 1fr 1fr;align-items:center;padding:10px;border-radius:10px;font-variant-numeric:tabular-nums}
+    .shot-row:nth-child(odd){background:var(--surface-2)}
+    .shot-row .n{color:var(--muted);font-size:.73rem}
+    .shot-row .split{text-align:right;color:var(--muted);font-size:.83rem}
+
+    /* ============ Einstellungen ============ */
+    .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .setting-tile{min-height:80px;background:var(--surface-2);border:1px solid var(--line);border-radius:15px;padding:11px;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+    .setting-tile.wide{grid-column:1/-1;min-height:0}
+    .setting-tile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .setting-tile b{font-size:.82rem}
+    .setting-tile small{display:block;color:var(--muted);font-size:.67rem;line-height:1.25;margin-top:2px}
+    .tile-control{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+    .tile-control select{min-height:32px;background:var(--sunken);border:1px solid var(--line);border-radius:9px;padding:5px 8px;color:var(--text);font-size:.76rem}
+    .toggle{flex:0 0 auto;width:46px;height:26px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line);padding:2px;cursor:pointer}
+    .toggle:after{content:"";display:block;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:.2s}
+    .toggle.on{background:var(--accent-fill);border-color:var(--accent-fill)}
+    .toggle.on:after{transform:translateX(20px);background:var(--accent-ink)}
+    .profile{display:flex;align-items:center;gap:12px;border-radius:14px;background:var(--accent-soft);padding:12px;border:1px solid var(--accent-line)}
+    .profile-icon{width:38px;height:38px;background:var(--surface);border-radius:11px;display:grid;place-items:center;color:var(--accent);font-weight:900;font-size:.9rem}
+    .profile b{display:block;font-size:.88rem}
+    .profile span{display:block;color:var(--muted);font-size:.71rem;margin-top:2px}
+    .range-line{margin-top:14px}
+    .range-head{display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:8px}
+    .range-head span{color:var(--muted)}
+    input[type=range]{width:100%;accent-color:var(--accent-fill)}
+    .range-legend{display:flex;justify-content:space-between;gap:10px;color:var(--faint);font-size:.67rem;margin-top:5px}
+    .tip{display:flex;gap:9px;color:var(--muted);font-size:.74rem;line-height:1.45;margin:14px 0 0;padding-top:13px;border-top:1px solid var(--line)}
+    .tip svg{flex:0 0 auto;color:var(--warm)}
+    .tip b{color:var(--text)}
+    .help-block{margin-bottom:16px}
+    .help-block h3{margin:0 0 5px;font-size:.9rem}
+    .help-block p{margin:0;color:var(--muted);font-size:.79rem;line-height:1.5}
+
+    /* ============ Hit Factor ============ */
+    .panel-head{flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .panel-head h1{font-size:1.4rem;margin:0 0 3px;letter-spacing:-.02em}
+    .panel-head p{color:var(--muted);margin:0;font-size:.78rem;line-height:1.35}
+    .stage-bar{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:11px}
+    .text-field{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--text);font-weight:750;min-width:0}
+    .text-field:focus{outline:2px solid var(--accent);outline-offset:1px}
+    .text-field::placeholder{color:var(--faint);font-weight:600}
+    #stageName{flex:1 1 150px}
+    .shots-field{display:flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:4px 6px}
+    .shots-field>span{color:var(--muted);font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;padding:0 2px}
+    .step{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface-3);color:var(--text);font-weight:800;font-size:1rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+    .step:hover{border-color:var(--line-strong)}
     .shots-value{min-width:2.4ch;text-align:center;font-weight:850;font-variant-numeric:tabular-nums}
-    .max-points{color:var(--muted);font-size:.74rem;font-variant-numeric:tabular-nums}
-    .entry{background:#14181a;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
-    .entry-head{display:flex;align-items:center;gap:9px;margin-bottom:12px}
-    .entry-head>b{font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .pf-badge{flex:0 0 auto;font-size:.6rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:3px 8px;border:1px solid #3a444a;color:#9aa3a8}
-    .pf-badge.major{border-color:#6d7f2a;color:var(--accent)}
+    .max-points{color:var(--muted);font-size:.72rem;font-variant-numeric:tabular-nums}
+    .score-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:0 2px 10px 0}
+    .entry{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:12px;margin-bottom:8px}
+    .entry-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .entry-head>b{font-size:.92rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pf-badge{flex:0 0 auto;font-size:.59rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase;border-radius:999px;padding:3px 8px;border:1px solid var(--line-strong);color:var(--muted)}
+    .pf-badge.major{border-color:var(--accent-line);color:var(--accent);background:var(--accent-soft)}
     button.pf-badge{background:transparent;font-family:inherit;cursor:pointer}
-    button.pf-badge:hover{border-color:#6f7b82;color:var(--text)}
-    .entry-tool{border:0;background:transparent;color:#6f797f;cursor:pointer;padding:5px;border-radius:9px;display:grid;place-items:center}
+    button.pf-badge.major{background:var(--accent-soft)}
+    button.pf-badge:hover{border-color:var(--line-strong);color:var(--text)}
+    .entry-tool{border:0;background:transparent;color:var(--faint);cursor:pointer;padding:5px;border-radius:9px;display:grid;place-items:center}
     .entry-tool.progress{margin-left:auto}
-    .entry-tool:hover{color:var(--text);background:#1d2124}
+    .entry-tool:hover{color:var(--text);background:var(--surface-3)}
     .entry-tool.remove:hover{color:var(--danger)}
     .entry-tool svg{width:17px;height:17px}
-    .entry-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:11px}
-    .time-field{grid-column:1/-1;display:flex;align-items:center;gap:8px;background:#0b0e10;border:1px solid #242a2e;border-radius:12px;padding:7px 8px 7px 12px}
-    .time-field input{flex:1;width:100%;min-width:0;background:transparent;border:0;color:var(--text);font-weight:850;font-size:1.05rem;font-variant-numeric:tabular-nums}
+    .entry-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:9px}
+    .time-field{grid-column:1/-1;display:flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:6px 7px 6px 11px}
+    .time-field input{flex:1;width:100%;min-width:0;background:transparent;border:0;color:var(--text);font-weight:850;font-size:1.02rem;font-variant-numeric:tabular-nums}
     .time-field input:focus{outline:none}
-    .time-field input::placeholder{color:#4e5559}
-    .time-field>span{color:var(--muted);font-size:.8rem}
-    .take-time{flex:0 0 auto;border:1px solid #2e353a;background:#171c1f;color:#b6bfc3;border-radius:9px;padding:6px 9px;font-size:.7rem;font-weight:750;cursor:pointer;white-space:nowrap}
+    .time-field input::placeholder{color:var(--faint)}
+    .time-field>span{color:var(--muted);font-size:.78rem}
+    .take-time{flex:0 0 auto;border:1px solid var(--line);background:var(--surface-3);color:var(--muted);border-radius:9px;padding:6px 9px;font-size:.69rem;font-weight:750;cursor:pointer;white-space:nowrap}
     .take-time:hover{border-color:var(--accent);color:var(--accent)}
-    .metric{background:#0b0e10;border:1px solid #242a2e;border-radius:12px;padding:8px 11px}
-    .metric>span{display:block;color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
-    .metric b{font-size:1.02rem;font-variant-numeric:tabular-nums}
+    .metric{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:7px 10px}
+    .metric>span{display:block;color:var(--muted);font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:1px}
+    .metric b{font-size:1rem;font-variant-numeric:tabular-nums}
     .metric.hf b{color:var(--accent)}
-    .counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
     .counter{position:relative}
-    .counter-main{width:100%;border:1px solid #2a3135;background:#0f1315;border-radius:13px;padding:8px 4px 6px;display:grid;justify-items:center;gap:1px;cursor:pointer}
-    .counter-main:hover{border-color:#47525a;background:#141a1d}
-    .counter-main:active{background:#1b2226}
-    .counter-main small{font-size:.62rem;font-weight:900;letter-spacing:.08em;color:var(--muted)}
-    .counter-main b{font-size:1.15rem;font-variant-numeric:tabular-nums}
-    .counter.pen .counter-main small{color:#b8908c}
+    .counter-main{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:7px 4px 5px;display:grid;justify-items:center;gap:1px;cursor:pointer}
+    .counter-main:hover{border-color:var(--line-strong);background:var(--surface-3)}
+    .counter-main small{font-size:.61rem;font-weight:900;letter-spacing:.07em;color:var(--muted)}
+    .counter-main b{font-size:1.12rem;font-variant-numeric:tabular-nums}
+    .counter.pen .counter-main small{color:var(--danger);opacity:.75}
     .counter-main b.hot{color:var(--danger)}
-    .counter-minus{position:absolute;top:-6px;right:-6px;width:23px;height:23px;border-radius:50%;border:1px solid #394247;background:#1c2225;color:#b9c1c5;font-size:.9rem;line-height:1;cursor:pointer;display:none;place-items:center;padding:0}
+    .counter-minus{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-3);color:var(--text);font-size:.85rem;line-height:1;cursor:pointer;display:none;place-items:center;padding:0}
     .counter-minus.show{display:grid}
     .counter-minus:hover{border-color:var(--danger);color:var(--danger)}
-    .result-block{margin-top:22px}
-    .muted-note{color:var(--muted);font-size:.72rem}
-    .rank-row{width:100%;text-align:left;display:grid;grid-template-columns:26px minmax(0,1fr) auto auto;gap:9px;align-items:center;padding:11px 10px;border:0;border-radius:12px;background:transparent;color:inherit;font-variant-numeric:tabular-nums}
+    .result-block{flex:0 0 auto;margin-top:10px}
+    .result-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .result-head h2{font-size:.95rem;margin:0}
+    .muted-note{color:var(--muted);font-size:.71rem}
+    .rank-row{width:100%;text-align:left;display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:9px;align-items:center;padding:10px;border:0;border-radius:11px;background:transparent;color:inherit;font-variant-numeric:tabular-nums}
     button.rank-row{cursor:pointer}
-    .rank-row:nth-child(odd){background:#15191c}
-    button.rank-row:hover{background:#1c2226}
-    .rank-row .pos{color:var(--muted);font-weight:900;font-size:.8rem;text-align:center}
+    .rank-row:nth-child(odd){background:var(--surface-2)}
+    button.rank-row:hover{background:var(--surface-3)}
+    .rank-row .pos{color:var(--muted);font-weight:900;font-size:.78rem;text-align:center}
     .rank-row.lead .pos{color:var(--accent)}
     .rank-row .who{min-width:0}
-    .rank-row .who b{display:block;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .rank-row .who span{display:block;color:var(--muted);font-size:.69rem;margin-top:2px}
-    .rank-row .hf{font-weight:850;font-size:.92rem}
+    .rank-row .who b{display:block;font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rank-row .who span{display:block;color:var(--muted);font-size:.68rem;margin-top:2px}
+    .rank-row .hf{font-weight:850;font-size:.9rem}
     .rank-row .pct{text-align:right;min-width:0}
-    .rank-row .pct b{display:block;color:var(--accent);font-weight:800;font-size:.8rem}
-    .rank-row .pct>span{display:block;color:var(--muted);font-size:.62rem;white-space:nowrap;margin-top:2px}
-    .score-footer{display:flex;gap:9px;align-items:center;margin-top:20px}
+    .rank-row .pct b{display:block;color:var(--accent);font-weight:800;font-size:.79rem}
+    .rank-row .pct>span{display:block;color:var(--muted);font-size:.61rem;white-space:nowrap;margin-top:2px}
+    .score-footer{flex:0 0 auto;display:flex;gap:8px;align-items:center;margin-top:0;padding-top:11px;border-top:1px solid var(--line)}
     .score-footer .sheet-action{flex:1;margin-top:0}
     .pick-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
-    .pick{flex:1;display:flex;align-items:center;gap:10px;background:#171b1e;border:1px solid transparent;border-radius:14px;padding:13px;cursor:pointer;text-align:left;min-width:0}
-    .pick:hover{border-color:#4a5a24;background:#171c14}
-    .pick b{flex:1;min-width:0;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .pick-del{flex:0 0 auto;width:38px;height:38px;border-radius:12px;border:1px solid #2b3236;background:#121618;color:#6f797f;cursor:pointer;font-size:1.05rem;padding:0}
-    .pick-del:hover{color:var(--danger);border-color:#5a3130}
+    .pick{flex:1;display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:12px;cursor:pointer;text-align:left;min-width:0}
+    .pick:hover{border-color:var(--accent-line);background:var(--accent-soft)}
+    .pick b{flex:1;min-width:0;font-size:.89rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pick-del{flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--faint);cursor:pointer;font-size:1.05rem;padding:0}
+    .pick-del:hover{color:var(--danger);border-color:var(--danger-soft)}
     .new-shooter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
-    .new-shooter .text-field{flex:1 1 150px}
-    .pf-switch{display:flex;gap:4px;background:#090b0c;border:1px solid #23282b;border-radius:13px;padding:4px}
-    .pf-opt{border:0;background:transparent;border-radius:9px;padding:9px 14px;font-weight:800;font-size:.8rem;color:var(--muted);cursor:pointer}
-    .pf-opt.selected{background:var(--panel-2);color:var(--text)}
-    .stage-card{background:#14181a;border:1px solid var(--line);border-radius:16px;margin-bottom:9px;overflow:hidden}
-    .stage-card summary{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;list-style:none}
+    .new-shooter .text-field{flex:1 1 140px}
+    .pf-switch{display:flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:4px}
+    .pf-opt{border:0;background:transparent;border-radius:9px;padding:9px 13px;font-weight:800;font-size:.79rem;color:var(--muted);cursor:pointer}
+    .pf-opt.selected{background:var(--surface-3);color:var(--text)}
+    .stage-card{background:var(--surface-2);border:1px solid var(--line);border-radius:15px;margin-bottom:8px;overflow:hidden}
+    .stage-card summary{display:flex;align-items:center;gap:9px;padding:13px;cursor:pointer;list-style:none}
     .stage-card summary::-webkit-details-marker{display:none}
     .stage-card summary>div{flex:1;min-width:0}
-    .stage-card summary b{display:block;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .stage-card summary>div>span{display:block;color:var(--muted);font-size:.71rem;margin-top:3px}
-    .stage-card summary em{font-style:normal;color:var(--accent);font-weight:850;font-variant-numeric:tabular-nums;font-size:.9rem}
-    .stage-del{flex:0 0 auto;width:30px;height:30px;border-radius:9px;border:1px solid #2b3236;background:#121618;color:#6f797f;cursor:pointer;font-size:1rem;line-height:1;padding:0}
-    .stage-del:hover{color:var(--danger);border-color:#5a3130}
-    .stage-detail{padding:0 8px 8px}
-    .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
-    .stat{background:#0f1214;border:1px solid #262d31;border-radius:14px;padding:11px 13px}
-    .stat span{display:block;color:var(--muted);font-size:.63rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:2px}
-    .stat b{font-size:1.1rem;font-variant-numeric:tabular-nums}
-    .spark-wrap{background:#0f1214;border:1px solid #262d31;border-radius:14px;padding:12px;margin-bottom:12px}
-    .spark-wrap>span{display:block;color:var(--muted);font-size:.63rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
-    .spark{width:100%;height:52px;display:block}
-    .sheet-foot{display:flex;justify-content:flex-end;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
+    .stage-card summary b{display:block;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .stage-card summary>div>span{display:block;color:var(--muted);font-size:.7rem;margin-top:2px}
+    .stage-card summary em{font-style:normal;color:var(--accent);font-weight:850;font-variant-numeric:tabular-nums;font-size:.88rem}
+    .stage-del{flex:0 0 auto;width:29px;height:29px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--faint);cursor:pointer;font-size:1rem;line-height:1;padding:0}
+    .stage-del:hover{color:var(--danger);border-color:var(--danger-soft)}
+    .stage-detail{padding:0 7px 7px}
+    .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:11px}
+    .stat{background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:10px 12px}
+    .stat span{display:block;color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px}
+    .stat b{font-size:1.08rem;font-variant-numeric:tabular-nums}
+    .spark-wrap{background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:11px;margin-bottom:11px}
+    .spark-wrap>span{display:block;color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+    .spark{width:100%;height:50px;display:block}
+
+    .toast{position:fixed;z-index:80;top:max(14px,env(safe-area-inset-top));left:50%;transform:translate(-50%,-18px);background:var(--text);color:var(--bg);border-radius:13px;padding:10px 15px;font-size:.81rem;font-weight:750;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 28px);text-align:center}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    body.sheet-open{overflow:hidden}
+
     @media(min-width:601px){
       .counters{grid-template-columns:repeat(6,minmax(0,1fr))}
       .entry-metrics{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr)}
       .time-field{grid-column:auto}
       .stat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .settings-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    /* Auf breiten Schirmen bleibt die Karte schmal statt in die Breite zu laufen. */
+    @media(min-width:760px){
+      .app{padding-left:18px;padding-right:18px;gap:14px}
+      .timer-card{width:min(100%,560px);margin:0 auto}
+      .view-panel{width:min(100%,780px);margin:0 auto}
+      .bottom-nav{width:min(100%,460px);margin:0 auto}
+      .time{font-size:clamp(4.5rem,9vw,6.4rem)}
     }
     @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   </style>
@@ -259,65 +358,57 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="13" r="7"/><path d="M12 6V3M8.5 3h7M12 13l3-2.5"/></svg></div><div>SHOT TIMER</div></div>
-      <div class="status-pill"><i id="micDot" class="status-dot"></i><span id="micStatus">Mikrofon aus</span></div>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="13" r="7"/><path d="M12 6V3M8.5 3h7M12 13l3-2.5"/></svg></div>
+        <div>SHOT TIMER</div>
+      </div>
+      <div class="top-tools">
+        <button class="tool-btn" id="helpBtn" aria-label="Hilfe" title="Hilfe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4"/><path d="M12 17.5h.01"/></svg></button>
+        <button class="tool-btn" id="moreBtn" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg></button>
+      </div>
     </header>
 
-    <main id="timerView" class="view active">
-      <div class="layout">
-        <section class="timer-card">
-          <div class="mode-switch" aria-label="Trainingsmodus">
-            <button class="mode-btn active" data-mode="live">LIVE FIRE<span>Schüsse erkennen</span></button>
-            <button class="mode-btn" data-mode="dry">DRY FIRE<span>Klicks erkennen</span></button>
-          </div>
-          <div class="timer-stage">
-            <div>
-              <div class="state-label" id="stateLabel">BEREIT</div>
-              <div class="time"><span id="seconds">0</span><span class="hundredths" id="hundredths">.00</span></div>
-              <div class="last-split" id="lastSplit">Noch keine Aufnahme</div>
-              <div class="sound-meter"><i id="soundLevel"></i></div>
-              <div class="meter-caption"><span>Umgebung</span><span id="thresholdLabel">Schwelle 42</span></div>
-            </div>
-          </div>
-          <div class="primary-row">
-            <button class="icon-btn" id="resetBtn" aria-label="Zurücksetzen" title="Zurücksetzen">
-              <svg viewBox="0 0 24 24" width="21" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-            </button>
-            <button class="start-btn" id="startBtn">START</button>
-            <button class="icon-btn" id="calibrateBtn" aria-label="Mikrofon kalibrieren" title="Mikrofon kalibrieren">
-              <svg viewBox="0 0 24 24" width="21" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg>
-            </button>
-          </div>
-          <button class="simulate" id="simulateBtn" type="button"><b>Treffer von Hand eintragen</b><small>Ersatz, solange das Mikrofon nicht erkennt</small></button>
-          <div class="quick-settings">
-            <button class="quick" data-open="delay"><label>Verzögerung</label><b id="delayValue">Zufall 2–4 s</b></button>
-            <button class="quick" data-open="par"><label>Par Time</label><b id="parValue">Aus</b></button>
-            <button class="quick" data-open="reps"><label>Durchgänge</label><b id="repsValue">1 Durchgang</b></button>
-          </div>
-        </section>
+    <main id="timerView" class="view">
+      <section class="card timer-card">
+        <div class="mode-switch" aria-label="Trainingsmodus">
+          <button class="mode-btn active" data-mode="live">LIVE FIRE<span>Schüsse erkennen</span></button>
+          <button class="mode-btn" data-mode="dry">DRY FIRE<span>Klicks erkennen</span></button>
+        </div>
 
-        <aside class="side">
-          <section class="side-card">
-            <div class="side-title"><h2>Letzter Durchgang</h2><button id="saveSession">Speichern</button></div>
-            <div class="shot-list" id="shotList"><div class="empty">Splits erscheinen hier automatisch.</div></div>
-          </section>
-          <section class="side-card">
-            <div class="side-title"><h2>Erkennungsprofil</h2><button id="calibrateText">Kalibrieren</button></div>
-            <div class="profile selected" id="profileCard">
-              <div class="profile-icon" id="profileIcon">9</div>
-              <div><b id="profileName">9 mm / Standard</b><span id="profileDesc">Für die meisten Indoor-Stände</span></div>
-            </div>
-            <div class="range-line">
-              <div class="range-head"><span>Empfindlichkeit</span><b id="sensitivityValue">42 %</b></div>
-              <input id="sensitivity" type="range" min="10" max="95" value="42" aria-label="Empfindlichkeit">
-              <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
-            </div>
-            <p class="tip"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11.5v4.5M12 8h.01" stroke-linecap="round"/></svg><span><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die
-              Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung
-              und Nachbarstände nicht mehr versehentlich aus.</span></p>
-          </section>
-        </aside>
-      </div>
+        <div class="timer-stage">
+          <div class="state-label" id="stateLabel">BEREIT</div>
+          <div class="time"><span id="seconds">0</span><span class="hundredths" id="hundredths">.00</span></div>
+          <div class="last-split" id="lastSplit">Noch keine Aufnahme</div>
+          <div class="sound-meter"><i id="soundLevel"></i></div>
+          <div class="meter-caption"><span>Umgebung</span><span id="thresholdLabel">Schwelle 36 %</span></div>
+          <p class="mic-warn" id="micWarn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg><span id="micWarnText"></span></p>
+        </div>
+
+        <div class="splits" id="splitStrip" role="button" tabindex="0" aria-label="Alle Splits anzeigen">
+          <span class="splits-empty">Splits erscheinen hier – antippen für die ganze Liste</span>
+        </div>
+
+        <div class="primary-row">
+          <button class="icon-btn" id="resetBtn" aria-label="Zurücksetzen" title="Zurücksetzen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button class="start-btn" id="startBtn">START</button>
+          <button class="icon-btn mic" id="calibrateBtn" aria-label="Mikrofon kalibrieren" title="Mikrofon kalibrieren">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg>
+          </button>
+        </div>
+
+        <div class="quick-settings">
+          <button class="quick" data-open="delay"><label>Verzögerung</label><b id="delayValue">Zufall 2–4 s</b></button>
+          <button class="quick" data-open="par"><label>Par Time</label><b id="parValue">Aus</b></button>
+          <button class="quick" data-open="reps"><label>Durchgänge</label><b id="repsValue">1 Durchgang</b></button>
+        </div>
+
+        <div class="card-actions">
+          <button class="ghost-btn" id="drillsBtn" type="button">Drills laden</button>
+          <button class="ghost-btn" id="simulateBtn" type="button">Treffer von Hand</button>
+        </div>
+      </section>
     </main>
 
     <section id="scoreView" class="view-panel" aria-labelledby="scoreTitle">
@@ -326,9 +417,7 @@
           <h1 id="scoreTitle">Hit Factor</h1>
           <p>Zeit und Trefferzonen eintragen – die Wertung entsteht live.</p>
         </div>
-        <button class="ghost-btn" id="openStages">Gespeichert</button>
       </div>
-
       <div class="stage-bar">
         <input id="stageName" class="text-field" type="text" maxlength="40" placeholder="Stage 1" aria-label="Name der Stage">
         <div class="shots-field">
@@ -339,43 +428,40 @@
         </div>
         <span class="max-points" id="maxPoints">max. 60 Punkte</span>
       </div>
-
-      <div id="entryList"></div>
-      <button class="ghost-btn wide" id="addEntry" type="button">+ Schütze hinzufügen</button>
-
-      <div class="result-block">
-        <div class="side-title"><h2>Wertung</h2><span class="muted-note" id="resultHint"></span></div>
-        <div id="resultList"></div>
+      <div class="score-scroll">
+        <div id="entryList"></div>
+        <button class="ghost-btn wide" id="addEntry" type="button">+ Schütze hinzufügen</button>
+        <div class="result-block">
+          <div class="result-head"><h2>Wertung</h2><span class="muted-note" id="resultHint"></span></div>
+          <div id="resultList"></div>
+        </div>
       </div>
-
       <div class="score-footer">
         <button class="sheet-action" id="saveStage" type="button">STAGE SPEICHERN</button>
         <button class="ghost-btn" id="newStage" type="button">Neue Stage</button>
       </div>
     </section>
 
+    <nav class="bottom-nav" aria-label="Hauptnavigation">
+      <button class="nav-btn active" id="timerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Timer</span></button>
+      <button class="nav-btn" id="scoreBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg><span>Score</span></button>
+      <button class="nav-btn" id="historyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Verlauf</span></button>
+    </nav>
   </div>
-
-  <nav class="bottom-nav" aria-label="Hauptnavigation">
-    <button class="nav-btn active" id="timerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Timer</span></button>
-    <button class="nav-btn" id="scoreBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg><span>Score</span></button>
-    <button class="nav-btn" id="drillsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10v4H7zM5 7h14v14H5z"/><path d="M9 12h6M9 16h4"/></svg><span>Drills</span></button>
-    <button class="nav-btn" id="historyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Verlauf</span></button>
-    <button class="nav-btn" id="moreBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg><span>Mehr</span></button>
-  </nav>
 
   <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="sheet">
       <div class="sheet-grab"></div>
-      <div class="sheet-head"><h2 id="sheetTitle">Startverzögerung</h2><button id="closeModal" aria-label="Schließen">×</button></div>
-      <div class="option-grid" id="optionGrid"></div>
+      <div class="sheet-head"><div><h2 id="sheetTitle">Verzögerung</h2></div><button id="closeModal" aria-label="Schließen">×</button></div>
+      <div class="sheet-body"><div class="option-grid" id="optionGrid"></div></div>
       <button class="sheet-action" id="applyOption">ÜBERNEHMEN</button>
     </div>
   </div>
+
   <div class="modal" id="drillsModal" role="dialog" aria-modal="true" aria-labelledby="drillsTitle">
-    <div class="sheet content-sheet">
+    <div class="sheet">
       <div class="sheet-grab"></div>
-      <div class="sheet-head"><div><h2 id="drillsTitle">Drills</h2><small>Schnell laden und direkt starten</small></div><button id="closeDrills" aria-label="Schließen">×</button></div>
+      <div class="sheet-head"><div><h2 id="drillsTitle">Drills</h2><small>Laden und direkt starten</small></div><button id="closeDrills" aria-label="Schließen">×</button></div>
       <div class="sheet-body">
         <div class="drill-grid">
           <article class="drill" data-drill="draw"><div class="go">→</div><div class="drill-tag">Reaction</div><h3>Draw to First Shot</h3><p>Zufallsstart · erster Treffer beendet den Durchgang</p></article>
@@ -386,29 +472,90 @@
       </div>
     </div>
   </div>
-  <div class="modal" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
-    <div class="sheet content-sheet history-sheet">
+
+  <div class="modal" id="runModal" role="dialog" aria-modal="true" aria-labelledby="runTitle">
+    <div class="sheet">
       <div class="sheet-grab"></div>
-      <div class="sheet-head"><div><h2 id="historyTitle">Verlauf</h2><small>Gespeicherte Trainings auf diesem Gerät</small></div><button id="closeHistory" aria-label="Schließen">×</button></div>
-      <div class="sheet-body"><div id="historyList"><div class="empty">Noch keine Trainings gespeichert.</div></div></div>
+      <div class="sheet-head"><div><h2 id="runTitle">Letzter Durchgang</h2><small id="runSub">Alle Zeiten und Splits</small></div><button id="closeRun" aria-label="Schließen">×</button></div>
+      <div class="sheet-body"><div class="shot-list" id="shotList"></div></div>
+      <button class="sheet-action" id="saveSession">IM VERLAUF SPEICHERN</button>
     </div>
   </div>
-  <div class="modal" id="moreModal" role="dialog" aria-modal="true" aria-labelledby="moreTitle">
-    <div class="sheet settings-sheet">
+
+  <div class="modal" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="sheet">
       <div class="sheet-grab"></div>
-      <div class="sheet-head"><h2 id="moreTitle">Einstellungen</h2><button id="closeMore" aria-label="Schließen">×</button></div>
-      <div class="settings-grid">
-        <div class="setting-tile"><div class="setting-tile-head"><div><b>Make Ready</b><small>Vorbereitungszeit</small></div><button class="toggle" id="makeReady" aria-label="Make Ready" aria-pressed="false"></button></div><div class="tile-control"><select id="readySeconds"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option></select></div></div>
-        <div class="setting-tile"><div><b>Signalton</b><small>Start- und Par-Signal</small></div><div class="tile-control"><select id="volume"><option value="0.35">Leise</option><option value="0.65" selected>Normal</option><option value="1">Laut</option></select></div></div>
-        <div class="setting-tile"><div class="setting-tile-head"><div><b>Vibration</b><small>Zusätzliches Startsignal</small></div><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div></div>
-        <div class="setting-tile"><div class="setting-tile-head"><div><b>Testtaste</b><small>Treffer ohne Mikrofon eintragen</small></div><button class="toggle" id="testToggle" aria-label="Testtaste" aria-pressed="false"></button></div></div>
-        <div class="setting-tile"><div><b>Sprache</b><small>Weitere Sprachen folgen</small></div><div class="tile-control"><select id="langSelect" aria-label="Sprache" disabled><option>Deutsch</option></select></div></div>
-        <div class="setting-tile"><div><b>Trainingsdaten</b><small>Lokal auf diesem Gerät</small></div><div class="tile-control"><button id="clearHistory" class="danger-link">Verlauf löschen</button></div></div>
+      <div class="sheet-head"><div><h2 id="historyTitle">Verlauf</h2><small>Auf diesem Gerät gespeichert</small></div><button id="closeHistory" aria-label="Schließen">×</button></div>
+      <div class="segment" id="historySegment">
+        <button class="selected" data-seg="runs" type="button">Trainings</button>
+        <button data-seg="stages" type="button">Stages</button>
+      </div>
+      <div class="sheet-body">
+        <div id="historyList"></div>
+        <div id="stagesList" hidden></div>
+      </div>
+      <div class="sheet-foot"><button id="clearHistory" class="danger-link" type="button">Trainings löschen</button><button id="clearStages" class="danger-link" type="button" hidden>Alle Stages löschen</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="moreModal" role="dialog" aria-modal="true" aria-labelledby="moreTitle">
+    <div class="sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="moreTitle">Einstellungen</h2></div><button id="closeMore" aria-label="Schließen">×</button></div>
+      <div class="sheet-body">
+        <span class="field-label">Darstellung</span>
+        <div class="segment" id="themeSwitch">
+          <button data-theme-opt="auto" type="button">Automatisch</button>
+          <button data-theme-opt="light" type="button">Hell</button>
+          <button data-theme-opt="dark" class="selected" type="button">Dunkel</button>
+        </div>
+
+        <span class="field-label">Signale</span>
+        <div class="settings-grid">
+          <div class="setting-tile"><div class="setting-tile-head"><div><b>Make Ready</b><small>Vorbereitungszeit</small></div><button class="toggle" id="makeReady" aria-label="Make Ready" aria-pressed="false"></button></div><div class="tile-control"><select id="readySeconds"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option></select></div></div>
+          <div class="setting-tile"><div><b>Signalton</b><small>Start- und Par-Signal</small></div><div class="tile-control"><select id="volume"><option value="0.35">Leise</option><option value="0.65" selected>Normal</option><option value="1">Laut</option></select></div></div>
+          <div class="setting-tile"><div class="setting-tile-head"><div><b>Vibration</b><small>Zusätzliches Startsignal</small></div><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div></div>
+          <div class="setting-tile"><div class="setting-tile-head"><div><b>Testtaste</b><small>Treffer ohne Mikrofon eintragen</small></div><button class="toggle" id="testToggle" aria-label="Testtaste" aria-pressed="false"></button></div></div>
+        </div>
+
+        <span class="field-label">Erkennung</span>
+        <div class="profile">
+          <div class="profile-icon" id="profileIcon">9</div>
+          <div><b id="profileName">9 mm / Standard</b><span id="profileDesc">Für die meisten Indoor-Stände</span></div>
+        </div>
+        <div class="range-line">
+          <div class="range-head"><span>Empfindlichkeit</span><b id="sensitivityValue">42 %</b></div>
+          <input id="sensitivity" type="range" min="10" max="95" value="42" aria-label="Empfindlichkeit">
+          <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
+        </div>
+        <button class="ghost-btn wide" id="calibrateText" type="button" style="margin-top:12px">Jetzt kalibrieren</button>
+        <p class="tip"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11.5v4.5M12 8h.01" stroke-linecap="round"/></svg><span><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
+
+        <span class="field-label">Sprache</span>
+        <div class="settings-grid">
+          <div class="setting-tile wide"><div class="setting-tile-head"><div><b>Deutsch</b><small>Weitere Sprachen folgen</small></div><select id="langSelect" aria-label="Sprache" disabled><option>Deutsch</option></select></div></div>
+        </div>
       </div>
     </div>
   </div>
+
+  <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="helpTitle">So funktioniert es</h2></div><button id="closeHelp" aria-label="Schließen">×</button></div>
+      <div class="sheet-body">
+        <div class="help-block"><h3>Mikrofon</h3><p>Nach dem Startsignal hört die App mit und stoppt bei jedem Knall die Zeit. Daraus entstehen die Draw-Zeit und die Splits. Im Dry-Fire-Modus gilt dasselbe für den Trigger-Klick, nur empfindlicher eingestellt.</p></div>
+        <div class="help-block"><h3>Kalibrieren</h3><p>Das Mikrofonsymbol neben START misst 1,5 Sekunden den Umgebungslärm und legt die Auslöseschwelle darüber. Einmal am Stand machen, solange es ruhig ist. Die Farbe des Symbols zeigt, ob das Mikrofon bereit ist.</p></div>
+        <div class="help-block"><h3>Treffer von Hand</h3><p>Trägt einen Treffer zum aktuellen Zeitpunkt ein – als Ersatz, wenn kein Mikrofon verfügbar ist, oder zum Ausprobieren ohne zu schießen.</p></div>
+        <div class="help-block"><h3>Par Time und Durchgänge</h3><p>Par Time beendet den Durchgang nach der eingestellten Zeit mit einem zweiten Signal. Mehrere Durchgänge laufen automatisch hintereinander.</p></div>
+        <div class="help-block"><h3>Hit Factor</h3><p>Unter <b>Score</b> werden Zeit und Trefferzonen mehrerer Schützen eingetragen. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %.</p></div>
+        <div class="help-block"><h3>Sicherheit</h3><p>Regeln des Standes und Waffensicherheit liegen in deiner Verantwortung. Beim Dry Fire sicherstellen, dass die Waffe entladen ist und keine Munition in der Nähe liegt.</p></div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="shooterModal" role="dialog" aria-modal="true" aria-labelledby="shooterTitle">
-    <div class="sheet content-sheet">
+    <div class="sheet">
       <div class="sheet-grab"></div>
       <div class="sheet-head"><div><h2 id="shooterTitle">Schütze hinzufügen</h2><small>Gespeicherte auswählen oder neu anlegen</small></div><button id="closeShooter" aria-label="Schließen">×</button></div>
       <div class="sheet-body">
@@ -421,25 +568,19 @@
             <button class="pf-opt" type="button" data-pf="major">Major</button>
           </div>
         </div>
-        <button class="sheet-action" id="createShooter" type="button">HINZUFÜGEN</button>
       </div>
+      <button class="sheet-action" id="createShooter" type="button">HINZUFÜGEN</button>
     </div>
   </div>
-  <div class="modal" id="stagesModal" role="dialog" aria-modal="true" aria-labelledby="stagesTitle">
-    <div class="sheet content-sheet">
-      <div class="sheet-grab"></div>
-      <div class="sheet-head"><div><h2 id="stagesTitle">Gespeicherte Stages</h2><small>Antippen zeigt die vollständige Wertung</small></div><button id="closeStages" aria-label="Schließen">×</button></div>
-      <div class="sheet-body"><div id="stagesList"></div></div>
-      <div class="sheet-foot"><button id="clearStages" class="danger-link" type="button">Alle Stages löschen</button></div>
-    </div>
-  </div>
+
   <div class="modal" id="progressModal" role="dialog" aria-modal="true" aria-labelledby="progressName">
-    <div class="sheet content-sheet">
+    <div class="sheet">
       <div class="sheet-grab"></div>
       <div class="sheet-head"><div><h2 id="progressName">Fortschritt</h2><small id="progressSub"></small></div><button id="closeProgress" aria-label="Schließen">×</button></div>
       <div class="sheet-body"><div id="progressBody"></div></div>
     </div>
   </div>
+
   <div class="toast" id="toast"></div>
   <audio id="standbyAudio" src="assets/standby.mp3" preload="auto"></audio>
   <audio id="signalAudio" src="assets/pact-beep.mp3" preload="auto"></audio>
@@ -473,7 +614,7 @@
       };
       const DEFAULTS={
         mode:'live',delay:'random',par:0,reps:1,
-        volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,
+        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
       };
@@ -488,6 +629,7 @@
           delay:OPTIONS.delay.some(o=>o[0]===stored.delay)?stored.delay:DEFAULTS.delay,
           par:num(stored.par,DEFAULTS.par,0,60),
           reps:Math.round(num(stored.reps,DEFAULTS.reps,1,99)),
+          theme:['auto','light','dark'].includes(stored.theme)?stored.theme:DEFAULTS.theme,
           volume:num(stored.volume,DEFAULTS.volume,0,1),
           vibration:typeof stored.vibration==='boolean'?stored.vibration:DEFAULTS.vibration,
           makeReady:typeof stored.makeReady==='boolean'?stored.makeReady:DEFAULTS.makeReady,
@@ -526,6 +668,32 @@
       function renderTime(t){const f=format(t);$('#seconds').textContent=f.whole;$('#hundredths').textContent=f.dec}
       function de(n){return n.toFixed(2).replace('.',',')}
       function setToggle(el,on){el.classList.toggle('on',on);el.setAttribute('aria-pressed',String(on))}
+
+      /* ---------- Darstellung ----------
+         'auto' folgt der Systemeinstellung, sonst gilt die feste Wahl. */
+      const LIGHT_QUERY=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):null;
+      function applyTheme(){
+        const mode=settings.theme==='auto'?(LIGHT_QUERY&&LIGHT_QUERY.matches?'light':'dark'):settings.theme;
+        document.documentElement.dataset.theme=mode;
+        $('#themeColor')?.setAttribute('content',mode==='light'?'#eef1f3':'#080a0b');
+        $$('#themeSwitch button').forEach(b=>b.classList.toggle('selected',b.dataset.themeOpt===settings.theme));
+      }
+      if(LIGHT_QUERY?.addEventListener)LIGHT_QUERY.addEventListener('change',()=>{if(settings.theme==='auto')applyTheme()});
+
+      /* ---------- Mikrofonzustand ----------
+         Das Mikrofonsymbol neben START ist die Anzeige; eine Warnzeile
+         erscheint nur, wenn wirklich etwas fehlt. */
+      function setMicState(state,message){
+        const btn=$('#calibrateBtn');
+        btn.classList.toggle('ready',state==='ready');
+        btn.classList.toggle('blocked',state==='blocked');
+        btn.setAttribute('aria-label',
+          state==='ready'?'Mikrofon bereit – jetzt kalibrieren'
+          :state==='blocked'?'Mikrofon nicht verfügbar'
+          :'Mikrofon kalibrieren');
+        $('#micWarn').classList.toggle('show',!!message);
+        if(message)$('#micWarnText').textContent=message;
+      }
 
       /* ---------- Audio ---------- */
       let beepBuffer=null,standbyBuffer=null,buffersLoaded=false;
@@ -579,7 +747,7 @@
       async function ensureMic(){
         if(rt.stream){await resumeAudio();return true}
         if(!navigator.mediaDevices?.getUserMedia){
-          $('#micStatus').textContent='Nicht verfügbar';
+          setMicState('blocked','Kein Mikrofonzugriff – Treffer von Hand eintragen');
           forceTestButton();
           return false;
         }
@@ -595,14 +763,13 @@
           rt.analyser.smoothingTimeConstant=.12;
           src.connect(rt.analyser);
           rt.stream.getAudioTracks().forEach(t=>t.addEventListener('ended',dropMic));
-          $('#micDot').classList.add('ready');
-          $('#micStatus').textContent='Mikrofon bereit';
+          setMicState('ready','');
           startMonitor();
           return true;
         }catch(e){
-          $('#micStatus').textContent='Zugriff blockiert';
+          setMicState('blocked','Mikrofon nicht freigegeben – Treffer von Hand eintragen');
           forceTestButton();
-          showToast('Mikrofon nicht freigegeben – Testtaste aktiviert');
+          showToast('Mikrofon nicht freigegeben');
           return false;
         }
       }
@@ -610,13 +777,12 @@
         stopMonitor();
         rt.stream?.getTracks?.().forEach(t=>t.stop());
         rt.stream=null;rt.analyser=null;
-        $('#micDot').classList.remove('ready');
-        $('#micStatus').textContent='Mikrofon aus';
+        setMicState('off','');
       }
       function forceTestButton(){
         settings.testButton=true;saveSettings();
         setToggle($('#testToggle'),true);
-        $('#simulateBtn').classList.add('show');
+        $('#simulateBtn').hidden=false;
       }
 
       /* ---------- Pegel und Erkennung ---------- */
@@ -785,12 +951,35 @@
       /* ---------- Rendern ---------- */
       function renderShots(){
         const list=$('#shotList');
-        if(!rt.shots.length){list.innerHTML='<div class="empty">Splits erscheinen hier automatisch.</div>';return}
-        list.innerHTML=rt.shots.map((s,i)=>
-          '<div class="shot-row"><span class="n">#'+String(i+1).padStart(2,'0')+'</span>'+
-          '<b>'+s.time.toFixed(2)+' s</b>'+
-          '<span class="split">'+(i===0?'Draw':'+'+s.split.toFixed(2))+'</span></div>'
-        ).reverse().join('');
+        list.innerHTML=rt.shots.length
+          ? rt.shots.map((s,i)=>
+              '<div class="shot-row"><span class="n">#'+String(i+1).padStart(2,'0')+'</span>'+
+              '<b>'+s.time.toFixed(2)+' s</b>'+
+              '<span class="split">'+(i===0?'Draw':'+'+s.split.toFixed(2))+'</span></div>'
+            ).reverse().join('')
+          : '<div class="empty">Noch keine Treffer aufgezeichnet.</div>';
+        renderSplitStrip();
+      }
+      // Die letzten vier Treffer bleiben auf der Karte sichtbar, ohne zu scrollen.
+      function renderSplitStrip(){
+        const strip=$('#splitStrip');
+        if(!rt.shots.length){
+          strip.innerHTML='<span class="splits-empty">Splits erscheinen hier – antippen für die ganze Liste</span>';
+          return;
+        }
+        const shown=rt.shots.map((s,i)=>({s,n:i+1})).slice(-4).reverse();
+        const rest=rt.shots.length-shown.length;
+        strip.innerHTML=shown.map(x=>
+          '<span class="chip'+(x.n===1?' first':'')+'"><small>#'+String(x.n).padStart(2,'0')+'</small>'+
+          '<b>'+(x.n===1?x.s.time.toFixed(2):'+'+x.s.split.toFixed(2))+'</b></span>'
+        ).join('')+(rest>0?'<span class="chip more">+'+rest+'</span>':'');
+      }
+      function openRunSheet(){
+        renderShots();
+        $('#runSub').textContent=rt.shots.length
+          ? rt.shots.length+(rt.shots.length===1?' Treffer':' Treffer')+' · '+rt.shots[rt.shots.length-1].time.toFixed(2)+' s gesamt'
+          : 'Noch keine Aufnahme';
+        openModalById('runModal');
       }
       function renderThreshold(){
         $('#thresholdLabel').textContent='Schwelle '+Math.round(currentThreshold()*100)+' %';
@@ -860,6 +1049,7 @@
         catch(e){showToast('Speichern fehlgeschlagen');return}
         LEGACY_HISTORY_KEYS.forEach(k=>localStorage.removeItem(k));
         renderHistory();
+        closeModals();
         showToast('Training gespeichert');
       }
       function renderHistory(){
@@ -878,7 +1068,7 @@
 
       /* ---------- Sheets ---------- */
       const FOCUSABLE='button:not([disabled]),select:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
-      const PANELS=['drillsModal','historyModal','moreModal'];
+      const ALL_MODALS=['settingsModal','drillsModal','runModal','historyModal','moreModal','helpModal','shooterModal','progressModal'];
       let activeModal=null,lastFocus=null,pendingKey='delay',pendingValue='random';
 
       function focusModal(id){
@@ -908,37 +1098,41 @@
         $('#optionGrid').innerHTML=OPTIONS[key].map(o=>
           '<button class="option '+(o[0]===pendingValue?'selected':'')+'" data-value="'+o[0]+'">'+o[1]+'</button>'
         ).join('');
-        $('#settingsModal').classList.add('show');
-        document.body.classList.add('sheet-open');
         $$('#optionGrid .option').forEach(b=>b.onclick=()=>{
           $$('#optionGrid .option').forEach(x=>x.classList.remove('selected'));
           b.classList.add('selected');
           pendingValue=b.dataset.value;
         });
-        focusModal('settingsModal');
-      }
-      function closeQuickSheet(){
-        $('#settingsModal').classList.remove('show');
-        releaseModal();
+        openModalById('settingsModal');
       }
       function applySheet(){
         settings[pendingKey]=pendingKey==='delay'?pendingValue:Number(pendingValue);
         saveSettings();
         renderQuickSettings();
-        closeQuickSheet();
+        closeModals();
       }
       function setNav(id){$$('.nav-btn').forEach(x=>x.classList.toggle('active',x.id===id))}
-      function openPanel(modalId,navId){
-        PANELS.forEach(id=>$('#'+id).classList.remove('show'));
-        $('#'+modalId).classList.add('show');
-        setNav(navId);
+      function openModalById(id,navId){
+        ALL_MODALS.forEach(x=>$('#'+x).classList.remove('show'));
+        $('#'+id).classList.add('show');
+        if(navId)setNav(navId);
         document.body.classList.add('sheet-open');
-        focusModal(modalId);
+        focusModal(id);
       }
-      function closePanels(){
-        PANELS.forEach(id=>$('#'+id).classList.remove('show'));
+      function closeModals(){
+        ALL_MODALS.forEach(x=>$('#'+x).classList.remove('show'));
         setNav(currentView==='score'?'scoreBtn':'timerBtn');
         releaseModal();
+      }
+      function anyModalOpen(){return ALL_MODALS.some(id=>$('#'+id).classList.contains('show'))}
+      // Verlauf führt Trainings und Stages an einem Ort zusammen.
+      function setHistorySegment(seg){
+        $$('#historySegment button').forEach(b=>b.classList.toggle('selected',b.dataset.seg===seg));
+        $('#historyList').hidden=seg!=='runs';
+        $('#stagesList').hidden=seg!=='stages';
+        $('#clearHistory').hidden=seg!=='runs';
+        $('#clearStages').hidden=seg!=='stages';
+        if(seg==='runs')renderHistory(); else renderStages();
       }
       function selectDrill(name){
         const d=DRILLS[name];
@@ -950,7 +1144,7 @@
         rt.drillStop=d.stop;
         rt.drillLabel=d.label;
         renderQuickSettings();
-        closePanels();
+        closeModals();
         showToast(d.label+' geladen');
       }
 
@@ -964,17 +1158,19 @@
       $('#simulateBtn').onclick=()=>rt.counting?recordShot():showToast('Timer zuerst starten');
       $('#saveSession').onclick=saveSession;
       $$('[data-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.open));
-      $('#closeModal').onclick=closeQuickSheet;
-      $('#settingsModal').onclick=e=>{if(e.target.id==='settingsModal')closeQuickSheet()};
       $('#applyOption').onclick=applySheet;
-      $('#timerBtn').onclick=()=>{closePanels();showView('timer')};
-      $('#drillsBtn').onclick=()=>openPanel('drillsModal','drillsBtn');
-      $('#historyBtn').onclick=()=>{renderHistory();openPanel('historyModal','historyBtn')};
-      $('#moreBtn').onclick=()=>openPanel('moreModal','moreBtn');
-      $('#closeDrills').onclick=closePanels;
-      $('#closeHistory').onclick=closePanels;
-      $('#closeMore').onclick=closePanels;
-      PANELS.forEach(id=>$('#'+id).onclick=e=>{if(e.target.id===id)closePanels()});
+      $('#timerBtn').onclick=()=>{closeModals();showView('timer')};
+      $('#drillsBtn').onclick=()=>openModalById('drillsModal');
+      $('#historyBtn').onclick=()=>{setHistorySegment('runs');openModalById('historyModal','historyBtn')};
+      $('#moreBtn').onclick=()=>openModalById('moreModal');
+      $('#helpBtn').onclick=()=>openModalById('helpModal');
+      $('#splitStrip').onclick=openRunSheet;
+      $('#splitStrip').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openRunSheet()}};
+      $$('#historySegment button').forEach(b=>b.onclick=()=>setHistorySegment(b.dataset.seg));
+      $$('#themeSwitch button').forEach(b=>b.onclick=()=>{settings.theme=b.dataset.themeOpt;saveSettings();applyTheme()});
+      ['closeModal','closeDrills','closeRun','closeHistory','closeMore','closeHelp','closeShooter','closeProgress']
+        .forEach(id=>{const el=$('#'+id);if(el)el.onclick=closeModals});
+      ALL_MODALS.forEach(id=>$('#'+id).addEventListener('click',e=>{if(e.target.id===id)closeModals()}));
       $$('.drill').forEach(d=>{
         d.setAttribute('role','button');
         d.setAttribute('tabindex','0');
@@ -989,7 +1185,7 @@
       $('#testToggle').onclick=e=>{
         settings.testButton=!settings.testButton;
         setToggle(e.currentTarget,settings.testButton);
-        $('#simulateBtn').classList.toggle('show',settings.testButton);
+        $('#simulateBtn').hidden=!settings.testButton;
         saveSettings();
       };
       $('#clearHistory').onclick=()=>{
@@ -1000,9 +1196,7 @@
 
       document.addEventListener('keydown',e=>{
         if(e.key==='Escape'){
-          if($('#settingsModal').classList.contains('show'))closeQuickSheet();
-          else if(anySheetOpen())closeSheetPanel();
-          else closePanels();
+          if(anyModalOpen())closeModals();
           return;
         }
         trapFocus(e);
@@ -1023,7 +1217,6 @@
       const STAGES_KEY='shot-timer-stages-v1';
       const DRAFT_KEY='shot-timer-stage-draft-v1';
       const STAGE_LIMIT=100;
-      const SHEETS=['shooterModal','stagesModal','progressModal'];
       const ZONES=[
         {key:'a',label:'A'},{key:'c',label:'C'},{key:'d',label:'D'},
         {key:'m',label:'M',pen:true},{key:'ns',label:'NS',pen:true},{key:'pe',label:'PE',pen:true}
@@ -1207,7 +1400,7 @@
         renderShooterPicker();
         $('#newShooterName').value='';
         setPf(pendingPf);
-        openSheetPanel('shooterModal');
+        openModalById('shooterModal');
       }
       function setPf(pf){
         pendingPf=pf==='major'?'major':'minor';
@@ -1221,7 +1414,7 @@
         else{shooter={id:uid(),name,pf:pendingPf};shooters.push(shooter)}
         writeJson(SHOOTERS_KEY,shooters);
         addEntry(shooter);
-        closeSheetPanel();
+        closeModals();
       }
       function deleteShooter(id){
         // Nur die Stammdaten; gespeicherte Stages behalten ihre Namenskopie.
@@ -1369,22 +1562,10 @@
               aside:'Platz '+r.rank+'/'+r.of
             })).join('')+'</div>';
         }
-        openSheetPanel('progressModal');
+        openModalById('progressModal');
       }
 
       /* ---------- Sheets der Score-Ansicht ---------- */
-      function openSheetPanel(id){
-        SHEETS.forEach(x=>$('#'+x).classList.remove('show'));
-        $('#'+id).classList.add('show');
-        document.body.classList.add('sheet-open');
-        focusModal(id);
-      }
-      function closeSheetPanel(){
-        SHEETS.forEach(x=>$('#'+x).classList.remove('show'));
-        releaseModal();
-      }
-      function anySheetOpen(){return SHEETS.some(id=>$('#'+id).classList.contains('show'))}
-
       /* ---------- Ansichtswechsel ---------- */
       function showView(name){
         currentView=name;
@@ -1454,7 +1635,7 @@
         const pick=ev.target.closest('[data-pick]');
         if(!pick)return;
         const shooter=shooters.find(s=>s.id===pick.dataset.pick);
-        if(shooter){addEntry(shooter);closeSheetPanel()}
+        if(shooter){addEntry(shooter);closeModals()}
       });
       $$('#pfSwitch .pf-opt').forEach(b=>b.onclick=()=>setPf(b.dataset.pf));
       $('#newShooterName').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();createShooter()}});
@@ -1465,17 +1646,12 @@
       $('#shotsDown').onclick=()=>{stage.shots=Math.max(MIN_SHOTS,stage.shots-1);persistDraft();renderScore()};
       $('#saveStage').onclick=saveStage;
       $('#newStage').onclick=newStage;
-      $('#openStages').onclick=()=>{renderStages();openSheetPanel('stagesModal')};
-      $('#closeShooter').onclick=closeSheetPanel;
-      $('#closeStages').onclick=closeSheetPanel;
-      $('#closeProgress').onclick=closeSheetPanel;
-      SHEETS.forEach(id=>$('#'+id).addEventListener('click',ev=>{if(ev.target.id===id)closeSheetPanel()}));
       $('#clearStages').onclick=()=>{
         localStorage.removeItem(STAGES_KEY);
         renderStages();
         showToast('Alle Stages gelöscht');
       };
-      $('#scoreBtn').onclick=()=>{closePanels();showView('score')};
+      $('#scoreBtn').onclick=()=>{closeModals();showView('score')};
 
       function initScore(){
         shooters=readJson(SHOOTERS_KEY,[]).filter(s=>s&&s.id&&s.name).map(s=>({
@@ -1489,6 +1665,8 @@
 
       /* ---------- Start ---------- */
       function init(){
+        applyTheme();
+        setMicState('off','');
         $$('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===settings.mode));
         renderProfile();
         renderSensitivity();
@@ -1498,13 +1676,14 @@
         setToggle($('#makeReady'),settings.makeReady);
         setToggle($('#vibration'),settings.vibration);
         setToggle($('#testToggle'),settings.testButton);
-        $('#simulateBtn').classList.toggle('show',settings.testButton);
+        $('#simulateBtn').hidden=!settings.testButton;
         renderShots();
         renderHistory();
         initScore();
       }
       init();
     })();
+
   </script>
 </body>
 </html>
