@@ -216,13 +216,38 @@ ein neues Keystore anlegen.
 
 **Voraussetzungen**
 
-- Ein Mac mit Xcode. Das ist zwingend – auf Windows lässt sich kein iOS-Build
-  erstellen und nichts einreichen. Alternative ohne eigenen Mac: ein
-  CI-Dienst mit macOS-Runnern (z. B. Codemagic, Bitrise, GitHub Actions).
-- CocoaPods auf dem Mac
 - Apple Developer Program, 99 USD pro Jahr
+- Eine macOS-Maschine für den Build – entweder ein eigener Mac oder eine
+  gemietete in der Cloud. Der Zwang kommt von Apple: `xcodebuild` und
+  `codesign` laufen ausschließlich unter macOS. Das gilt für **jedes**
+  Framework, auch für Flutter, React Native oder MAUI. Ein Wechsel der
+  Technik würde daran nichts ändern.
 
-**Build auf dem Mac**
+**Ohne eigenen Mac: Build in der Cloud**
+
+`codemagic.yaml` im Projektwurzelverzeichnis beschreibt beide Plattformen.
+Codemagic startet eine macOS-Maschine, baut das IPA, signiert es und lädt es
+nach TestFlight. Die Zertifikate erzeugt der Dienst selbst über einen
+App-Store-Connect-API-Schlüssel – dafür wird kein Keychain-Zugriff auf einem
+eigenen Gerät gebraucht.
+
+Einzurichten ist einmalig: Repository verbinden, API-Schlüssel hinterlegen,
+App-ID und App-Eintrag anlegen, Android-Keystore hochladen. Die Schritte
+stehen als Kommentar oben in `codemagic.yaml`. Kontingente und Preise der
+kostenlosen Stufe bitte aktuell prüfen.
+
+Gleichwertige Alternativen: **Bitrise**, **Ionic Appflow** oder **GitHub
+Actions** mit `runs-on: macos-latest`. Bei GitHub Actions muss die Signatur
+selbst eingerichtet werden (Zertifikat und Profil als Secrets, üblicherweise
+über fastlane) – mehr Aufwand, dafür ohne zusätzlichen Anbieter. Wer lieber
+direkt an einem Mac arbeitet, mietet einen bei MacStadium oder MacInCloud.
+
+Damit ein Cloud-Build überhaupt startet, muss das Xcode-Scheme geteilt sein.
+Capacitor legt es nur benutzerlokal an, deshalb liegt
+`ios/App/App.xcodeproj/xcshareddata/xcschemes/App.xcscheme` hier im
+Repository. Nicht löschen.
+
+**Build auf einem eigenen Mac**
 
 ```bash
 npm install
