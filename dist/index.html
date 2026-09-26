@@ -100,7 +100,7 @@
     /* height:100% statt 100dvh: in der iOS-Standalone-App liefert dvh die
        bereits um die Safe Areas verkleinerte Hoehe, die Insets unten wuerden
        dann doppelt zaehlen und es entstuende ein leeres Band. */
-    .app{height:100%;width:min(100%,1120px);margin:0 auto;display:flex;flex-direction:column;gap:11px;padding:max(10px,env(safe-area-inset-top)) 11px max(11px,env(safe-area-inset-bottom))}
+    .app{height:100%;width:min(100%,1120px);margin:0 auto;display:flex;flex-direction:column;gap:11px;padding:max(10px,env(safe-area-inset-top)) 11px 0}
 
     /* ============ Kopfzeile ============ */
     .topbar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -127,6 +127,9 @@
     .mode-btn.active{background:var(--surface-3);color:var(--text);box-shadow:var(--shadow-soft)}
     .mode-btn span{display:block;font-size:.65rem;font-weight:600;color:var(--faint);margin-top:1px}
     .mode-btn.active span{color:var(--muted)}
+    .mode-btn{position:relative}
+    .mode-info{position:absolute;top:5px;right:7px;width:17px;height:17px;border-radius:50%;border:1px solid var(--line-strong);color:var(--muted);font-style:normal;font-size:.62rem;font-weight:800;display:grid;place-items:center;cursor:pointer}
+    .mode-info:hover{border-color:var(--accent);color:var(--accent)}
 
     .timer-stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center}
     .state-label{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.2em;color:var(--accent);font-size:.74rem;font-weight:900;min-height:1.1em}
@@ -174,7 +177,10 @@
     .card-actions>button{flex:1;min-width:0}
 
     /* ============ Tableiste ============ */
-    .bottom-nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);background:var(--nav-bg);border:1px solid var(--line);border-radius:19px;padding:6px;backdrop-filter:blur(18px);box-shadow:var(--shadow-soft)}
+    /* Die Leiste reicht bis zur Bildschirmkante; nur ihr Inhalt wird um die
+       Safe Area nach oben gepolstert. Sonst bleibt darunter ein leerer
+       Streifen in der reinen Hintergrundfarbe stehen. */
+    .bottom-nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);background:var(--nav-bg);border:1px solid var(--line);border-bottom:0;border-radius:19px 19px 0 0;margin:0 -11px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(18px);box-shadow:var(--shadow-soft)}
     .nav-btn{border:0;background:transparent;color:var(--faint);border-radius:14px;padding:7px 4px 6px;display:grid;justify-items:center;gap:3px;font-size:.66rem;font-weight:700;cursor:pointer}
     .nav-btn svg{width:20px;height:20px}
     .nav-btn.active{background:var(--accent-soft);color:var(--accent)}
@@ -235,7 +241,10 @@
     .drill .go{position:absolute;right:10px;top:10px;border-radius:50%;width:26px;height:26px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent);font-size:.85rem}
 
     /* ============ Verlauf ============ */
-    .history-card{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .history-card{width:100%;text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;color:inherit;font:inherit;cursor:pointer}
+    .history-card:hover{border-color:var(--line-strong)}
+    .shot-row.head{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;background:none}
+    .shot-row.head b,.shot-row.head .split{color:var(--muted);font-weight:700}
     .history-card>div{min-width:0}
     .history-card b{display:block;font-size:.89rem}
     .history-card span{display:block;color:var(--muted);font-size:.72rem;margin-top:3px;line-height:1.4}
@@ -275,6 +284,7 @@
     .help-block{margin-bottom:16px}
     .help-block h3{font-family:var(--font-display);margin:0 0 5px;font-size:.9rem}
     .help-block p{margin:0;color:var(--muted);font-size:.79rem;line-height:1.5}
+    .help-text{margin:0 0 12px;color:var(--muted);font-size:.83rem;line-height:1.55}
 
     /* ============ Hit Factor ============ */
     .panel-head{flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -421,7 +431,7 @@
       <section class="card timer-card">
         <div class="mode-switch" aria-label="Trainingsmodus">
           <button class="mode-btn active" data-mode="live">LIVE FIRE<span>Schüsse erkennen</span></button>
-          <button class="mode-btn" data-mode="dry">DRY FIRE<span>Klicks erkennen</span></button>
+          <button class="mode-btn" data-mode="dry">DRY FIRE<span>Klicks erkennen</span><i class="mode-info" id="dryInfo" role="button" tabindex="0" aria-label="Hinweis zur Dry-Fire-Erkennung">i</i></button>
         </div>
 
         <div class="timer-stage">
@@ -603,7 +613,6 @@
       <div class="sheet-grab"></div>
       <div class="sheet-head"><div><h2 id="runTitle">Letzter Durchgang</h2><small id="runSub">Alle Zeiten und Splits</small></div><button id="closeRun" aria-label="Schließen">×</button></div>
       <div class="sheet-body"><div class="shot-list" id="shotList"></div></div>
-      <button class="sheet-action" id="saveSession">IM VERLAUF SPEICHERN</button>
     </div>
   </div>
 
@@ -623,7 +632,8 @@
         <span class="field-label">Signale</span>
         <div class="settings-grid">
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Make Ready</b><small>Vorbereitungszeit</small></div><button class="toggle" id="makeReady" aria-label="Make Ready" aria-pressed="false"></button></div><div class="tile-control"><select id="readySeconds"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option></select></div></div>
-          <div class="setting-tile"><div><b>Signalton</b><small>Start- und Par-Signal</small></div><div class="tile-control"><select id="volume"><option value="0.35">Leise</option><option value="0.65" selected>Normal</option><option value="1">Laut</option></select></div></div>
+          <div class="setting-tile"><div><b>Lautstärke</b><small>Start- und Par-Signal</small></div><div class="tile-control"><select id="volume"><option value="0.35">Leise</option><option value="0.65" selected>Normal</option><option value="1">Laut</option></select></div></div>
+        <div class="setting-tile"><div><b>Startton</b><small>Kurz sperrt das Mikrofon nur 190 statt 430 ms</small></div><div class="tile-control"><select id="beepStyle"><option value="original">Original</option><option value="kurz">Kurz</option></select></div></div>
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Vibration</b><small>Zusätzliches Startsignal</small></div><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div></div>
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Testtaste</b><small>Treffer ohne Mikrofon eintragen</small></div><button class="toggle" id="testToggle" aria-label="Testtaste" aria-pressed="false"></button></div></div>
         <div class="setting-tile"><div class="setting-tile-head"><div><b>Messwerte</b><small>Pegel und Schwelle einblenden</small></div><button class="toggle" id="debugToggle" aria-label="Messwerte" aria-pressed="false"></button></div></div>
@@ -650,6 +660,25 @@
     </div>
   </div>
 
+  <div class="modal" id="runDetailModal" role="dialog" aria-modal="true" aria-labelledby="runDetailTitle">
+    <div class="sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="runDetailTitle">Durchgang</h2><small id="runDetailSub"></small></div><button id="closeRunDetail" aria-label="Schließen">×</button></div>
+      <div class="sheet-body"><div id="runDetailBody"></div></div>
+      <div class="sheet-foot"><button id="deleteRun" class="danger-link" type="button">Diesen Durchgang löschen</button></div>
+    </div>
+  </div>
+  <div class="modal" id="dryInfoModal" role="dialog" aria-modal="true" aria-labelledby="dryInfoTitle">
+    <div class="sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="dryInfoTitle">Dry-Fire-Erkennung</h2></div><button id="closeDryInfo" aria-label="Schließen">×</button></div>
+      <div class="sheet-body">
+        <p class="help-text">Die Schusserkennung läuft über das Mikrofon deines Geräts. Umgebungsgeräusche, Holsterbewegungen, Manipulationen an der Waffe oder andere Geräusche können ebenfalls als Treffer gewertet werden. Die gemessenen Zeiten können daher je nach Gerät und Umgebung abweichen.</p>
+        <p class="help-text">Kalibriere einmal, solange es ruhig ist, und prüfe die Zeiten gegen eine Referenz, bevor du dich auf sie verlässt. Ein eigenständiger Shot Timer arbeitet unter allen Bedingungen genauer.</p>
+      </div>
+      <button class="sheet-action" id="dryInfoOk" type="button">VERSTANDEN</button>
+    </div>
+  </div>
   <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="sheet">
       <div class="sheet-grab"></div>
@@ -715,7 +744,11 @@
       // Sperrzeit nach dem Startsignal, damit der Piep sich nicht selbst als
       // Treffer meldet. Nur so lang wie nötig – früher 520 ms, was jeden
       // Draw unter einer halben Sekunde verworfen hat.
-      const BLANK_MS=BEEP_MS+60;
+      // Sperrzeit nach dem Startsignal, damit der Ton sich nicht selbst als
+      // Treffer meldet. Sie richtet sich nach der tatsächlichen Länge des
+      // beschnittenen Tons; der Wert hier gilt, bis die Datei geladen ist.
+      const BLANK_MARGIN_MS=50;
+      const BLANK_MS=BEEP_MS+BLANK_MARGIN_MS;
       // Par Time: frei waehlbar in halben Sekunden. PAR_TAIL ist der Nachlauf,
       // nach dem bei mehreren Durchgaengen der naechste startet - die Par-Zeit
       // selbst beendet die Messung nicht.
@@ -742,7 +775,7 @@
       let drillDraft=null;
       const DEFAULTS={
         mode:'live',delay:'random',par:0,reps:1,
-        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,debug:false,
+        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,debug:false,drySeen:false,beep:'original',
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
       };
@@ -764,6 +797,8 @@
           readySeconds:Math.round(num(stored.readySeconds,DEFAULTS.readySeconds,5,120)),
           testButton:typeof stored.testButton==='boolean'?stored.testButton:DEFAULTS.testButton,
           debug:typeof stored.debug==='boolean'?stored.debug:DEFAULTS.debug,
+          drySeen:typeof stored.drySeen==='boolean'?stored.drySeen:DEFAULTS.drySeen,
+          beep:stored.beep==='kurz'?'kurz':DEFAULTS.beep,
           sensitivity:{
             live:Math.round(num(stored.sensitivity?.live,DEFAULTS.sensitivity.live,10,95)),
             dry:Math.round(num(stored.sensitivity?.dry,DEFAULTS.sensitivity.dry,10,95))
@@ -783,7 +818,7 @@
         running:false,counting:false,startAt:0,shots:[],repNow:1,
         lastDetected:0,ignoreUntil:0,runId:0,drillStop:0,drillLabel:null,
         audio:null,analyser:null,stream:null,raf:null,clock:null,wakeLock:null,
-        threshold:0,monitoring:false,audioT0:null,peakMax:0,debugStamp:0
+        threshold:0,monitoring:false,audioT0:null,peakMax:0,debugStamp:0,blankMs:0,saved:false
       };
 
       /* ---------- Timer-Verwaltung ---------- */
@@ -837,7 +872,42 @@
           }catch(e){return null}
         };
         const [beep,standby]=await Promise.all([grab('assets/pact-beep.mp3'),grab('assets/standby.mp3')]);
-        beepBuffer=beep;standbyBuffer=standby;
+        beepBuffer=beep?trimmeStille(beep):null;
+        standbyBuffer=standby;
+        aktualisiereSperrzeit();
+      }
+      /* Die Signaldatei beginnt mit rund 110 ms Stille und klingt hinten aus.
+         Beides muss weg: der Ton soll exakt zum geplanten Zeitpunkt hörbar
+         werden, sonst misst die App die Stille mit. Der Klang selbst bleibt
+         unangetastet – es wird nur vorne und hinten beschnitten. */
+      function aktualisiereSperrzeit(){
+        rt.blankMs=(settings.beep==='original'&&beepBuffer)
+          ? Math.round(beepBuffer.duration*1000)+BLANK_MARGIN_MS
+          : BLANK_MS;
+      }
+      function trimmeStille(buffer){
+        const rate=buffer.sampleRate;
+        const kanal=buffer.getChannelData(0);
+        const schwelle=.02;
+        let start=0, ende=kanal.length-1;
+        while(start<kanal.length&&Math.abs(kanal[start])<schwelle)start++;
+        while(ende>start&&Math.abs(kanal[ende])<schwelle)ende--;
+        if(start>=ende)return buffer;
+        // Etwas Luft hinten lassen und sanft ausblenden, sonst knackt es.
+        const ausklang=Math.round(rate*.02);
+        ende=Math.min(kanal.length-1,ende+ausklang);
+        const laenge=ende-start+1;
+        const neu=rt.audio.createBuffer(buffer.numberOfChannels,laenge,rate);
+        for(let k=0;k<buffer.numberOfChannels;k++){
+          const quelle=buffer.getChannelData(k);
+          const ziel=neu.getChannelData(k);
+          for(let i=0;i<laenge;i++)ziel[i]=quelle[start+i];
+          for(let i=0;i<ausklang;i++){
+            const j=laenge-ausklang+i;
+            if(j>=0)ziel[j]*=1-i/ausklang;
+          }
+        }
+        return neu;
       }
       async function resumeAudio(){
         if(rt.audio&&rt.audio.state!=='running'){try{await rt.audio.resume()}catch(e){}}
@@ -883,7 +953,20 @@
         if(type==='signal'&&settings.vibration&&navigator.vibrate)navigator.vibrate(35);
         const latenz=()=>rt.audio.outputLatency||rt.audio.baseLatency||0;
 
+        // Der Originalton, vorne und hinten beschnitten. Er startet exakt
+        // zum geplanten Zeitpunkt der AudioContext-Uhr; erst wenn er fehlt,
+        // springt der erzeugte Ton ein.
         if(type==='signal'){
+          if(rt.audio&&rt.audio.state==='running'&&beepBuffer&&settings.beep==='original'){
+            const when=rt.audio.currentTime+CUE_LEAD;
+            const src=rt.audio.createBufferSource();
+            const gain=rt.audio.createGain();
+            gain.gain.value=settings.volume;
+            src.buffer=beepBuffer;src.connect(gain);gain.connect(rt.audio.destination);
+            src.start(when);
+            rt.audioT0=when+latenz();
+            return performance.now()+(when-rt.audio.currentTime+latenz())*1000;
+          }
           const when=playBeep();
           if(when!==null){
             rt.audioT0=when+latenz();
@@ -1060,7 +1143,7 @@
           const t0=playCue('signal');
           rt.startAt=t0;
           rt.lastDetected=t0;
-          rt.ignoreUntil=t0+BLANK_MS;
+          rt.ignoreUntil=t0+(rt.blankMs||BLANK_MS);
           rt.counting=true;
           $('#stateLabel').textContent='GO';
           rt.clock=requestAnimationFrame(tick);
@@ -1117,6 +1200,7 @@
         }else stop(false);
       }
       function stop(update=true){
+        const lief=rt.running;
         rt.runId++;
         rt.running=false;rt.counting=false;
         clearTimers();
@@ -1125,11 +1209,13 @@
         $('#startBtn').textContent='START';
         $('#startBtn').classList.remove('stop');
         releaseWakeLock();
+        if(lief&&rt.shots.length&&!rt.saved){rt.saved=true;saveRun()}
         if(update)$('#stateLabel').textContent=rt.shots.length?'ENDE':'BEREIT';
       }
       function reset(label=true,clearDrill=true){
         stop(false);
         rt.shots=[];
+        rt.saved=false;
         if(clearDrill){rt.drillStop=0;rt.drillLabel=null}
         renderTime(0);
         renderShots();
@@ -1179,7 +1265,7 @@
       function openRunSheet(){
         renderShots();
         $('#runSub').textContent=rt.shots.length
-          ? rt.shots.length+(rt.shots.length===1?' Treffer':' Treffer')+' · '+rt.shots[rt.shots.length-1].time.toFixed(2)+' s gesamt'
+          ? rt.shots.length+' Treffer · '+rt.shots[rt.shots.length-1].time.toFixed(2)+' s gesamt · liegt im Verlauf'
           : 'Noch keine Aufnahme';
         openModalById('runModal');
       }
@@ -1204,6 +1290,12 @@
         $('#profileDesc').textContent=p.desc;
       }
       function setMode(mode){
+        // Beim ersten Wechsel auf Dry Fire einmalig auf die Grenzen der
+        // Mikrofonerkennung hinweisen.
+        if(mode==='dry'&&!settings.drySeen){
+          settings.drySeen=true;
+          openModalById('dryInfoModal');
+        }
         settings.mode=mode;
         saveSettings();
         $$('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
@@ -1234,43 +1326,91 @@
         const splits=shots.slice(1).map(s=>s.split);
         return splits.length?Math.min(...splits):null;
       }
-      function saveSession(){
-        if(!rt.shots.length){showToast('Noch keine Zeiten vorhanden');return}
-        const history=readHistory();
-        history.unshift({
+      /* Jeder beendete Durchgang wandert von selbst in den Verlauf – vorher
+         war er weg, sobald der nächste startete. Mit allen Einzelzeiten,
+         damit sich ein Lauf später noch auswerten lässt. */
+      function saveRun(){
+        if(!rt.shots.length)return null;
+        const eintrag={
+          id:uid(),
           at:new Date().toISOString(),
           mode:settings.mode,
           drill:rt.drillLabel,
-          total:rt.shots[rt.shots.length-1].time,
+          par:settings.par,
+          delay:settings.delay,
+          reps:settings.reps,
+          total:Number(rt.shots[rt.shots.length-1].time.toFixed(3)),
           count:rt.shots.length,
-          first:rt.shots[0].time,
+          first:Number(rt.shots[0].time.toFixed(3)),
           best:bestSplit(rt.shots),
+          shots:rt.shots.map(s=>({t:Number(s.time.toFixed(3)),s:Number(s.split.toFixed(3))})),
           splits:rt.shots.map(s=>Number(s.split.toFixed(3)))
-        });
+        };
+        const history=readHistory();
+        history.unshift(eintrag);
         try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(0,HISTORY_LIMIT)))}
-        catch(e){showToast('Speichern fehlgeschlagen');return}
+        catch(e){showToast('Speichern fehlgeschlagen');return null}
         LEGACY_HISTORY_KEYS.forEach(k=>localStorage.removeItem(k));
         renderHistory();
-        closeModals();
-        showToast('Training gespeichert');
+        return eintrag;
+      }
+      function deleteRun(id){
+        const history=readHistory().filter(x=>x.id!==id);
+        writeJson(HISTORY_KEY,history);
+        renderHistory();
+        showToast('Durchgang gelöscht');
+      }
+      // Zeiten eines Laufs als Tabelle, für die Detailansicht und das
+      // Sheet zum laufenden Durchgang.
+      function shotTable(shots){
+        if(!shots||!shots.length)return '<div class="empty">Keine Treffer aufgezeichnet.</div>';
+        return '<div class="shot-list">'+
+          '<div class="shot-row head"><span class="n">#</span><b>Zeit</b><span class="split">Split</span></div>'+
+          shots.map((s,i)=>
+            '<div class="shot-row"><span class="n">'+String(i+1).padStart(2,'0')+'</span>'+
+            '<b>'+s.t.toFixed(2)+' s</b>'+
+            '<span class="split">'+(i===0?'Draw':'+'+s.s.toFixed(2))+'</span></div>'
+          ).join('')+'</div>';
+      }
+      function openRunDetail(id){
+        const lauf=readHistory().find(x=>x.id===id);
+        if(!lauf)return;
+        const titel=lauf.drill||(lauf.mode==='live'?'Live Fire':'Dry Fire');
+        $('#runDetailTitle').textContent=titel;
+        $('#runDetailSub').textContent=dateText(lauf.at);
+        const fakten=[
+          ['Erster Treffer',lauf.first.toFixed(2)+' s'],
+          ['Gesamtzeit',lauf.total.toFixed(2)+' s'],
+          ['Treffer',String(lauf.count)],
+          ['Bester Split',typeof lauf.best==='number'?lauf.best.toFixed(2)+' s':'–'],
+          ['Par Time',lauf.par?de(lauf.par)+' s':'Aus'],
+          ['Verzögerung',lauf.delay==='random'?'Zufall 2–4 s':'Fix '+de(Number(lauf.delay))+' s']
+        ];
+        $('#runDetailBody').innerHTML=
+          '<div class="stat-grid">'+fakten.map(([k,v])=>statTile(k,v)).join('')+'</div>'+
+          shotTable(lauf.shots||(lauf.splits||[]).map((s,i,a)=>({t:a.slice(0,i+1).reduce((x,y)=>x+y,0),s})));
+        $('#deleteRun').dataset.run=lauf.id;
+        openModalById('runDetailModal');
       }
       function renderHistory(){
         const h=readHistory(),el=$('#historyList');
         if(!h.length){el.innerHTML='<div class="empty">Noch keine Trainings gespeichert.</div>';return}
-        el.innerHTML=h.map(x=>{
+        el.innerHTML=h.map((x,i)=>{
           const title=x.drill||(x.mode==='live'?'Live Fire':'Dry Fire');
           const when=new Date(x.at).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
           const draw=typeof x.first==='number'?' · Draw '+x.first.toFixed(2)+' s':'';
           const best=typeof x.best==='number'?' · Bester Split '+x.best.toFixed(2)+' s':'';
-          return '<div class="history-card"><div><b>'+title+' · '+x.count+' Signale</b>'+
+          const nr=h.length-i;
+          return '<button class="history-card" type="button"'+(x.id?' data-run="'+x.id+'"':'')+'>'+
+                 '<div><b>Lauf '+nr+' · '+esc(title)+' · '+x.count+' Treffer</b>'+
                  '<span>'+when+draw+best+'</span></div>'+
-                 '<strong>'+x.total.toFixed(2)+' s</strong></div>';
+                 '<strong>'+x.total.toFixed(2)+' s</strong></button>';
         }).join('');
       }
 
       /* ---------- Sheets ---------- */
       const FOCUSABLE='button:not([disabled]),select:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
-      const ALL_MODALS=['settingsModal','drillsModal','drillEditModal','runModal','moreModal','helpModal','shooterModal','progressModal'];
+      const ALL_MODALS=['settingsModal','drillsModal','drillEditModal','runModal','runDetailModal','dryInfoModal','moreModal','helpModal','shooterModal','progressModal'];
       let activeModal=null,lastFocus=null,pendingKey='delay',pendingValue='random';
 
       function focusModal(id){
@@ -1502,14 +1642,17 @@
       $('#drillName').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();saveDrillDraft()}});
       $('#saveDrill').onclick=saveDrillDraft;
       $('#deleteDrill').onclick=deleteDrillDraft;
-      $$('.mode-btn').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+      $$('.mode-btn').forEach(b=>b.onclick=e=>{
+        if(e.target.closest('.mode-info')){e.stopPropagation();openModalById('dryInfoModal');return}
+        setMode(b.dataset.mode);
+      });
+      $('#dryInfo').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();openModalById('dryInfoModal')}};
       $('#sensitivity').oninput=updateSensitivity;
       $('#startBtn').onclick=start;
       $('#resetBtn').onclick=()=>reset();
       $('#calibrateBtn').onclick=calibrate;
       $('#calibrateText').onclick=calibrate;
       $('#simulateBtn').onclick=()=>rt.counting?recordShot():showToast('Timer zuerst starten');
-      $('#saveSession').onclick=saveSession;
       $$('[data-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.open));
       $('#applyOption').onclick=applySheet;
       $('#sheetUp').onclick=()=>stepSheet(1);
@@ -1522,9 +1665,14 @@
       $('#splitStrip').onclick=openRunSheet;
       $('#splitStrip').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openRunSheet()}};
       $$('#historySegment button').forEach(b=>b.onclick=()=>setHistorySegment(b.dataset.seg));
+      $('#historyList').addEventListener('click',ev=>{
+        const karte=ev.target.closest('[data-run]');
+        if(karte)openRunDetail(karte.dataset.run);
+      });
+      $('#deleteRun').onclick=e=>{deleteRun(e.currentTarget.dataset.run);closeModals()};
       $$('#themeSwitch button').forEach(b=>b.onclick=()=>{settings.theme=b.dataset.themeOpt;saveSettings();applyTheme()});
       ['closeModal','closeDrills','closeRun','closeMore','closeHelp','closeShooter','closeProgress']
-        .concat(['closeDrillEdit'])
+        .concat(['closeDrillEdit','closeDryInfo','dryInfoOk','closeRunDetail'])
         .forEach(id=>{const el=$('#'+id);if(el)el.onclick=closeModals});
       ALL_MODALS.forEach(id=>$('#'+id).addEventListener('click',e=>{if(e.target.id===id)closeModals()}));
 
@@ -1532,6 +1680,7 @@
       $('#makeReady').onclick=e=>{settings.makeReady=!settings.makeReady;setToggle(e.currentTarget,settings.makeReady);saveSettings()};
       $('#readySeconds').onchange=e=>{settings.readySeconds=Number(e.target.value);saveSettings()};
       $('#volume').onchange=e=>{settings.volume=Number(e.target.value);saveSettings()};
+      $('#beepStyle').onchange=e=>{settings.beep=e.target.value;aktualisiereSperrzeit();saveSettings()};
       $('#vibration').onclick=e=>{settings.vibration=!settings.vibration;setToggle(e.currentTarget,settings.vibration);saveSettings()};
       $('#testToggle').onclick=e=>{
         settings.testButton=!settings.testButton;
@@ -2052,6 +2201,8 @@
         renderSensitivity();
         renderQuickSettings();
         $('#volume').value=String(settings.volume);
+        $('#beepStyle').value=settings.beep;
+        aktualisiereSperrzeit();
         $('#readySeconds').value=String(settings.readySeconds);
         setToggle($('#makeReady'),settings.makeReady);
         setToggle($('#vibration'),settings.vibration);
