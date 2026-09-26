@@ -168,6 +168,33 @@ npx cap sync
 
 Ohne `sync` läuft in den nativen Projekten weiter der alte Stand.
 
+## Als Web-App veroeffentlicht
+
+https://jaegerii.github.io/shot-timer-app/
+
+`.github/workflows/pages.yml` stellt `dist/` nach jedem Push auf `main`
+ueber GitHub Pages bereit. Die feste HTTPS-Adresse ist Voraussetzung dafuer,
+dass der Mikrofonzugriff erlaubt wird und sich die App auf dem iPhone zum
+Home-Bildschirm hinzufuegen laesst.
+
+Auf dem iPhone: in **Safari** oeffnen (nicht Chrome), Teilen → *Zum
+Home-Bildschirm*. Danach startet sie im Vollbild ohne Browserleiste, mit
+eigenem Symbol und laeuft dank Service Worker offline.
+
+**Der Service Worker muss zum Inhalt passen.** `dist/sw.js` enthaelt die
+Dateiliste und eine Version aus einem Inhalts-Hash. Nach jeder Aenderung an
+`dist/` gehoert `npm run sw` ausgefuehrt und das Ergebnis eingecheckt –
+`npm run build` erledigt das mit. Der Workflow erzeugt die Datei vor dem
+Veroeffentlichen zur Sicherheit neu und warnt, wenn der eingecheckte Stand
+veraltet war.
+
+In der Capacitor-App wird der Service Worker bewusst **nicht** registriert:
+dort liefert der WebView die Dateien ohnehin lokal aus, und ein zusaetzlicher
+Cache wuerde nach einem App-Update den alten Stand festhalten.
+
+Web-App und Store-App sind getrennte Ablageorte. Trainings und Stages aus dem
+Web-Test tauchen in der spaeteren App nicht auf.
+
 ---
 
 # Weg in die Stores
