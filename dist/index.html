@@ -1708,6 +1708,16 @@
         initScore();
       }
       init();
+
+      /* ---------- Offline-Betrieb ----------
+         Nur im Browser registrieren. In der Capacitor-App liefert der
+         WebView die Dateien bereits lokal aus; ein zusaetzlicher Cache
+         wuerde dort nach einem App-Update den alten Stand festhalten. */
+      if('serviceWorker' in navigator && !window.Capacitor && location.protocol.startsWith('http')){
+        window.addEventListener('load',()=>{
+          navigator.serviceWorker.register('sw.js').catch(()=>{});
+        });
+      }
     })();
 
   </script>

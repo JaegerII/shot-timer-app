@@ -1,0 +1,52 @@
+name: Web-App veröffentlichen
+
+# Stellt dist/ als GitHub Pages bereit. Damit hat die App eine feste
+# HTTPS-Adresse – Voraussetzung dafür, dass der Mikrofonzugriff und
+# "Zum Home-Bildschirm" auf dem iPhone funktionieren.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dist/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Der Service Worker hält die Dateiliste und eine Inhaltsversion.
+      # Neu erzeugen, damit eine vergessene Aktualisierung nicht zu einer
+      # veralteten Offline-Fassung führt.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Service Worker erzeugen
+        run: node tools/make-sw.mjs
+      - name: Pruefen, ob der eingecheckte Stand aktuell ist
+        run: |
+          if ! git diff --quiet -- dist/sw.js; then
+            echo "::warning::dist/sw.js war nicht aktuell und wurde fuer diese Veroeffentlichung neu erzeugt. Bitte 'node tools/make-sw.mjs' ausfuehren und einchecken."
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deploy
+        uses: actions/deploy-pages@v4

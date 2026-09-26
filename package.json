@@ -11,7 +11,8 @@
     "sync": "cap sync",
     "android": "cap sync android && cap open android",
     "ios": "cap sync ios && cap open ios",
-    "build": "node tools/make-icons.mjs && npm run assets && cap sync"
+    "build": "node tools/make-icons.mjs && node tools/make-topo.mjs && npm run assets && node tools/make-sw.mjs && cap sync",
+    "sw": "node tools/make-sw.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
