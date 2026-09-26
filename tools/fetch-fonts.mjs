@@ -22,7 +22,10 @@ const FAMILIES = [
   { css: 'Archivo:wght@400..700', name: 'Archivo', slug: 'archivo', ofl: 'archivo' },
   // Laufende Ziffern brauchen gleiche Breiten. Big Shoulders hat keine
   // Tabellenziffern, deshalb traegt die Mono-Schrift des Systems alle Zahlen.
-  { css: 'IBM+Plex+Mono:wght@500;600', name: 'IBM Plex Mono', slug: 'plex-mono', ofl: 'ibmplexmono' }
+  { css: 'IBM+Plex+Mono:wght@500;600', name: 'IBM Plex Mono', slug: 'plex-mono', ofl: 'ibmplexmono' },
+  // Nur fuer die Wortmarke im Kopf. Big Shoulders ist dort zu schmal und
+  // laeuft auf einer Zeile unruhig; Montserrat stand vorher da und bleibt.
+  { css: 'Montserrat:wght@700..900', name: 'Montserrat', slug: 'montserrat', ofl: 'montserrat', subsets: ['latin'] }
 ];
 // Deutsch braucht nur "latin"; "latin-ext" kommt dazu, weil Schützennamen
 // frei eingegeben werden und osteuropäische Zeichen enthalten können.
@@ -41,17 +44,17 @@ for (const family of FAMILIES) {
   const css = await get(`https://fonts.googleapis.com/css2?family=${family.css}&display=swap`);
   const blocks = [...css.matchAll(/\/\*\s*([\w-]+)\s*\*\/\s*@font-face\s*\{([^}]+)\}/g)]
     .map(m => ({ subset: m[1], body: m[2] }))
-    .filter(b => WANTED.includes(b.subset) && b.body.includes(`'${family.name}'`));
+    .filter(b => (family.subsets || WANTED).includes(b.subset) && b.body.includes(`'${family.name}'`));
 
   // Variable Familien liefern einen Block je Zeichensatz, statische einen
   // je Zeichensatz und Schnitt. Beides ist zulässig, fehlen darf keiner.
-  for (const wanted of WANTED) {
+  for (const wanted of (family.subsets || WANTED)) {
     if (!blocks.some(b => b.subset === wanted)) {
       throw new Error(family.name + ': Zeichensatz ' + wanted + ' nicht gefunden');
     }
   }
 
-  const mehrfach = blocks.length > WANTED.length;
+  const mehrfach = blocks.length > (family.subsets || WANTED).length;
   for (const block of blocks) {
     const src = block.body.match(/url\((https:[^)]+\.woff2)\)/)?.[1];
     const range = block.body.match(/unicode-range:\s*([^;]+);/)?.[1].trim();
