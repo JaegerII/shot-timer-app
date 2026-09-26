@@ -84,7 +84,7 @@
     /* ============ Grundgerüst ============
        Die Seite selbst scrollt nie: .app füllt genau eine Bildschirmhöhe,
        nur ausgewiesene Bereiche innerhalb der Karten dürfen scrollen. */
-    *{box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none}
+    *{box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none;touch-action:manipulation}
     *::-webkit-scrollbar{width:0;height:0;display:none}
     html{background:radial-gradient(circle at 50% -14%,var(--bg-glow) 0,transparent 26rem),var(--bg)}
     html,body{height:100%;overflow:hidden}
@@ -205,6 +205,16 @@
     .drill-tag{font-size:.6rem;color:var(--accent);letter-spacing:.1em;font-weight:900;text-transform:uppercase}
     .drill h3{margin:10px 0 4px;font-size:.9rem}
     .drill p{margin:0;color:var(--muted);font-size:.7rem;line-height:1.35}
+    .drill.add{display:grid;place-items:center;gap:5px;border-style:dashed;border-color:var(--accent-line);color:var(--accent);text-align:center}
+    .drill.add b{font-size:.88rem}
+    .drill.add span{font-size:.7rem;color:var(--muted)}
+    .drill.add .plus{font-size:1.5rem;line-height:1}
+    .drill-edit{position:absolute;right:8px;bottom:8px;border:0;background:transparent;color:var(--faint);cursor:pointer;padding:4px;border-radius:8px;font-size:.68rem;font-weight:750}
+    .drill-edit:hover{color:var(--text);background:var(--surface-3)}
+    .text-field.block{width:100%}
+    .field-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .field-row .text-field{width:7.5em}
+    .field-note{color:var(--muted);font-size:.72rem}
     .drill .go{position:absolute;right:10px;top:10px;border-radius:50%;width:26px;height:26px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent);font-size:.85rem}
 
     /* ============ Verlauf ============ */
@@ -227,7 +237,8 @@
     .setting-tile b{font-size:.82rem}
     .setting-tile small{display:block;color:var(--muted);font-size:.67rem;line-height:1.25;margin-top:2px}
     .tile-control{display:flex;align-items:center;justify-content:flex-end;gap:7px}
-    .tile-control select{min-height:32px;background:var(--sunken);border:1px solid var(--line);border-radius:9px;padding:5px 8px;color:var(--text);font-size:.76rem}
+    /* 16px ist die Grenze, unterhalb derer iOS beim Antippen hineinzoomt. */
+    .tile-control select{min-height:32px;background:var(--sunken);border:1px solid var(--line);border-radius:9px;padding:4px 6px;color:var(--text);font-size:16px}
     .toggle{flex:0 0 auto;width:46px;height:26px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line);padding:2px;cursor:pointer}
     .toggle:after{content:"";display:block;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:.2s}
     .toggle.on{background:var(--accent-fill);border-color:var(--accent-fill)}
@@ -264,6 +275,7 @@
     .shots-value{min-width:2.4ch;text-align:center;font-weight:850;font-variant-numeric:tabular-nums}
     .max-points{color:var(--muted);font-size:.72rem;font-variant-numeric:tabular-nums}
     .score-scroll,.view-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 2px 10px 0}
+    #entryList .empty{margin-bottom:9px}
     .entry{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:12px;margin-bottom:8px}
     .entry-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
     .entry-head>b{font-size:.92rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -326,6 +338,10 @@
     .pick b{flex:1;min-width:0;font-size:.89rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .pick-del{flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--faint);cursor:pointer;font-size:1.05rem;padding:0}
     .pick-del:hover{color:var(--danger);border-color:var(--danger-soft)}
+    .pick-row.confirm{background:var(--surface-2);border:1px solid var(--danger-soft);border-radius:13px;padding:8px 10px}
+    .confirm-text{flex:1;min-width:0;font-size:.84rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .ghost-btn.danger{color:var(--danger);border-color:var(--danger-soft)}
+    .ghost-btn.danger:hover{background:var(--danger);color:var(--bg);border-color:var(--danger)}
     .new-shooter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
     .new-shooter .text-field{flex:1 1 140px}
     .pf-switch{display:flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:4px}
@@ -500,16 +516,57 @@
       <div class="sheet-grab"></div>
       <div class="sheet-head"><div><h2 id="drillsTitle">Drills</h2><small>Laden und direkt starten</small></div><button id="closeDrills" aria-label="Schließen">×</button></div>
       <div class="sheet-body">
-        <div class="drill-grid">
-          <article class="drill" data-drill="draw"><div class="go">→</div><div class="drill-tag">Reaction</div><h3>Draw to First Shot</h3><p>Zufallsstart · erster Treffer beendet den Durchgang</p></article>
-          <article class="drill" data-drill="bill"><div class="go">→</div><div class="drill-tag">Speed</div><h3>Bill Drill</h3><p>6 Schüsse · Splits und Gesamtzeit</p></article>
-          <article class="drill" data-drill="reload"><div class="go">→</div><div class="drill-tag">Par</div><h3>Reload</h3><p>1,50 s Par · 5 automatische Wiederholungen</p></article>
-          <article class="drill" data-drill="transition"><div class="go">→</div><div class="drill-tag">Dry Fire</div><h3>Transitions</h3><p>Akustischer Start · 2,00 s Par · 10 Wiederholungen</p></article>
-        </div>
+        <div class="drill-grid" id="drillGrid"></div>
       </div>
     </div>
   </div>
 
+  <div class="modal" id="drillEditModal" role="dialog" aria-modal="true" aria-labelledby="drillEditTitle">
+    <div class="sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="drillEditTitle">Eigener Drill</h2><small>Wird auf diesem Gerät gespeichert</small></div><button id="closeDrillEdit" aria-label="Schließen">×</button></div>
+      <div class="sheet-body">
+        <label class="field-label" for="drillName">Name</label>
+        <input id="drillName" class="text-field block" type="text" maxlength="28" placeholder="z. B. Mozambique" autocomplete="off">
+
+        <span class="field-label">Modus</span>
+        <div class="segment" id="drillMode">
+          <button type="button" data-dmode="live" class="selected">Live Fire</button>
+          <button type="button" data-dmode="dry">Dry Fire</button>
+        </div>
+
+        <span class="field-label">Par Time</span>
+        <div class="field-row">
+          <input id="drillPar" class="text-field" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off">
+          <span class="field-note">Sekunden · leer oder 0 = aus</span>
+        </div>
+
+        <span class="field-label">Durchgänge</span>
+        <div class="field-row">
+          <div class="shots-field">
+            <button class="step" id="drillRepsDown" type="button" aria-label="Weniger Durchgänge">−</button>
+            <b class="shots-value" id="drillRepsValue">1</b>
+            <button class="step" id="drillRepsUp" type="button" aria-label="Mehr Durchgänge">+</button>
+          </div>
+          <span class="field-note">laufen automatisch hintereinander</span>
+        </div>
+
+        <span class="field-label">Ende nach Treffern</span>
+        <div class="field-row">
+          <div class="shots-field">
+            <button class="step" id="drillStopDown" type="button" aria-label="Weniger Treffer">−</button>
+            <b class="shots-value" id="drillStopValue">0</b>
+            <button class="step" id="drillStopUp" type="button" aria-label="Mehr Treffer">+</button>
+          </div>
+          <span class="field-note">0 = läuft bis Par oder STOP</span>
+        </div>
+      </div>
+      <div class="score-footer">
+        <button class="sheet-action" id="saveDrill" type="button">DRILL SPEICHERN</button>
+        <button class="ghost-btn danger" id="deleteDrill" type="button" hidden>Löschen</button>
+      </div>
+    </div>
+  </div>
   <div class="modal" id="runModal" role="dialog" aria-modal="true" aria-labelledby="runTitle">
     <div class="sheet">
       <div class="sheet-grab"></div>
@@ -628,12 +685,16 @@
         live:{icon:'9',name:'9 mm / Standard',desc:'Für die meisten Indoor-Stände',sensitivity:42},
         dry:{icon:'DF',name:'Dry Fire / Striker',desc:'Hohe Empfindlichkeit für Trigger-Klicks',sensitivity:78}
       };
-      const DRILLS={
-        draw:{mode:'live',par:0,reps:1,stop:1,label:'Draw to First Shot'},
-        bill:{mode:'live',par:0,reps:1,stop:6,label:'Bill Drill'},
-        reload:{mode:'dry',par:1.5,reps:5,stop:0,label:'Reload'},
-        transition:{mode:'dry',par:2,reps:10,stop:0,label:'Transitions'}
-      };
+      const DRILLS_KEY='shot-timer-drills-v1';
+      const MAX_REPS=99, MAX_STOP=60;
+      const BUILTIN_DRILLS=[
+        {id:'draw',mode:'live',par:0,reps:1,stop:1,label:'Draw to First Shot',tag:'Reaction'},
+        {id:'bill',mode:'live',par:0,reps:1,stop:6,label:'Bill Drill',tag:'Speed'},
+        {id:'reload',mode:'dry',par:1.5,reps:5,stop:0,label:'Reload',tag:'Par'},
+        {id:'transition',mode:'dry',par:2,reps:10,stop:0,label:'Transitions',tag:'Dry Fire'}
+      ];
+      let customDrills=[];
+      let drillDraft=null;
       const DEFAULTS={
         mode:'live',delay:'random',par:0,reps:1,
         theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,
@@ -735,11 +796,18 @@
       async function resumeAudio(){
         if(rt.audio&&rt.audio.state!=='running'){try{await rt.audio.resume()}catch(e){}}
       }
+      // Audio-Elemente einmalig fuer die Wiedergabe freischalten.
+      // iOS ignoriert das Setzen von .volume, beachtet aber .muted - mit
+      // volume=0 liefen Ansage und Signal beim Start hoerbar an.
       function unlockCues(){
         ['standbyAudio','signalAudio'].forEach(id=>{
-          const a=$('#'+id);a.volume=0;
-          const p=a.play();
-          if(p?.then)p.then(()=>{a.pause();a.currentTime=0;a.volume=settings.volume}).catch(()=>{a.volume=settings.volume});
+          const a=$('#'+id);
+          a.muted=true;
+          const stop=()=>{try{a.pause();a.currentTime=0}catch(e){}a.muted=false};
+          try{
+            const p=a.play();
+            if(p?.then)p.then(stop).catch(stop); else stop();
+          }catch(e){a.muted=false}
         });
       }
       /* Gibt den performance.now()-Zeitpunkt zurück, an dem der Ton tatsächlich hörbar wird. */
@@ -1090,7 +1158,7 @@
 
       /* ---------- Sheets ---------- */
       const FOCUSABLE='button:not([disabled]),select:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
-      const ALL_MODALS=['settingsModal','drillsModal','runModal','moreModal','helpModal','shooterModal','progressModal'];
+      const ALL_MODALS=['settingsModal','drillsModal','drillEditModal','runModal','moreModal','helpModal','shooterModal','progressModal'];
       let activeModal=null,lastFocus=null,pendingKey='delay',pendingValue='random';
 
       function focusModal(id){
@@ -1157,8 +1225,33 @@
         $('#clearStages').hidden=seg!=='stages';
         if(seg==='runs')renderHistory(); else renderStages();
       }
+      function allDrills(){return [...BUILTIN_DRILLS,...customDrills]}
+      // Beschreibung eines Drills aus seinen Werten, damit eigene Drills
+      // genauso lesbar sind wie die vorgegebenen.
+      function drillText(d){
+        const teile=[];
+        if(d.stop)teile.push(d.stop===1?'erster Treffer beendet':d.stop+' Treffer');
+        if(d.par)teile.push(de(d.par)+' s Par');
+        teile.push(d.reps===1?'1 Durchgang':d.reps+' Durchgänge');
+        return teile.join(' · ');
+      }
+      function renderDrills(){
+        const grid=$('#drillGrid');
+        grid.innerHTML=allDrills().map(d=>
+          '<article class="drill" data-drill="'+d.id+'" role="button" tabindex="0">'+
+            '<div class="go">→</div>'+
+            '<div class="drill-tag">'+esc(d.tag||(d.mode==='dry'?'Dry Fire':'Live Fire'))+'</div>'+
+            '<h3>'+esc(d.label)+'</h3>'+
+            '<p>'+esc(drillText(d))+'</p>'+
+            (d.custom?'<button class="drill-edit" type="button" data-edit="'+d.id+'">Bearbeiten</button>':'')+
+          '</article>'
+        ).join('')+
+        '<article class="drill add" id="addDrill" role="button" tabindex="0">'+
+          '<span class="plus">+</span><b>Eigener Drill</b><span>Par, Durchgänge, Trefferzahl</span>'+
+        '</article>';
+      }
       function selectDrill(name){
-        const d=DRILLS[name];
+        const d=allDrills().find(x=>x.id===name);
         if(!d)return;
         setMode(d.mode);
         settings.par=d.par;
@@ -1171,7 +1264,96 @@
         showToast(d.label+' geladen');
       }
 
+      /* ---------- Eigene Drills ---------- */
+      function loadDrills(){
+        customDrills=readJson(DRILLS_KEY,[])
+          .filter(d=>d&&d.id&&d.label)
+          .map(d=>({
+            id:String(d.id),
+            label:String(d.label).slice(0,28),
+            mode:d.mode==='dry'?'dry':'live',
+            par:Math.min(60,Math.max(0,Number(d.par)||0)),
+            reps:Math.min(MAX_REPS,Math.max(1,Math.round(Number(d.reps))||1)),
+            stop:Math.min(MAX_STOP,Math.max(0,Math.round(Number(d.stop))||0)),
+            tag:'Eigener',
+            custom:true
+          }));
+      }
+      function saveDrills(){writeJson(DRILLS_KEY,customDrills)}
+      // Nur die Werte, die sich ueber Schaltflaechen aendern.
+      function refreshDrillForm(){
+        $$('#drillMode button').forEach(b=>b.classList.toggle('selected',b.dataset.dmode===drillDraft.mode));
+        $('#drillRepsValue').textContent=drillDraft.reps;
+        $('#drillStopValue').textContent=drillDraft.stop;
+        $('#deleteDrill').hidden=!drillDraft.existing;
+        $('#drillEditTitle').textContent=drillDraft.existing?'Drill bearbeiten':'Eigener Drill';
+      }
+      // Die Textfelder werden ausschliesslich beim Oeffnen gesetzt.
+      function fillDrillForm(){
+        $('#drillName').value=drillDraft.label;
+        $('#drillPar').value=drillDraft.par?de(drillDraft.par):'';
+        refreshDrillForm();
+      }
+      function openDrillEditor(id){
+        const vorhanden=id?customDrills.find(d=>d.id===id):null;
+        drillDraft=vorhanden
+          ? {...vorhanden,existing:true}
+          : {id:uid(),label:'',mode:settings.mode,par:0,reps:1,stop:0,existing:false};
+        fillDrillForm();
+        openModalById('drillEditModal');
+      }
+      function saveDrillDraft(){
+        const label=$('#drillName').value.trim();
+        if(!label){showToast('Name fehlt');$('#drillName').focus();return}
+        const parRoh=Number(String($('#drillPar').value).replace(',','.'));
+        const drill={
+          id:drillDraft.id,
+          label,
+          mode:drillDraft.mode,
+          par:Number.isFinite(parRoh)&&parRoh>0?Math.min(60,parRoh):0,
+          reps:drillDraft.reps,
+          stop:drillDraft.stop,
+          tag:'Eigener',
+          custom:true
+        };
+        const i=customDrills.findIndex(d=>d.id===drill.id);
+        if(i>=0)customDrills[i]=drill; else customDrills.push(drill);
+        saveDrills();
+        renderDrills();
+        openModalById('drillsModal');
+        showToast(drillDraft.existing?'Drill gespeichert':'Drill angelegt');
+      }
+      function deleteDrillDraft(){
+        customDrills=customDrills.filter(d=>d.id!==drillDraft.id);
+        saveDrills();
+        renderDrills();
+        openModalById('drillsModal');
+        showToast('Drill gelöscht');
+      }
+
       /* ---------- Ereignisse ---------- */
+      $('#drillGrid').addEventListener('click',ev=>{
+        const edit=ev.target.closest('[data-edit]');
+        if(edit){ev.stopPropagation();openDrillEditor(edit.dataset.edit);return}
+        if(ev.target.closest('#addDrill')){openDrillEditor(null);return}
+        const card=ev.target.closest('.drill[data-drill]');
+        if(card)selectDrill(card.dataset.drill);
+      });
+      $('#drillGrid').addEventListener('keydown',ev=>{
+        if(ev.key!=='Enter'&&ev.key!==' ')return;
+        const ziel=ev.target.closest('#addDrill,.drill[data-drill]');
+        if(!ziel)return;
+        ev.preventDefault();
+        if(ziel.id==='addDrill')openDrillEditor(null); else selectDrill(ziel.dataset.drill);
+      });
+      $$('#drillMode button').forEach(b=>b.onclick=()=>{drillDraft.mode=b.dataset.dmode;refreshDrillForm()});
+      $('#drillRepsUp').onclick=()=>{drillDraft.reps=Math.min(MAX_REPS,drillDraft.reps+1);refreshDrillForm()};
+      $('#drillRepsDown').onclick=()=>{drillDraft.reps=Math.max(1,drillDraft.reps-1);refreshDrillForm()};
+      $('#drillStopUp').onclick=()=>{drillDraft.stop=Math.min(MAX_STOP,drillDraft.stop+1);refreshDrillForm()};
+      $('#drillStopDown').onclick=()=>{drillDraft.stop=Math.max(0,drillDraft.stop-1);refreshDrillForm()};
+      $('#drillName').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();saveDrillDraft()}});
+      $('#saveDrill').onclick=saveDrillDraft;
+      $('#deleteDrill').onclick=deleteDrillDraft;
       $$('.mode-btn').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
       $('#sensitivity').oninput=updateSensitivity;
       $('#startBtn').onclick=start;
@@ -1192,14 +1374,10 @@
       $$('#historySegment button').forEach(b=>b.onclick=()=>setHistorySegment(b.dataset.seg));
       $$('#themeSwitch button').forEach(b=>b.onclick=()=>{settings.theme=b.dataset.themeOpt;saveSettings();applyTheme()});
       ['closeModal','closeDrills','closeRun','closeMore','closeHelp','closeShooter','closeProgress']
+        .concat(['closeDrillEdit'])
         .forEach(id=>{const el=$('#'+id);if(el)el.onclick=closeModals});
       ALL_MODALS.forEach(id=>$('#'+id).addEventListener('click',e=>{if(e.target.id===id)closeModals()}));
-      $$('.drill').forEach(d=>{
-        d.setAttribute('role','button');
-        d.setAttribute('tabindex','0');
-        d.onclick=()=>selectDrill(d.dataset.drill);
-        d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectDrill(d.dataset.drill)}};
-      });
+
 
       $('#makeReady').onclick=e=>{settings.makeReady=!settings.makeReady;setToggle(e.currentTarget,settings.makeReady);saveSettings()};
       $('#readySeconds').onchange=e=>{settings.readySeconds=Number(e.target.value);saveSettings()};
@@ -1253,6 +1431,7 @@
       let currentView='timer';
       let currentSegment='runs';
       let pendingPf='minor';
+      let pendingDelete=null;
 
       const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
       const nf=(v,d)=>Number(v).toFixed(d).replace('.',',');
@@ -1413,6 +1592,14 @@
         if(!free.length){el.innerHTML='<div class="empty">Alle gespeicherten Schützen stehen schon auf der Stage.</div>';return}
         el.innerHTML=free.map(s=>{
           const name=esc(s.name);
+          // Rueckfrage in der Zeile statt eines zweiten Dialogs ueber dem offenen.
+          if(s.id===pendingDelete){
+            return '<div class="pick-row confirm">'+
+              '<span class="confirm-text">'+name+' löschen?</span>'+
+              '<button class="ghost-btn" type="button" data-cancel-del="1">Abbrechen</button>'+
+              '<button class="ghost-btn danger" type="button" data-confirm-del="'+s.id+'">Löschen</button>'+
+            '</div>';
+          }
           return '<div class="pick-row">'+
             '<button class="pick" type="button" data-pick="'+s.id+'"><b>'+name+'</b>'+
               '<span class="pf-badge '+s.pf+'">'+(s.pf==='major'?'Major':'Minor')+'</span></button>'+
@@ -1421,6 +1608,7 @@
         }).join('');
       }
       function openShooterSheet(){
+        pendingDelete=null;
         renderShooterPicker();
         $('#newShooterName').value='';
         setPf(pendingPf);
@@ -1440,10 +1628,15 @@
         addEntry(shooter);
         closeModals();
       }
+      function askDeleteShooter(id){
+        pendingDelete=id;
+        renderShooterPicker();
+      }
       function deleteShooter(id){
         // Nur die Stammdaten; gespeicherte Stages behalten ihre Namenskopie.
         shooters=shooters.filter(s=>s.id!==id);
         writeJson(SHOOTERS_KEY,shooters);
+        pendingDelete=null;
         renderShooterPicker();
         showToast('Schütze gelöscht');
       }
@@ -1657,7 +1850,10 @@
       });
       $('#shooterPicker').addEventListener('click',ev=>{
         const del=ev.target.closest('[data-del]');
-        if(del){deleteShooter(del.dataset.del);return}
+        if(ev.target.closest('[data-cancel-del]')){pendingDelete=null;renderShooterPicker();return}
+        const confirmDel=ev.target.closest('[data-confirm-del]');
+        if(confirmDel){deleteShooter(confirmDel.dataset.confirmDel);return}
+        if(del){askDeleteShooter(del.dataset.del);return}
         const pick=ev.target.closest('[data-pick]');
         if(!pick)return;
         const shooter=shooters.find(s=>s.id===pick.dataset.pick);
@@ -1692,6 +1888,8 @@
       /* ---------- Start ---------- */
       function init(){
         applyTheme();
+        loadDrills();
+        renderDrills();
         setMicState('off','');
         $$('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===settings.mode));
         renderProfile();
