@@ -11,10 +11,10 @@
 #
 #   Apple Developer / App Store Connect
 #   1. Zertifikate, IDs & Profile → Identifiers → neue App-ID
-#      de.wemacon.shottimer. Fuer das Mikrofon ist keine eigene Capability
+#      de.forthtrace.timer. Fuer das Mikrofon ist keine eigene Capability
 #      noetig, der Zugriff laeuft ueber NSMicrophoneUsageDescription.
 #   2. Apps → neue App anlegen. ACHTUNG: der Name im Store muss weltweit
-#      eindeutig sein, "Shot Timer" ist mit hoher Wahrscheinlichkeit belegt.
+#      eindeutig sein, "FORTH TRACE Timer" duerfte frei sein, anders als "Shot Timer".
 #      Der Name unter dem Symbol auf dem Geraet ist davon unabhaengig und
 #      steht in ios/App/App/Info.plist als CFBundleDisplayName.
 #   3. Benutzer & Zugriff → Integrationen → App Store Connect API →
@@ -36,7 +36,7 @@
 
 workflows:
   ios:
-    name: Shot Timer iOS
+    name: FORTH TRACE Timer iOS
     instance_type: mac_mini_m2
     max_build_duration: 45
     integrations:
@@ -47,7 +47,7 @@ workflows:
       xcode: latest
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: de.wemacon.shottimer
+        bundle_identifier: de.forthtrace.timer
       vars:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
@@ -84,7 +84,7 @@ workflows:
         submit_to_app_store: false
 
   android:
-    name: Shot Timer Android
+    name: FORTH TRACE Timer Android
     instance_type: linux_x2
     max_build_duration: 30
     environment:
@@ -94,7 +94,7 @@ workflows:
         # Referenzname des hochgeladenen Keystores aus Schritt 4
         - shot-timer-keystore
       vars:
-        PACKAGE_NAME: "de.wemacon.shottimer"
+        PACKAGE_NAME: "de.forthtrace.timer"
     scripts:
       - name: Abhängigkeiten installieren
         script: npm ci

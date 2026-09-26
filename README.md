@@ -1,6 +1,6 @@
-# Shot Timer
+# FORTH TRACE Timer
 
-Shot Timer für Live Fire und Dry Fire. Die App erkennt Schüsse bzw. Trigger-Klicks
+FORTH TRACE Timer für Live Fire und Dry Fire. Die App erkennt Schüsse bzw. Trigger-Klicks
 über das Mikrofon, misst Draw- und Split-Zeiten und speichert Trainings lokal auf
 dem Gerät.
 
@@ -207,7 +207,7 @@ Web-Test tauchen in der spaeteren App nicht auf.
 
 Fertig:
 
-- Natives Android- und iOS-Projekt angelegt (`de.wemacon.shottimer`, Version 1.0)
+- Natives Android- und iOS-Projekt angelegt (`de.forthtrace.timer`, Version 1.0)
 - Mikrofonberechtigung deklariert: `RECORD_AUDIO` (Android),
   `NSMicrophoneUsageDescription` (iOS)
 - App-Icons und Splash-Screens für beide Plattformen erzeugt, das 1024er-Icon
@@ -218,7 +218,7 @@ Offen – siehe die Abschnitte unten.
 
 ## App-ID festlegen
 
-Die App-ID steht aktuell auf `de.wemacon.shottimer`. **Sie lässt sich nach der
+Die App-ID steht aktuell auf `de.forthtrace.timer`. **Sie lässt sich nach der
 ersten Veröffentlichung nicht mehr ändern.** Falls eine andere gewünscht ist, jetzt
 in `capacitor.config.json` anpassen und danach `android/` und `ios/` neu anlegen:
 

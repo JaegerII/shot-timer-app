@@ -1,4 +1,4 @@
-# Datenschutzerklärung – Shot Timer
+# Datenschutzerklärung – FORTH TRACE Timer
 
 **Stand:** 26.09.2026
 **Verantwortlich:** *(Name, Anschrift und E-Mail der verantwortlichen Stelle hier eintragen)*
@@ -11,7 +11,7 @@
 
 ## Kurzfassung
 
-Shot Timer verarbeitet ausschließlich auf dem Gerät. Es werden keine Daten an den
+FORTH TRACE Timer verarbeitet ausschließlich auf dem Gerät. Es werden keine Daten an den
 Anbieter oder an Dritte übertragen. Es gibt keine Konten, kein Tracking, keine
 Werbung und keine Analyse-SDKs.
 

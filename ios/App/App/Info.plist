@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Shot Timer</string>
+        <string>FT Timer</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -44,7 +44,7 @@
     </dict>
 	</dict>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Shot Timer hört über das Mikrofon mit, um Schüsse und Trigger-Klicks zu erkennen und die Zeiten zu messen. Es wird nichts aufgezeichnet oder übertragen.</string>
+	<string>FORTH TRACE Timer hört über das Mikrofon mit, um Schüsse und Trigger-Klicks zu erkennen und die Zeiten zu messen. Es wird nichts aufgezeichnet oder übertragen.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

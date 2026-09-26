@@ -1,6 +1,6 @@
 {
-  "appId": "de.wemacon.shottimer",
-  "appName": "Shot Timer",
+  "appId": "de.forthtrace.timer",
+  "appName": "FORTH TRACE Timer",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

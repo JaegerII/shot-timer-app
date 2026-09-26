@@ -1,10 +1,19 @@
 /* Erzeugt von tools/make-sw.mjs – nicht von Hand ändern. */
-const VERSION = 'shot-timer-009203e7e3';
+const VERSION = 'shot-timer-9d3d421be7';
 const ASSETS = [
   "./",
   "assets/apple-touch-icon.png",
-  "assets/fonts/montserrat-latin-ext.woff2",
-  "assets/fonts/montserrat-latin.woff2",
+  "assets/fonts/OFL-archivo.txt",
+  "assets/fonts/OFL-big-shoulders.txt",
+  "assets/fonts/OFL-plex-mono.txt",
+  "assets/fonts/archivo-latin-ext.woff2",
+  "assets/fonts/archivo-latin.woff2",
+  "assets/fonts/big-shoulders-latin-ext.woff2",
+  "assets/fonts/big-shoulders-latin.woff2",
+  "assets/fonts/plex-mono-latin-500.woff2",
+  "assets/fonts/plex-mono-latin-600.woff2",
+  "assets/fonts/plex-mono-latin-ext-500.woff2",
+  "assets/fonts/plex-mono-latin-ext-600.woff2",
   "assets/icon-192.png",
   "assets/icon-512.png",
   "assets/icon-appstore-1024.png",

@@ -1,4 +1,4 @@
-package de.wemacon.shottimer;
+package de.forthtrace.timer;
 
 import com.getcapacitor.BridgeActivity;
 

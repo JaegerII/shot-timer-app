@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Shot Timer</string>
-    <string name="title_activity_main">Shot Timer</string>
-    <string name="package_name">de.wemacon.shottimer</string>
-    <string name="custom_url_scheme">de.wemacon.shottimer</string>
+    <string name="app_name">FT Timer</string>
+    <string name="title_activity_main">FORTH TRACE Timer</string>
+    <string name="package_name">de.forthtrace.timer</string>
+    <string name="custom_url_scheme">de.forthtrace.timer</string>
 </resources>
