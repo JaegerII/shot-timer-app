@@ -41,8 +41,8 @@ Schützenliste der Score-Ansicht und der Inhalt langer Sheets.
 - **Drills** sind ein Knopf auf der Timer-Karte, kein eigener Reiter.
 - **Erkennungsprofil, Empfindlichkeit und Kalibrieren** stehen in den
   Einstellungen, direkt mit der Erklärung dazu.
-- **Verlauf** führt Trainings und gespeicherte Stages in einem Sheet mit zwei
-  Segmenten zusammen.
+- **Verlauf** ist eine eigene Ansicht – kein Sheet – und führt Trainings und
+  gespeicherte Stages über zwei Segmente zusammen.
 
 ### Farben, Textur und Schrift
 

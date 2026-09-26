@@ -189,7 +189,7 @@
     .option-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
     .option{border:1px solid var(--line);background:var(--surface-2);border-radius:13px;padding:11px 8px;cursor:pointer;font-weight:700;font-size:.84rem}
     .option.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-    .segment{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:13px;padding:4px;margin-bottom:14px}
+    .segment{flex:0 0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:13px;padding:4px;margin-bottom:14px}
     .segment button{border:0;background:transparent;border-radius:9px;padding:9px 8px;font-weight:800;font-size:.82rem;color:var(--muted);cursor:pointer}
     .segment button.selected{background:var(--surface-3);color:var(--text)}
 
@@ -204,8 +204,9 @@
 
     /* ============ Verlauf ============ */
     .history-card{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-    .history-card b{font-size:.89rem}
-    .history-card span{color:var(--muted);font-size:.72rem}
+    .history-card>div{min-width:0}
+    .history-card b{display:block;font-size:.89rem}
+    .history-card span{display:block;color:var(--muted);font-size:.72rem;margin-top:3px;line-height:1.4}
     .history-card strong{font-variant-numeric:tabular-nums;font-size:1.15rem}
     .shot-list{display:grid;gap:3px}
     .shot-row{display:grid;grid-template-columns:40px 1fr 1fr;align-items:center;padding:10px;border-radius:10px;font-variant-numeric:tabular-nums}
@@ -257,7 +258,7 @@
     .step:hover{border-color:var(--line-strong)}
     .shots-value{min-width:2.4ch;text-align:center;font-weight:850;font-variant-numeric:tabular-nums}
     .max-points{color:var(--muted);font-size:.72rem;font-variant-numeric:tabular-nums}
-    .score-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 2px 10px 0}
+    .score-scroll,.view-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 2px 10px 0}
     .entry{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:12px;margin-bottom:8px}
     .entry-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
     .entry-head>b{font-size:.92rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -311,6 +312,7 @@
     .rank-row .pct{text-align:right;min-width:0}
     .rank-row .pct b{display:block;color:var(--accent);font-weight:800;font-size:.79rem}
     .rank-row .pct>span{display:block;color:var(--muted);font-size:.61rem;white-space:nowrap;margin-top:2px}
+    .view-footer{flex:0 0 auto;display:flex;justify-content:flex-end;padding-top:11px;border-top:1px solid var(--line)}
     .score-footer{flex:0 0 auto;display:flex;gap:8px;align-items:center;margin-top:0;padding-top:11px;border-top:1px solid var(--line)}
     .score-footer .sheet-action{flex:1;margin-top:0}
     .pick-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
@@ -451,6 +453,27 @@
       </div>
     </section>
 
+    <section id="historyView" class="view-panel" aria-labelledby="historyTitle">
+      <div class="panel-head">
+        <div>
+          <h1 id="historyTitle">Verlauf</h1>
+          <p>Auf diesem Gerät gespeichert – nichts verlässt das Telefon.</p>
+        </div>
+      </div>
+      <div class="segment" id="historySegment">
+        <button class="selected" data-seg="runs" type="button">Trainings</button>
+        <button data-seg="stages" type="button">Stages</button>
+      </div>
+      <div class="view-scroll">
+        <div id="historyList"></div>
+        <div id="stagesList" hidden></div>
+      </div>
+      <div class="view-footer">
+        <button id="clearHistory" class="danger-link" type="button">Trainings löschen</button>
+        <button id="clearStages" class="danger-link" type="button" hidden>Alle Stages löschen</button>
+      </div>
+    </section>
+
     <nav class="bottom-nav" aria-label="Hauptnavigation">
       <button class="nav-btn active" id="timerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Timer</span></button>
       <button class="nav-btn" id="scoreBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg><span>Score</span></button>
@@ -491,21 +514,6 @@
     </div>
   </div>
 
-  <div class="modal" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
-    <div class="sheet">
-      <div class="sheet-grab"></div>
-      <div class="sheet-head"><div><h2 id="historyTitle">Verlauf</h2><small>Auf diesem Gerät gespeichert</small></div><button id="closeHistory" aria-label="Schließen">×</button></div>
-      <div class="segment" id="historySegment">
-        <button class="selected" data-seg="runs" type="button">Trainings</button>
-        <button data-seg="stages" type="button">Stages</button>
-      </div>
-      <div class="sheet-body">
-        <div id="historyList"></div>
-        <div id="stagesList" hidden></div>
-      </div>
-      <div class="sheet-foot"><button id="clearHistory" class="danger-link" type="button">Trainings löschen</button><button id="clearStages" class="danger-link" type="button" hidden>Alle Stages löschen</button></div>
-    </div>
-  </div>
 
   <div class="modal" id="moreModal" role="dialog" aria-modal="true" aria-labelledby="moreTitle">
     <div class="sheet">
@@ -1077,7 +1085,7 @@
 
       /* ---------- Sheets ---------- */
       const FOCUSABLE='button:not([disabled]),select:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
-      const ALL_MODALS=['settingsModal','drillsModal','runModal','historyModal','moreModal','helpModal','shooterModal','progressModal'];
+      const ALL_MODALS=['settingsModal','drillsModal','runModal','moreModal','helpModal','shooterModal','progressModal'];
       let activeModal=null,lastFocus=null,pendingKey='delay',pendingValue='random';
 
       function focusModal(id){
@@ -1130,12 +1138,13 @@
       }
       function closeModals(){
         ALL_MODALS.forEach(x=>$('#'+x).classList.remove('show'));
-        setNav(currentView==='score'?'scoreBtn':'timerBtn');
+        setNav(VIEW_NAV[currentView]||'timerBtn');
         releaseModal();
       }
       function anyModalOpen(){return ALL_MODALS.some(id=>$('#'+id).classList.contains('show'))}
       // Verlauf führt Trainings und Stages an einem Ort zusammen.
       function setHistorySegment(seg){
+        currentSegment=seg;
         $$('#historySegment button').forEach(b=>b.classList.toggle('selected',b.dataset.seg===seg));
         $('#historyList').hidden=seg!=='runs';
         $('#stagesList').hidden=seg!=='stages';
@@ -1170,14 +1179,14 @@
       $('#applyOption').onclick=applySheet;
       $('#timerBtn').onclick=()=>{closeModals();showView('timer')};
       $('#drillsBtn').onclick=()=>openModalById('drillsModal');
-      $('#historyBtn').onclick=()=>{setHistorySegment('runs');openModalById('historyModal','historyBtn')};
+      $('#historyBtn').onclick=()=>{closeModals();showView('history')};
       $('#moreBtn').onclick=()=>openModalById('moreModal');
       $('#helpBtn').onclick=()=>openModalById('helpModal');
       $('#splitStrip').onclick=openRunSheet;
       $('#splitStrip').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openRunSheet()}};
       $$('#historySegment button').forEach(b=>b.onclick=()=>setHistorySegment(b.dataset.seg));
       $$('#themeSwitch button').forEach(b=>b.onclick=()=>{settings.theme=b.dataset.themeOpt;saveSettings();applyTheme()});
-      ['closeModal','closeDrills','closeRun','closeHistory','closeMore','closeHelp','closeShooter','closeProgress']
+      ['closeModal','closeDrills','closeRun','closeMore','closeHelp','closeShooter','closeProgress']
         .forEach(id=>{const el=$('#'+id);if(el)el.onclick=closeModals});
       ALL_MODALS.forEach(id=>$('#'+id).addEventListener('click',e=>{if(e.target.id===id)closeModals()}));
       $$('.drill').forEach(d=>{
@@ -1237,6 +1246,7 @@
       const stage={name:'',shots:12,entries:[]};
       let shooters=[];
       let currentView='timer';
+      let currentSegment='runs';
       let pendingPf='minor';
 
       const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -1576,12 +1586,14 @@
 
       /* ---------- Sheets der Score-Ansicht ---------- */
       /* ---------- Ansichtswechsel ---------- */
+      const VIEW_NAV={timer:'timerBtn',score:'scoreBtn',history:'historyBtn'};
       function showView(name){
         currentView=name;
         $('#timerView').classList.toggle('hidden',name!=='timer');
         $('#scoreView').classList.toggle('active',name==='score');
-        setNav(name==='score'?'scoreBtn':'timerBtn');
-        window.scrollTo(0,0);
+        $('#historyView').classList.toggle('active',name==='history');
+        setNav(VIEW_NAV[name]||'timerBtn');
+        if(name==='history')setHistorySegment(currentSegment);
       }
 
       /* ---------- Ereignisse ---------- */
