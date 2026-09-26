@@ -56,12 +56,28 @@ sie prozedural: umlaufendes Wertrauschen, Marching Squares fuer die Isolinien,
 verkettet zu Polylinien. Ausgabe sind `dist/assets/topo.svg` (helle Linien) und
 `topo-light.svg` (dunkle Linien); umgeschaltet wird ueber `data-theme`.
 
-Schrift laeuft ueber `--font-display` (Intro) und `--font-text` (Raleway).
-Beide Familien sind noch **nicht** als Dateien hinterlegt, daher greift aktuell
-die Systemschrift. Zum Einbauen: woff2-Dateien nach `dist/assets/fonts/` legen
-und passende `@font-face`-Regeln ergaenzen. Eingebunden werden muessen sie
-lokal, nicht ueber Google Fonts – sonst braucht die App zur Laufzeit Netz und
-die Aussage der Datenschutzerklaerung stimmt nicht mehr.
+Schrift ist **Montserrat**, als variable Schriftdatei fuer alle Straerken von
+100 bis 900. Sie liegt unter `dist/assets/fonts/` **lokal im Projekt** und wird
+nicht zur Laufzeit von Google geladen – die App muss ohne Netz laufen, und die
+Datenschutzerklaerung sagt zu, dass keine Verbindungen nach aussen entstehen.
+
+`node tools/fetch-fonts.mjs` holt die Dateien neu (Zeichensaetze `latin` und
+`latin-ext`, zusammen rund 106 KB) und schreibt die passenden
+`@font-face`-Regeln nach `dist/assets/fonts/font-face.css`. Von dort gehoeren
+sie an den Anfang des `<style>`-Abschnitts in `dist/index.html`.
+
+Montserrat steht unter der **SIL Open Font License 1.1**; der Lizenztext liegt
+als `dist/assets/fonts/OFL.txt` bei, weil die Lizenz das verlangt. Er muss
+mit ausgeliefert werden.
+
+Die Token `--font-display` und `--font-text` zeigen derzeit beide auf
+Montserrat. Sie bleiben getrennt, damit sich eine eigene Auszeichnungsschrift
+spaeter an einer Stelle einsetzen laesst. Urspruenglich war dafuer *Intro*
+vorgesehen – die ist kommerziell lizenziert und liegt dem Projekt nicht bei.
+
+Montserrat laeuft breiter als die Systemschrift. Nach einem Schriftwechsel
+lohnt ein Blick auf die Quick-Settings und den Split-Streifen: dort sind die
+Schriftgroessen knapp auf eine Zeile abgestimmt.
 
 ### Hell und Dunkel
 
@@ -116,6 +132,7 @@ tools/
   dev-server.mjs           Statischer Server für die lokale Entwicklung
   make-icons.mjs           Erzeugt alle Icons und Splash-Quellbilder
   make-topo.mjs            Erzeugt die Hoehenlinien-Textur des Hintergrunds
+  fetch-fonts.mjs          Laedt die Schriftdateien und legt sie lokal ab
 capacitor.config.json      App-ID, App-Name, Web-Verzeichnis
 PRIVACY.md                 Entwurf der Datenschutzerklärung
 ```

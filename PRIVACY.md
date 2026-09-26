@@ -61,6 +61,10 @@ Die App enthält keine Werbe-, Tracking- oder Analysebibliotheken und stellt im
 Betrieb keine Netzwerkverbindungen her. Eine Übermittlung personenbezogener Daten
 an Dritte findet nicht statt.
 
+Auch Schriften, Symbole und Töne sind vollständig in der App enthalten. Es
+werden keine externen Dienste eingebunden – insbesondere kein Google Fonts,
+über das sonst bei jedem Start die IP-Adresse des Geräts übertragen würde.
+
 Unabhängig davon erheben Apple und Google beim Download und beim Betrieb von Apps
 eigene Daten. Dafür gelten die Datenschutzbestimmungen des jeweiligen Anbieters.
 
