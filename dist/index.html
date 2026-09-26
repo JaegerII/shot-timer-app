@@ -11,23 +11,27 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="description" content="Shot Timer für Live Fire und Dry Fire.">
   <title>Shot Timer</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23090b0c'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23c8ff24' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%23c8ff24' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23090b0c'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23ff3131' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%23ff3131' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
   <style>
     /* ============ Farbtoken ============
        Alle Flächen und Texte laufen über diese Variablen, damit Hell und
        Dunkel aus derselben Formatvorlage entstehen. */
     :root{
       color-scheme:dark;
-      --accent:#c8ff24;
-      --accent-fill:#c8ff24;
-      --accent-ink:#0b0f02;
-      --accent-soft:#171c14;
-      --accent-line:#4a5a24;
-      --danger:#ff625f;
+      /* Intro für Auszeichnung, Raleway für Fließtext; siehe assets/fonts. */
+      --font-display:'Intro','Raleway',ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      --font-text:'Raleway',ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      --accent:#ff3131;
+      --accent-fill:#ff3131;
+      --accent-dark:#c2201f;
+      --accent-ink:#ffffff;
+      --accent-soft:#241312;
+      --accent-line:#5f2422;
+      --danger:#ff8a87;
       --danger-soft:#5a3130;
       --warm:#ffb347;
       --bg:#080a0b;
-      --bg-glow:#202820;
+      --bg-glow:#2a1517;
       --surface:#121619;
       --surface-2:#0f1315;
       --surface-3:#1a1f22;
@@ -45,16 +49,17 @@
     }
     :root[data-theme="light"]{
       color-scheme:light;
-      --accent:#5f7d00;
-      --accent-fill:#c8ff24;
-      --accent-ink:#141a06;
-      --accent-soft:#eef7d4;
-      --accent-line:#b9d371;
-      --danger:#c0322e;
+      --accent:#d61f1f;
+      --accent-fill:#ff3131;
+      --accent-dark:#a81818;
+      --accent-ink:#ffffff;
+      --accent-soft:#ffe8e7;
+      --accent-line:#f2b9b7;
+      --danger:#b3302d;
       --danger-soft:#e3b7b5;
       --warm:#9a5a00;
       --bg:#eef1f3;
-      --bg-glow:#dde9c6;
+      --bg-glow:#f7dedd;
       --surface:#ffffff;
       --surface-2:#f5f7f8;
       --surface-3:#e8edf0;
@@ -74,18 +79,21 @@
     /* ============ Grundgerüst ============
        Die Seite selbst scrollt nie: .app füllt genau eine Bildschirmhöhe,
        nur ausgewiesene Bereiche innerhalb der Karten dürfen scrollen. */
-    *{box-sizing:border-box}
-    html{background:var(--bg)}
+    *{box-sizing:border-box;scrollbar-width:none;-ms-overflow-style:none}
+    *::-webkit-scrollbar{width:0;height:0;display:none}
+    html{background:radial-gradient(circle at 50% -14%,var(--bg-glow) 0,transparent 26rem),var(--bg)}
     html,body{height:100%;overflow:hidden}
-    body{margin:0;background:radial-gradient(circle at 50% -14%,var(--bg-glow) 0,transparent 26rem),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+    /* Höhenlinien als Textur; erzeugt von tools/make-topo.mjs */
+    body{margin:0;background:url("assets/topo.svg") 0 0/620px 620px repeat;color:var(--text);font-family:var(--font-text);-webkit-tap-highlight-color:transparent}
+    :root[data-theme="light"] body{background-image:url("assets/topo-light.svg")}
     button,input,select{font:inherit}
     button{color:inherit}
     .app{height:100dvh;width:min(100%,1120px);margin:0 auto;display:flex;flex-direction:column;gap:11px;padding:max(10px,env(safe-area-inset-top)) 11px max(11px,env(safe-area-inset-bottom))}
 
     /* ============ Kopfzeile ============ */
     .topbar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.11em;font-size:.92rem}
-    .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent-fill);display:grid;place-items:center;color:var(--accent-ink);box-shadow:0 0 26px #c8ff2426}
+    .brand{font-family:var(--font-display);display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.11em;font-size:.92rem}
+    .brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent-fill);display:grid;place-items:center;color:var(--accent-ink);box-shadow:0 0 26px #ff31312e}
     .top-tools{display:flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:var(--shadow-soft)}
     .tool-btn{width:40px;height:40px;border:0;border-radius:999px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
     .tool-btn:hover{background:var(--surface-3);color:var(--text)}
@@ -96,19 +104,20 @@
     .view.hidden{display:none}
     .view-panel{flex:1;min-height:0;display:none;flex-direction:column}
     .view-panel.active{display:flex}
-    .card{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);position:relative}
+    .card{background:url("assets/topo.svg") 0 0/620px 620px repeat,var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);position:relative}
+    :root[data-theme="light"] .card{background-image:url("assets/topo-light.svg")}
     .timer-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px;padding:14px;overflow:hidden}
     .timer-card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,var(--accent-line),transparent);border-radius:24px 24px 0 0}
 
     .mode-switch{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;background:var(--sunken);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
-    .mode-btn{border:0;background:transparent;border-radius:10px;padding:9px 10px;font-weight:800;font-size:.9rem;color:var(--muted);cursor:pointer;transition:.18s ease}
+    .mode-btn{font-family:var(--font-display);border:0;background:transparent;border-radius:10px;padding:9px 10px;font-weight:800;font-size:.9rem;color:var(--muted);cursor:pointer;transition:.18s ease}
     .mode-btn.active{background:var(--surface-3);color:var(--text);box-shadow:var(--shadow-soft)}
     .mode-btn span{display:block;font-size:.65rem;font-weight:600;color:var(--faint);margin-top:1px}
     .mode-btn.active span{color:var(--muted)}
 
     .timer-stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center}
-    .state-label{text-transform:uppercase;letter-spacing:.2em;color:var(--accent);font-size:.74rem;font-weight:900;min-height:1.1em}
-    .time{font-variant-numeric:tabular-nums;font-size:clamp(3.8rem,19vw,6.4rem);font-weight:850;line-height:.88;letter-spacing:-.07em;margin-left:-.05em}
+    .state-label{font-family:var(--font-display);text-transform:uppercase;letter-spacing:.2em;color:var(--accent);font-size:.74rem;font-weight:900;min-height:1.1em}
+    .time{font-family:var(--font-display);font-variant-numeric:tabular-nums;font-size:clamp(3.8rem,19vw,6.4rem);font-weight:850;line-height:.88;letter-spacing:-.07em;margin-left:-.05em}
     .time .hundredths{color:var(--muted);font-size:.54em;letter-spacing:-.03em}
     .last-split{color:var(--muted);font-size:.85rem;min-height:1.3em}
     .last-split strong{color:var(--text);font-size:1.02rem;margin-left:6px;font-variant-numeric:tabular-nums}
@@ -136,9 +145,9 @@
     /* Das Mikrofonsymbol ist zugleich die Statusanzeige. */
     .icon-btn.mic.ready{color:var(--accent);border-color:var(--accent-line)}
     .icon-btn.mic.blocked{color:var(--warm);border-color:var(--warm)}
-    .start-btn{border:0;border-radius:17px;background:var(--accent-fill);color:var(--accent-ink);height:56px;font-weight:950;font-size:1.05rem;letter-spacing:.11em;cursor:pointer;box-shadow:0 8px 26px #b8ff1f24;transition:transform .12s ease,background .2s ease}
+    .start-btn{font-family:var(--font-display);border:0;border-radius:17px;background:var(--accent-fill);color:var(--accent-ink);height:56px;font-weight:950;font-size:1.05rem;letter-spacing:.11em;cursor:pointer;box-shadow:0 8px 26px #ff313126;transition:transform .12s ease,background .2s ease}
     .start-btn:active{transform:scale(.985)}
-    .start-btn.stop{background:var(--danger);color:#fff}
+    .start-btn.stop{background:var(--text);color:var(--bg);box-shadow:none}
 
     .quick-settings{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
     .quick{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:13px;padding:9px 8px;text-align:left;cursor:pointer}
@@ -159,7 +168,7 @@
     .ghost-btn:hover{border-color:var(--line-strong);color:var(--text)}
     .ghost-btn.wide{width:100%;padding:12px;border-style:dashed;color:var(--accent);border-color:var(--accent-line)}
     .ghost-btn.wide:hover{background:var(--accent-soft)}
-    .sheet-action{width:100%;height:50px;border:0;border-radius:15px;background:var(--accent-fill);color:var(--accent-ink);font-weight:900;margin-top:8px;cursor:pointer}
+    .sheet-action{font-family:var(--font-display);width:100%;height:50px;border:0;border-radius:15px;background:var(--accent-fill);color:var(--accent-ink);font-weight:900;margin-top:8px;cursor:pointer}
     .danger-link{border:0;background:transparent;color:var(--danger);font-weight:750;cursor:pointer;padding:5px}
     .empty{padding:22px 12px;color:var(--faint);text-align:center;font-size:.85rem;border:1px dashed var(--line);border-radius:14px}
 
@@ -170,10 +179,10 @@
     @keyframes up{from{transform:translateY(26px);opacity:0}}
     .sheet-grab{flex:0 0 auto;width:40px;height:4px;background:var(--line-strong);border-radius:999px;margin:-6px auto 14px}
     .sheet-head{flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
-    .sheet-head h2{margin:0;font-size:1.06rem}
+    .sheet-head h2{font-family:var(--font-display);margin:0;font-size:1.06rem}
     .sheet-head small{display:block;color:var(--muted);font-size:.7rem;margin-top:3px}
     .sheet-head button{flex:0 0 auto;border:0;background:var(--surface-3);color:var(--text);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:1.1rem;line-height:1}
-    .sheet-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+    .sheet-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
     .sheet-foot{flex:0 0 auto;display:flex;justify-content:flex-end;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
     .field-label{display:block;color:var(--muted);font-size:.74rem;font-weight:700;margin:16px 0 8px}
     .field-label:first-child{margin-top:0}
@@ -230,12 +239,12 @@
     .tip svg{flex:0 0 auto;color:var(--warm)}
     .tip b{color:var(--text)}
     .help-block{margin-bottom:16px}
-    .help-block h3{margin:0 0 5px;font-size:.9rem}
+    .help-block h3{font-family:var(--font-display);margin:0 0 5px;font-size:.9rem}
     .help-block p{margin:0;color:var(--muted);font-size:.79rem;line-height:1.5}
 
     /* ============ Hit Factor ============ */
     .panel-head{flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .panel-head h1{font-size:1.4rem;margin:0 0 3px;letter-spacing:-.02em}
+    .panel-head h1{font-family:var(--font-display);font-size:1.4rem;margin:0 0 3px;letter-spacing:-.02em}
     .panel-head p{color:var(--muted);margin:0;font-size:.78rem;line-height:1.35}
     .stage-bar{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:11px}
     .text-field{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--text);font-weight:750;min-width:0}
@@ -248,7 +257,7 @@
     .step:hover{border-color:var(--line-strong)}
     .shots-value{min-width:2.4ch;text-align:center;font-weight:850;font-variant-numeric:tabular-nums}
     .max-points{color:var(--muted);font-size:.72rem;font-variant-numeric:tabular-nums}
-    .score-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:0 2px 10px 0}
+    .score-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 2px 10px 0}
     .entry{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:12px;margin-bottom:8px}
     .entry-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
     .entry-head>b{font-size:.92rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -287,7 +296,7 @@
     .counter-minus:hover{border-color:var(--danger);color:var(--danger)}
     .result-block{flex:0 0 auto;margin-top:10px}
     .result-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .result-head h2{font-size:.95rem;margin:0}
+    .result-head h2{font-family:var(--font-display);font-size:.95rem;margin:0}
     .muted-note{color:var(--muted);font-size:.71rem}
     .rank-row{width:100%;text-align:left;display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:9px;align-items:center;padding:10px;border:0;border-radius:11px;background:transparent;color:inherit;font-variant-numeric:tabular-nums}
     button.rank-row{cursor:pointer}

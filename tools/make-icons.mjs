@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const BG = [0x09, 0x0b, 0x0c];
-const ACCENT = [0xc8, 0xff, 0x24];
+const ACCENT = [0xff, 0x31, 0x31];
 const SS = 4; // Supersampling-Faktor für weiche Kanten
 
 /* ---------- Geometrie in Einheitskoordinaten (0..1) ---------- */

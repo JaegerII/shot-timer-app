@@ -44,6 +44,25 @@ Schützenliste der Score-Ansicht und der Inhalt langer Sheets.
 - **Verlauf** führt Trainings und gespeicherte Stages in einem Sheet mit zwei
   Segmenten zusammen.
 
+### Farben, Textur und Schrift
+
+Akzentfarbe ist `#ff3131`. Sie steckt an drei Stellen und muss bei einer
+Aenderung ueberall nachgezogen werden: in den Token `--accent*` im Stylesheet,
+im Favicon-Data-URI im `<head>` und in `ACCENT` in `tools/make-icons.mjs`
+(danach `npm run build`).
+
+Der Hintergrund traegt eine Hoehenlinien-Textur. `tools/make-topo.mjs` erzeugt
+sie prozedural: umlaufendes Wertrauschen, Marching Squares fuer die Isolinien,
+verkettet zu Polylinien. Ausgabe sind `dist/assets/topo.svg` (helle Linien) und
+`topo-light.svg` (dunkle Linien); umgeschaltet wird ueber `data-theme`.
+
+Schrift laeuft ueber `--font-display` (Intro) und `--font-text` (Raleway).
+Beide Familien sind noch **nicht** als Dateien hinterlegt, daher greift aktuell
+die Systemschrift. Zum Einbauen: woff2-Dateien nach `dist/assets/fonts/` legen
+und passende `@font-face`-Regeln ergaenzen. Eingebunden werden muessen sie
+lokal, nicht ueber Google Fonts – sonst braucht die App zur Laufzeit Netz und
+die Aussage der Datenschutzerklaerung stimmt nicht mehr.
+
 ### Hell und Dunkel
 
 Alle Farben laufen über Token auf `:root`; `:root[data-theme="light"]`
@@ -96,6 +115,7 @@ ios/                       Natives Xcode-Projekt (Capacitor)
 tools/
   dev-server.mjs           Statischer Server für die lokale Entwicklung
   make-icons.mjs           Erzeugt alle Icons und Splash-Quellbilder
+  make-topo.mjs            Erzeugt die Hoehenlinien-Textur des Hintergrunds
 capacitor.config.json      App-ID, App-Name, Web-Verzeichnis
 PRIVACY.md                 Entwurf der Datenschutzerklärung
 ```
