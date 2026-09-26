@@ -140,6 +140,116 @@
     .toast{position:fixed;z-index:80;top:20px;left:50%;transform:translate(-50%,-20px);background:#eef4e7;color:#10130d;border-radius:13px;padding:11px 15px;font-size:.82rem;font-weight:750;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
     @media(max-width:820px){.app{padding:16px 14px 105px}.layout{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.timer-card{min-height:610px}.topbar{margin-bottom:16px}}
     @media(max-width:600px){body{background:var(--bg)}.app{padding-left:10px;padding-right:10px}.brand small{display:none}.status-pill{font-size:.7rem}.timer-card,.view-panel{border-radius:23px;padding:18px}.timer-card{min-height:calc(100vh - 152px)}.side{grid-template-columns:1fr}.side-card{border-radius:22px}.time{font-size:clamp(5.2rem,26vw,7.5rem)}.quick-settings{gap:6px}.quick{padding:10px 8px}.quick label{font-size:.58rem;letter-spacing:.03em;line-height:1.25}.quick b{font-size:.82rem}.drill-grid{grid-template-columns:1fr}.view-panel{min-height:calc(100vh - 150px)}.mode-btn{padding:10px 8px}.primary-row{grid-template-columns:48px minmax(0,1fr) 48px}.icon-btn{width:48px;height:54px}.modal{padding:8px}.settings-sheet,.content-sheet{padding:15px 13px 14px;border-radius:23px}.settings-grid{gap:7px}.setting-tile{min-height:78px;padding:10px}.setting-tile small{display:none}.content-sheet .drill-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.content-sheet .drill{min-height:116px;padding:11px}.content-sheet .drill h3{margin:10px 0 4px;font-size:.88rem}.content-sheet .drill p{font-size:.68rem}.content-sheet .drill .go{width:27px;height:27px;right:9px;top:9px}.content-sheet .drill-tag{font-size:.6rem}}
+    /* ---------- Hit Factor: Ansicht, Eingabe, Wertung ---------- */
+    .view{display:block}
+    .view.hidden{display:none}
+    .bottom-nav{grid-template-columns:repeat(5,1fr)}
+    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px}
+    .panel-head h1{font-size:1.7rem;margin:0 0 6px;letter-spacing:-.03em}
+    .panel-head p{color:var(--muted);margin:0;font-size:.84rem;line-height:1.4}
+    .ghost-btn{border:1px solid #2e353a;background:#12171a;color:#c4ccd0;border-radius:13px;padding:10px 14px;font-size:.78rem;font-weight:750;cursor:pointer;white-space:nowrap}
+    .ghost-btn:hover{border-color:#47525a;color:var(--text)}
+    .ghost-btn.wide{width:100%;padding:13px;border-style:dashed;color:var(--accent);border-color:#4a5a24}
+    .ghost-btn.wide:hover{border-color:var(--accent);background:#151a10}
+    .stage-bar{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:16px}
+    .text-field{background:#0b0e10;border:1px solid #242a2e;border-radius:13px;padding:11px 13px;color:var(--text);font-weight:750;min-width:0}
+    .text-field:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+    .text-field::placeholder{color:#5f686d;font-weight:600}
+    #stageName{flex:1 1 170px}
+    .shots-field{display:flex;align-items:center;gap:7px;background:#0b0e10;border:1px solid #242a2e;border-radius:13px;padding:5px 7px}
+    .shots-field>span{color:var(--muted);font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;padding:0 3px}
+    .step{width:34px;height:34px;border-radius:10px;border:1px solid #2e353a;background:#14181b;color:var(--text);font-weight:800;font-size:1.05rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+    .step:hover{border-color:#47525a}
+    .shots-value{min-width:2.4ch;text-align:center;font-weight:850;font-variant-numeric:tabular-nums}
+    .max-points{color:var(--muted);font-size:.74rem;font-variant-numeric:tabular-nums}
+    .entry{background:#14181a;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+    .entry-head{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+    .entry-head>b{font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pf-badge{flex:0 0 auto;font-size:.6rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:3px 8px;border:1px solid #3a444a;color:#9aa3a8}
+    .pf-badge.major{border-color:#6d7f2a;color:var(--accent)}
+    button.pf-badge{background:transparent;font-family:inherit;cursor:pointer}
+    button.pf-badge:hover{border-color:#6f7b82;color:var(--text)}
+    .entry-tool{border:0;background:transparent;color:#6f797f;cursor:pointer;padding:5px;border-radius:9px;display:grid;place-items:center}
+    .entry-tool.progress{margin-left:auto}
+    .entry-tool:hover{color:var(--text);background:#1d2124}
+    .entry-tool.remove:hover{color:var(--danger)}
+    .entry-tool svg{width:17px;height:17px}
+    .entry-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:11px}
+    .time-field{grid-column:1/-1;display:flex;align-items:center;gap:8px;background:#0b0e10;border:1px solid #242a2e;border-radius:12px;padding:7px 8px 7px 12px}
+    .time-field input{flex:1;width:100%;min-width:0;background:transparent;border:0;color:var(--text);font-weight:850;font-size:1.05rem;font-variant-numeric:tabular-nums}
+    .time-field input:focus{outline:none}
+    .time-field input::placeholder{color:#4e5559}
+    .time-field>span{color:var(--muted);font-size:.8rem}
+    .take-time{flex:0 0 auto;border:1px solid #2e353a;background:#171c1f;color:#b6bfc3;border-radius:9px;padding:6px 9px;font-size:.7rem;font-weight:750;cursor:pointer;white-space:nowrap}
+    .take-time:hover{border-color:var(--accent);color:var(--accent)}
+    .metric{background:#0b0e10;border:1px solid #242a2e;border-radius:12px;padding:8px 11px}
+    .metric>span{display:block;color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+    .metric b{font-size:1.02rem;font-variant-numeric:tabular-nums}
+    .metric.hf b{color:var(--accent)}
+    .counters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .counter{position:relative}
+    .counter-main{width:100%;border:1px solid #2a3135;background:#0f1315;border-radius:13px;padding:8px 4px 6px;display:grid;justify-items:center;gap:1px;cursor:pointer}
+    .counter-main:hover{border-color:#47525a;background:#141a1d}
+    .counter-main:active{background:#1b2226}
+    .counter-main small{font-size:.62rem;font-weight:900;letter-spacing:.08em;color:var(--muted)}
+    .counter-main b{font-size:1.15rem;font-variant-numeric:tabular-nums}
+    .counter.pen .counter-main small{color:#b8908c}
+    .counter-main b.hot{color:var(--danger)}
+    .counter-minus{position:absolute;top:-6px;right:-6px;width:23px;height:23px;border-radius:50%;border:1px solid #394247;background:#1c2225;color:#b9c1c5;font-size:.9rem;line-height:1;cursor:pointer;display:none;place-items:center;padding:0}
+    .counter-minus.show{display:grid}
+    .counter-minus:hover{border-color:var(--danger);color:var(--danger)}
+    .result-block{margin-top:22px}
+    .muted-note{color:var(--muted);font-size:.72rem}
+    .rank-row{width:100%;text-align:left;display:grid;grid-template-columns:26px minmax(0,1fr) auto auto;gap:9px;align-items:center;padding:11px 10px;border:0;border-radius:12px;background:transparent;color:inherit;font-variant-numeric:tabular-nums}
+    button.rank-row{cursor:pointer}
+    .rank-row:nth-child(odd){background:#15191c}
+    button.rank-row:hover{background:#1c2226}
+    .rank-row .pos{color:var(--muted);font-weight:900;font-size:.8rem;text-align:center}
+    .rank-row.lead .pos{color:var(--accent)}
+    .rank-row .who{min-width:0}
+    .rank-row .who b{display:block;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rank-row .who span{display:block;color:var(--muted);font-size:.69rem;margin-top:2px}
+    .rank-row .hf{font-weight:850;font-size:.92rem}
+    .rank-row .pct{text-align:right;min-width:0}
+    .rank-row .pct b{display:block;color:var(--accent);font-weight:800;font-size:.8rem}
+    .rank-row .pct>span{display:block;color:var(--muted);font-size:.62rem;white-space:nowrap;margin-top:2px}
+    .score-footer{display:flex;gap:9px;align-items:center;margin-top:20px}
+    .score-footer .sheet-action{flex:1;margin-top:0}
+    .pick-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+    .pick{flex:1;display:flex;align-items:center;gap:10px;background:#171b1e;border:1px solid transparent;border-radius:14px;padding:13px;cursor:pointer;text-align:left;min-width:0}
+    .pick:hover{border-color:#4a5a24;background:#171c14}
+    .pick b{flex:1;min-width:0;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pick-del{flex:0 0 auto;width:38px;height:38px;border-radius:12px;border:1px solid #2b3236;background:#121618;color:#6f797f;cursor:pointer;font-size:1.05rem;padding:0}
+    .pick-del:hover{color:var(--danger);border-color:#5a3130}
+    .new-shooter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+    .new-shooter .text-field{flex:1 1 150px}
+    .pf-switch{display:flex;gap:4px;background:#090b0c;border:1px solid #23282b;border-radius:13px;padding:4px}
+    .pf-opt{border:0;background:transparent;border-radius:9px;padding:9px 14px;font-weight:800;font-size:.8rem;color:var(--muted);cursor:pointer}
+    .pf-opt.selected{background:var(--panel-2);color:var(--text)}
+    .stage-card{background:#14181a;border:1px solid var(--line);border-radius:16px;margin-bottom:9px;overflow:hidden}
+    .stage-card summary{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;list-style:none}
+    .stage-card summary::-webkit-details-marker{display:none}
+    .stage-card summary>div{flex:1;min-width:0}
+    .stage-card summary b{display:block;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .stage-card summary>div>span{display:block;color:var(--muted);font-size:.71rem;margin-top:3px}
+    .stage-card summary em{font-style:normal;color:var(--accent);font-weight:850;font-variant-numeric:tabular-nums;font-size:.9rem}
+    .stage-del{flex:0 0 auto;width:30px;height:30px;border-radius:9px;border:1px solid #2b3236;background:#121618;color:#6f797f;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+    .stage-del:hover{color:var(--danger);border-color:#5a3130}
+    .stage-detail{padding:0 8px 8px}
+    .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+    .stat{background:#0f1214;border:1px solid #262d31;border-radius:14px;padding:11px 13px}
+    .stat span{display:block;color:var(--muted);font-size:.63rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:2px}
+    .stat b{font-size:1.1rem;font-variant-numeric:tabular-nums}
+    .spark-wrap{background:#0f1214;border:1px solid #262d31;border-radius:14px;padding:12px;margin-bottom:12px}
+    .spark-wrap>span{display:block;color:var(--muted);font-size:.63rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
+    .spark{width:100%;height:52px;display:block}
+    .sheet-foot{display:flex;justify-content:flex-end;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
+    @media(min-width:601px){
+      .counters{grid-template-columns:repeat(6,minmax(0,1fr))}
+      .entry-metrics{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr)}
+      .time-field{grid-column:auto}
+      .stat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    }
     @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   </style>
 </head>
@@ -203,10 +313,45 @@
       </div>
     </main>
 
+    <section id="scoreView" class="view-panel" aria-labelledby="scoreTitle">
+      <div class="panel-head">
+        <div>
+          <h1 id="scoreTitle">Hit Factor</h1>
+          <p>Zeit und Trefferzonen eintragen – die Wertung entsteht live.</p>
+        </div>
+        <button class="ghost-btn" id="openStages">Gespeichert</button>
+      </div>
+
+      <div class="stage-bar">
+        <input id="stageName" class="text-field" type="text" maxlength="40" placeholder="Stage 1" aria-label="Name der Stage">
+        <div class="shots-field">
+          <span>Schüsse</span>
+          <button class="step" id="shotsDown" type="button" aria-label="Weniger Schüsse">−</button>
+          <b class="shots-value" id="shotsValue">12</b>
+          <button class="step" id="shotsUp" type="button" aria-label="Mehr Schüsse">+</button>
+        </div>
+        <span class="max-points" id="maxPoints">max. 60 Punkte</span>
+      </div>
+
+      <div id="entryList"></div>
+      <button class="ghost-btn wide" id="addEntry" type="button">+ Schütze hinzufügen</button>
+
+      <div class="result-block">
+        <div class="side-title"><h2>Wertung</h2><span class="muted-note" id="resultHint"></span></div>
+        <div id="resultList"></div>
+      </div>
+
+      <div class="score-footer">
+        <button class="sheet-action" id="saveStage" type="button">STAGE SPEICHERN</button>
+        <button class="ghost-btn" id="newStage" type="button">Neue Stage</button>
+      </div>
+    </section>
+
   </div>
 
   <nav class="bottom-nav" aria-label="Hauptnavigation">
     <button class="nav-btn active" id="timerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Timer</span></button>
+    <button class="nav-btn" id="scoreBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg><span>Score</span></button>
     <button class="nav-btn" id="drillsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10v4H7zM5 7h14v14H5z"/><path d="M9 12h6M9 16h4"/></svg><span>Drills</span></button>
     <button class="nav-btn" id="historyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Verlauf</span></button>
     <button class="nav-btn" id="moreBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg><span>Mehr</span></button>
@@ -253,6 +398,39 @@
         <div class="setting-tile"><div><b>Sprache</b><small>Weitere Sprachen folgen</small></div><div class="tile-control"><select id="langSelect" aria-label="Sprache" disabled><option>Deutsch</option></select></div></div>
         <div class="setting-tile"><div><b>Trainingsdaten</b><small>Lokal auf diesem Gerät</small></div><div class="tile-control"><button id="clearHistory" class="danger-link">Verlauf löschen</button></div></div>
       </div>
+    </div>
+  </div>
+  <div class="modal" id="shooterModal" role="dialog" aria-modal="true" aria-labelledby="shooterTitle">
+    <div class="sheet content-sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="shooterTitle">Schütze hinzufügen</h2><small>Gespeicherte auswählen oder neu anlegen</small></div><button id="closeShooter" aria-label="Schließen">×</button></div>
+      <div class="sheet-body">
+        <div id="shooterPicker"></div>
+        <label class="field-label" for="newShooterName">Neu anlegen</label>
+        <div class="new-shooter">
+          <input id="newShooterName" class="text-field" type="text" maxlength="28" placeholder="Name" autocomplete="off">
+          <div class="pf-switch" id="pfSwitch">
+            <button class="pf-opt selected" type="button" data-pf="minor">Minor</button>
+            <button class="pf-opt" type="button" data-pf="major">Major</button>
+          </div>
+        </div>
+        <button class="sheet-action" id="createShooter" type="button">HINZUFÜGEN</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal" id="stagesModal" role="dialog" aria-modal="true" aria-labelledby="stagesTitle">
+    <div class="sheet content-sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="stagesTitle">Gespeicherte Stages</h2><small>Antippen zeigt die vollständige Wertung</small></div><button id="closeStages" aria-label="Schließen">×</button></div>
+      <div class="sheet-body"><div id="stagesList"></div></div>
+      <div class="sheet-foot"><button id="clearStages" class="danger-link" type="button">Alle Stages löschen</button></div>
+    </div>
+  </div>
+  <div class="modal" id="progressModal" role="dialog" aria-modal="true" aria-labelledby="progressName">
+    <div class="sheet content-sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="progressName">Fortschritt</h2><small id="progressSub"></small></div><button id="closeProgress" aria-label="Schließen">×</button></div>
+      <div class="sheet-body"><div id="progressBody"></div></div>
     </div>
   </div>
   <div class="toast" id="toast"></div>
@@ -751,7 +929,7 @@
       }
       function closePanels(){
         PANELS.forEach(id=>$('#'+id).classList.remove('show'));
-        setNav('timerBtn');
+        setNav(currentView==='score'?'scoreBtn':'timerBtn');
         releaseModal();
       }
       function selectDrill(name){
@@ -781,7 +959,7 @@
       $('#closeModal').onclick=closeQuickSheet;
       $('#settingsModal').onclick=e=>{if(e.target.id==='settingsModal')closeQuickSheet()};
       $('#applyOption').onclick=applySheet;
-      $('#timerBtn').onclick=closePanels;
+      $('#timerBtn').onclick=()=>{closePanels();showView('timer')};
       $('#drillsBtn').onclick=()=>openPanel('drillsModal','drillsBtn');
       $('#historyBtn').onclick=()=>{renderHistory();openPanel('historyModal','historyBtn')};
       $('#moreBtn').onclick=()=>openPanel('moreModal','moreBtn');
@@ -815,6 +993,7 @@
       document.addEventListener('keydown',e=>{
         if(e.key==='Escape'){
           if($('#settingsModal').classList.contains('show'))closeQuickSheet();
+          else if(anySheetOpen())closeSheetPanel();
           else closePanels();
           return;
         }
@@ -827,6 +1006,478 @@
           if(rt.running)requestWakeLock();
         }
       });
+
+      /* ================= Hit Factor: Stage-Wertung nach Comstock =================
+         Punkte = A/C/D je nach Power Factor, minus 10 je Miss, No-Shoot und
+         Prozedurfehler. Die Stage-Punktzahl kann nicht unter null fallen.
+         Hit Factor = Punkte / Zeit. Bester Hit Factor der Stage = 100 %.        */
+      const SHOOTERS_KEY='shot-timer-shooters-v1';
+      const STAGES_KEY='shot-timer-stages-v1';
+      const DRAFT_KEY='shot-timer-stage-draft-v1';
+      const STAGE_LIMIT=100;
+      const SHEETS=['shooterModal','stagesModal','progressModal'];
+      const ZONES=[
+        {key:'a',label:'A'},{key:'c',label:'C'},{key:'d',label:'D'},
+        {key:'m',label:'M',pen:true},{key:'ns',label:'NS',pen:true},{key:'pe',label:'PE',pen:true}
+      ];
+      const ZONE_VALUE={major:{a:5,c:4,d:2},minor:{a:5,c:3,d:1}};
+      const PENALTY=10;
+      const MIN_SHOTS=1,MAX_SHOTS=64;
+
+      const stage={name:'',shots:12,entries:[]};
+      let shooters=[];
+      let currentView='timer';
+      let pendingPf='minor';
+
+      const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+      const nf=(v,d)=>Number(v).toFixed(d).replace('.',',');
+      const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const dateText=iso=>new Date(iso).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const dateShort=iso=>new Date(iso).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'});
+      function readJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch(e){return fallback}}
+      function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast('Speichern fehlgeschlagen');return false}}
+
+      /* ---------- Laufende Stage sichern ----------
+         Die App kann am Stand jederzeit vom System beendet werden; ohne das
+         hier wären bereits eingetragene Zeiten und Treffer verloren.        */
+      function persistDraft(){
+        try{localStorage.setItem(DRAFT_KEY,JSON.stringify({name:stage.name,shots:stage.shots,entries:stage.entries}))}catch(e){}
+      }
+      function loadDraft(){
+        const d=readJson(DRAFT_KEY,null);
+        if(!d||!Array.isArray(d.entries))return;
+        stage.name=typeof d.name==='string'?d.name:'';
+        const shots=Math.round(Number(d.shots));
+        stage.shots=Number.isFinite(shots)?Math.min(MAX_SHOTS,Math.max(MIN_SHOTS,shots)):12;
+        stage.entries=d.entries.filter(e=>e&&e.id&&e.shooterId).map(e=>{
+          const time=Number(e.time);
+          const out={
+            id:String(e.id),shooterId:String(e.shooterId),
+            name:String(e.name||'Schütze'),pf:e.pf==='major'?'major':'minor',
+            time:Number.isFinite(time)&&time>0?time:0
+          };
+          ZONES.forEach(z=>{
+            const n=Math.round(Number(e[z.key]));
+            out[z.key]=Number.isFinite(n)&&n>0?Math.min(99,n):0;
+          });
+          return out;
+        });
+        $('#stageName').value=stage.name;
+      }
+      // Nach jeder Eingabe: sichern, Karte auffrischen, Rangliste neu rechnen.
+      function updated(entry){
+        persistDraft();
+        if(entry)refreshEntry(entry);
+        renderResult();
+      }
+
+      /* ---------- Rechnen ---------- */
+      function scoreEntry(e){
+        const z=ZONE_VALUE[e.pf]||ZONE_VALUE.minor;
+        const hits=e.a*z.a+e.c*z.c+e.d*z.d;
+        const penalties=(e.m+e.ns+e.pe)*PENALTY;
+        const points=Math.max(0,hits-penalties);
+        return {hits,penalties,points,hf:e.time>0?points/e.time:0};
+      }
+      function maxStagePoints(){return stage.shots*5}
+      function ranked(){
+        return stage.entries
+          .filter(e=>e.time>0)
+          .map(e=>({entry:e,...scoreEntry(e)}))
+          .sort((x,y)=>y.hf-x.hf);
+      }
+
+      /* ---------- Eingabekarten ---------- */
+      const ICON_CHART='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg>';
+      const ICON_CLOSE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+      function entryHtml(e){
+        const s=scoreEntry(e);
+        const name=esc(e.name);
+        return '<article class="entry" data-entry="'+e.id+'">'+
+          '<div class="entry-head">'+
+            '<b>'+name+'</b>'+
+            '<button class="pf-badge '+e.pf+'" type="button" title="Power Factor umschalten" aria-label="Power Factor von '+name+' umschalten, aktuell '+(e.pf==='major'?'Major':'Minor')+'">'+(e.pf==='major'?'Major':'Minor')+'</button>'+
+            '<button class="entry-tool progress" type="button" aria-label="Fortschritt von '+name+'">'+ICON_CHART+'</button>'+
+            '<button class="entry-tool remove" type="button" aria-label="'+name+' von der Stage nehmen">'+ICON_CLOSE+'</button>'+
+          '</div>'+
+          '<div class="entry-metrics">'+
+            '<div class="time-field">'+
+              '<input class="time-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" value="'+(e.time>0?nf(e.time,2):'')+'" aria-label="Zeit von '+name+' in Sekunden">'+
+              '<span>s</span>'+
+              '<button class="take-time" type="button">Aus Timer</button>'+
+            '</div>'+
+            '<div class="metric points"><span>Punkte</span><b>'+s.points+'</b></div>'+
+            '<div class="metric hf"><span>Hit Factor</span><b>'+(e.time>0?nf(s.hf,4):'—')+'</b></div>'+
+          '</div>'+
+          '<div class="counters">'+ZONES.map(z=>
+            '<div class="counter'+(z.pen?' pen':'')+'" data-zone="'+z.key+'">'+
+              '<button class="counter-main" type="button" aria-label="'+z.label+' erhöhen"><small>'+z.label+'</small>'+
+                '<b'+(z.pen&&e[z.key]>0?' class="hot"':'')+'>'+e[z.key]+'</b></button>'+
+              '<button class="counter-minus'+(e[z.key]>0?' show':'')+'" type="button" aria-label="'+z.label+' verringern">−</button>'+
+            '</div>').join('')+
+          '</div>'+
+        '</article>';
+      }
+      function renderEntries(){
+        const list=$('#entryList');
+        list.innerHTML=stage.entries.length
+          ? stage.entries.map(entryHtml).join('')
+          : '<div class="empty">Noch kein Schütze auf dieser Stage.</div>';
+      }
+      // Aktualisiert nur die Zahlen, damit ein laufendes Tippen im Zeitfeld erhalten bleibt.
+      function refreshEntry(e){
+        const el=$('.entry[data-entry="'+e.id+'"]');
+        if(!el)return;
+        const s=scoreEntry(e);
+        ZONES.forEach(z=>{
+          const c=el.querySelector('.counter[data-zone="'+z.key+'"]');
+          if(!c)return;
+          const value=c.querySelector('.counter-main b');
+          value.textContent=e[z.key];
+          value.classList.toggle('hot',!!z.pen&&e[z.key]>0);
+          c.querySelector('.counter-minus').classList.toggle('show',e[z.key]>0);
+        });
+        el.querySelector('.metric.points b').textContent=s.points;
+        el.querySelector('.metric.hf b').textContent=e.time>0?nf(s.hf,4):'—';
+      }
+
+      /* ---------- Rangliste ---------- */
+      function renderResult(){
+        const rows=ranked();
+        const el=$('#resultList');
+        $('#resultHint').textContent=stage.entries.length
+          ? rows.length+' von '+stage.entries.length+' gewertet'
+          : '';
+        if(!rows.length){
+          el.innerHTML='<div class="empty">Sobald eine Zeit eingetragen ist, erscheint hier die Rangliste.</div>';
+          return;
+        }
+        const best=rows[0].hf, max=maxStagePoints();
+        el.innerHTML=rows.map((r,i)=>{
+          const pct=best>0?r.hf/best*100:0;
+          return rankRow({
+            tag:'button',attrs:' type="button" data-shooter="'+r.entry.shooterId+'"',lead:i===0,
+            rank:i+1,title:r.entry.name,hf:r.hf,pct,
+            sub:r.points+' Pkt · '+nf(r.entry.time,2)+' s',
+            aside:nf(max*pct/100,1)+' Stage-Pkt'
+          });
+        }).join('');
+      }
+      function renderStageBar(){
+        $('#shotsValue').textContent=stage.shots;
+        $('#maxPoints').textContent='max. '+maxStagePoints()+' Punkte';
+      }
+      function renderScore(){renderStageBar();renderResult()}
+
+      /* ---------- Schützen ---------- */
+      function addEntry(shooter){
+        if(stage.entries.some(e=>e.shooterId===shooter.id)){showToast('Steht bereits auf der Stage');return}
+        stage.entries.push({id:uid(),shooterId:shooter.id,name:shooter.name,pf:shooter.pf,time:0,a:0,c:0,d:0,m:0,ns:0,pe:0});
+        persistDraft();renderEntries();renderResult();
+      }
+      function removeEntry(id){
+        stage.entries=stage.entries.filter(e=>e.id!==id);
+        persistDraft();renderEntries();renderResult();
+      }
+      function renderShooterPicker(){
+        const el=$('#shooterPicker');
+        const used=new Set(stage.entries.map(e=>e.shooterId));
+        const free=shooters.filter(s=>!used.has(s.id));
+        if(!shooters.length){el.innerHTML='<div class="empty">Noch keine Schützen gespeichert.</div>';return}
+        if(!free.length){el.innerHTML='<div class="empty">Alle gespeicherten Schützen stehen schon auf der Stage.</div>';return}
+        el.innerHTML=free.map(s=>{
+          const name=esc(s.name);
+          return '<div class="pick-row">'+
+            '<button class="pick" type="button" data-pick="'+s.id+'"><b>'+name+'</b>'+
+              '<span class="pf-badge '+s.pf+'">'+(s.pf==='major'?'Major':'Minor')+'</span></button>'+
+            '<button class="pick-del" type="button" data-del="'+s.id+'" aria-label="'+name+' aus der Liste löschen">×</button>'+
+          '</div>';
+        }).join('');
+      }
+      function openShooterSheet(){
+        renderShooterPicker();
+        $('#newShooterName').value='';
+        setPf(pendingPf);
+        openSheetPanel('shooterModal');
+      }
+      function setPf(pf){
+        pendingPf=pf==='major'?'major':'minor';
+        $$('#pfSwitch .pf-opt').forEach(b=>b.classList.toggle('selected',b.dataset.pf===pendingPf));
+      }
+      function createShooter(){
+        const name=$('#newShooterName').value.trim();
+        if(!name){showToast('Name fehlt');$('#newShooterName').focus();return}
+        let shooter=shooters.find(s=>s.name.toLowerCase()===name.toLowerCase());
+        if(shooter)shooter.pf=pendingPf;
+        else{shooter={id:uid(),name,pf:pendingPf};shooters.push(shooter)}
+        writeJson(SHOOTERS_KEY,shooters);
+        addEntry(shooter);
+        closeSheetPanel();
+      }
+      function deleteShooter(id){
+        // Nur die Stammdaten; gespeicherte Stages behalten ihre Namenskopie.
+        shooters=shooters.filter(s=>s.id!==id);
+        writeJson(SHOOTERS_KEY,shooters);
+        renderShooterPicker();
+        showToast('Schütze gelöscht');
+      }
+
+      /* ---------- Zeit aus dem Timer ---------- */
+      function takeTimerTime(entry){
+        if(!rt.shots.length){showToast('Im Timer liegt noch keine Zeit');return}
+        const shots=rt.shots.length;
+        entry.time=Number(rt.shots[shots-1].time.toFixed(2));
+        const input=$('.entry[data-entry="'+entry.id+'"] .time-input');
+        if(input)input.value=nf(entry.time,2);
+        const empty=ZONES.every(z=>entry[z.key]===0);
+        if(empty){
+          entry.a=shots; // Vorbelegung: alles A, danach nur noch herunterstufen
+          showToast('Zeit und '+shots+(shots===1?' Treffer':' Treffer')+' als A übernommen');
+        }else showToast('Zeit übernommen');
+        updated(entry);
+      }
+
+      /* ---------- Speichern und Verlauf ---------- */
+      function defaultStageName(){return 'Stage '+(readJson(STAGES_KEY,[]).length+1)}
+      function saveStage(){
+        const rows=ranked();
+        if(!rows.length){showToast('Noch keine Zeit eingetragen');return}
+        const best=rows[0].hf, max=maxStagePoints();
+        const stages=readJson(STAGES_KEY,[]);
+        stages.unshift({
+          id:uid(),
+          at:new Date().toISOString(),
+          name:stage.name.trim()||defaultStageName(),
+          shots:stage.shots,
+          maxPoints:max,
+          results:rows.map((r,i)=>{
+            const pct=best>0?r.hf/best*100:0;
+            return {
+              rank:i+1,shooterId:r.entry.shooterId,name:r.entry.name,pf:r.entry.pf,
+              time:Number(r.entry.time.toFixed(2)),points:r.points,
+              hf:Number(r.hf.toFixed(4)),pct:Number(pct.toFixed(2)),
+              stagePoints:Number((max*pct/100).toFixed(2)),
+              a:r.entry.a,c:r.entry.c,d:r.entry.d,m:r.entry.m,ns:r.entry.ns,pe:r.entry.pe
+            };
+          })
+        });
+        if(!writeJson(STAGES_KEY,stages.slice(0,STAGE_LIMIT)))return;
+        renderStages();
+        showToast('Stage gespeichert');
+      }
+      function newStage(){
+        stage.entries.forEach(e=>{e.time=0;ZONES.forEach(z=>{e[z.key]=0})});
+        stage.name='';
+        $('#stageName').value='';
+        $('#stageName').placeholder=defaultStageName();
+        persistDraft();renderEntries();renderResult();
+        showToast('Neue Stage – Schützen bleiben geladen');
+      }
+      function rankRow(o){
+        const tag=o.tag||'div';
+        return '<'+tag+' class="rank-row'+(o.lead?' lead':'')+'"'+(o.attrs||'')+'>'+
+          '<span class="pos">'+o.rank+'</span>'+
+          '<span class="who"><b>'+esc(o.title)+'</b><span>'+o.sub+'</span></span>'+
+          '<span class="hf">'+nf(o.hf,4)+'</span>'+
+          '<span class="pct"><b>'+nf(o.pct,1)+' %</b><span>'+o.aside+'</span></span>'+
+        '</'+tag+'>';
+      }
+      function renderStages(){
+        const stages=readJson(STAGES_KEY,[]);
+        const el=$('#stagesList');
+        if(!stages.length){el.innerHTML='<div class="empty">Noch keine Stage gespeichert.</div>';return}
+        el.innerHTML=stages.map(s=>{
+          const rows=Array.isArray(s.results)?s.results:[];
+          const top=rows[0];
+          return '<details class="stage-card">'+
+            '<summary><div><b>'+esc(s.name)+'</b>'+
+              '<span>'+dateText(s.at)+' · '+rows.length+(rows.length===1?' Schütze':' Schützen')+' · max. '+s.maxPoints+' Pkt</span></div>'+
+              '<em>'+(top?nf(top.hf,4):'—')+'</em>'+
+              '<button class="stage-del" type="button" data-del-stage="'+s.id+'" aria-label="Stage '+esc(s.name)+' löschen">×</button>'+
+            '</summary>'+
+            '<div class="stage-detail">'+rows.map(r=>rankRow({
+              rank:r.rank,title:r.name,hf:r.hf,pct:r.pct,lead:r.rank===1,
+              sub:r.points+' Pkt · '+nf(r.time,2)+' s',
+              aside:nf(r.stagePoints,1)+' Stage-Pkt'
+            })).join('')+'</div>'+
+          '</details>';
+        }).join('');
+      }
+      function deleteStage(id){
+        const stages=readJson(STAGES_KEY,[]).filter(s=>s.id!==id);
+        writeJson(STAGES_KEY,stages);
+        renderStages();
+        showToast('Stage gelöscht');
+      }
+
+      /* ---------- Fortschritt ---------- */
+      function shooterHistory(id){
+        const out=[];
+        for(const s of readJson(STAGES_KEY,[])){
+          if(!Array.isArray(s.results))continue;
+          const r=s.results.find(x=>x.shooterId===id);
+          if(r)out.push({at:s.at,stage:s.name,name:r.name,hf:r.hf,pct:r.pct,rank:r.rank,of:s.results.length,points:r.points,time:r.time});
+        }
+        return out; // neueste zuerst, wie die Stage-Liste
+      }
+      function sparkline(values){
+        const w=300,h=52,pad=5;
+        const min=Math.min(...values), max=Math.max(...values);
+        const span=max-min||1;
+        const pts=values.map((v,i)=>{
+          const x=pad+i*(w-2*pad)/(values.length-1);
+          const y=h-pad-((v-min)/span)*(h-2*pad);
+          return x.toFixed(1)+','+y.toFixed(1);
+        }).join(' ');
+        return '<svg class="spark" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Hit Factor von '+nf(min,4)+' bis '+nf(max,4)+'">'+
+          '<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+      }
+      function statTile(label,value){return '<div class="stat"><span>'+label+'</span><b>'+value+'</b></div>'}
+      function openProgress(shooterId,fallbackName){
+        const rows=shooterHistory(shooterId);
+        const name=shooters.find(s=>s.id===shooterId)?.name||rows[0]?.name||fallbackName||'Schütze';
+        $('#progressName').textContent=name;
+        const body=$('#progressBody');
+        if(!rows.length){
+          $('#progressSub').textContent='Noch nichts gespeichert';
+          body.innerHTML='<div class="empty">Sobald eine Stage mit '+esc(name)+' gespeichert ist, entsteht hier der Verlauf.</div>';
+        }else{
+          const hfs=rows.map(r=>r.hf);
+          const avg=hfs.reduce((a,b)=>a+b,0)/hfs.length;
+          const avgPct=rows.reduce((a,r)=>a+r.pct,0)/rows.length;
+          $('#progressSub').textContent=rows.length+(rows.length===1?' Stage':' Stages');
+          body.innerHTML=
+            '<div class="stat-grid">'+
+              statTile('Bester HF',nf(Math.max(...hfs),4))+
+              statTile('Ø HF',nf(avg,4))+
+              statTile('Ø Prozent',nf(avgPct,1)+' %')+
+              statTile('Stage-Siege',String(rows.filter(r=>r.rank===1).length))+
+            '</div>'+
+            (rows.length>1?'<div class="spark-wrap"><span>Hit Factor über die Zeit</span>'+sparkline([...hfs].reverse())+'</div>':'')+
+            '<div class="rank-list">'+rows.map(r=>rankRow({
+              rank:r.rank,title:r.stage,hf:r.hf,pct:r.pct,lead:r.rank===1,
+              sub:dateShort(r.at)+' · '+r.points+' Pkt · '+nf(r.time,2)+' s',
+              aside:'Platz '+r.rank+'/'+r.of
+            })).join('')+'</div>';
+        }
+        openSheetPanel('progressModal');
+      }
+
+      /* ---------- Sheets der Score-Ansicht ---------- */
+      function openSheetPanel(id){
+        SHEETS.forEach(x=>$('#'+x).classList.remove('show'));
+        $('#'+id).classList.add('show');
+        document.body.classList.add('sheet-open');
+        focusModal(id);
+      }
+      function closeSheetPanel(){
+        SHEETS.forEach(x=>$('#'+x).classList.remove('show'));
+        releaseModal();
+      }
+      function anySheetOpen(){return SHEETS.some(id=>$('#'+id).classList.contains('show'))}
+
+      /* ---------- Ansichtswechsel ---------- */
+      function showView(name){
+        currentView=name;
+        $('#timerView').classList.toggle('hidden',name!=='timer');
+        $('#scoreView').classList.toggle('active',name==='score');
+        setNav(name==='score'?'scoreBtn':'timerBtn');
+        window.scrollTo(0,0);
+      }
+
+      /* ---------- Ereignisse ---------- */
+      function entryFor(el){
+        const card=el.closest('.entry');
+        return card?stage.entries.find(x=>x.id===card.dataset.entry):null;
+      }
+      $('#entryList').addEventListener('click',ev=>{
+        const entry=entryFor(ev.target);
+        if(!entry)return;
+        if(ev.target.closest('.entry-tool.remove')){removeEntry(entry.id);return}
+        if(ev.target.closest('.entry-tool.progress')){openProgress(entry.shooterId,entry.name);return}
+        if(ev.target.closest('.take-time')){takeTimerTime(entry);return}
+        const badge=ev.target.closest('.pf-badge');
+        if(badge){
+          entry.pf=entry.pf==='major'?'minor':'major';
+          const shooter=shooters.find(s=>s.id===entry.shooterId);
+          if(shooter){shooter.pf=entry.pf;writeJson(SHOOTERS_KEY,shooters)}
+          badge.className='pf-badge '+entry.pf;
+          badge.textContent=entry.pf==='major'?'Major':'Minor';
+          updated(entry);
+          return;
+        }
+        const minus=ev.target.closest('.counter-minus');
+        if(minus){
+          const key=minus.closest('.counter').dataset.zone;
+          entry[key]=Math.max(0,entry[key]-1);
+          updated(entry);
+          return;
+        }
+        const main=ev.target.closest('.counter-main');
+        if(main){
+          const key=main.closest('.counter').dataset.zone;
+          entry[key]=Math.min(99,entry[key]+1);
+          updated(entry);
+          if(settings.vibration&&navigator.vibrate)navigator.vibrate(8);
+        }
+      });
+      $('#entryList').addEventListener('input',ev=>{
+        if(!ev.target.matches('.time-input'))return;
+        const entry=entryFor(ev.target);
+        if(!entry)return;
+        const value=Number(String(ev.target.value).replace(',','.'));
+        entry.time=Number.isFinite(value)&&value>0?value:0;
+        updated(entry);
+      });
+      $('#resultList').addEventListener('click',ev=>{
+        const row=ev.target.closest('.rank-row[data-shooter]');
+        if(row)openProgress(row.dataset.shooter);
+      });
+      $('#stagesList').addEventListener('click',ev=>{
+        const del=ev.target.closest('[data-del-stage]');
+        if(!del)return;
+        ev.preventDefault(); // sonst klappt das <details> zusätzlich auf
+        deleteStage(del.dataset.delStage);
+      });
+      $('#shooterPicker').addEventListener('click',ev=>{
+        const del=ev.target.closest('[data-del]');
+        if(del){deleteShooter(del.dataset.del);return}
+        const pick=ev.target.closest('[data-pick]');
+        if(!pick)return;
+        const shooter=shooters.find(s=>s.id===pick.dataset.pick);
+        if(shooter){addEntry(shooter);closeSheetPanel()}
+      });
+      $$('#pfSwitch .pf-opt').forEach(b=>b.onclick=()=>setPf(b.dataset.pf));
+      $('#newShooterName').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();createShooter()}});
+      $('#createShooter').onclick=createShooter;
+      $('#addEntry').onclick=openShooterSheet;
+      $('#stageName').oninput=ev=>{stage.name=ev.target.value;persistDraft()};
+      $('#shotsUp').onclick=()=>{stage.shots=Math.min(MAX_SHOTS,stage.shots+1);persistDraft();renderScore()};
+      $('#shotsDown').onclick=()=>{stage.shots=Math.max(MIN_SHOTS,stage.shots-1);persistDraft();renderScore()};
+      $('#saveStage').onclick=saveStage;
+      $('#newStage').onclick=newStage;
+      $('#openStages').onclick=()=>{renderStages();openSheetPanel('stagesModal')};
+      $('#closeShooter').onclick=closeSheetPanel;
+      $('#closeStages').onclick=closeSheetPanel;
+      $('#closeProgress').onclick=closeSheetPanel;
+      SHEETS.forEach(id=>$('#'+id).addEventListener('click',ev=>{if(ev.target.id===id)closeSheetPanel()}));
+      $('#clearStages').onclick=()=>{
+        localStorage.removeItem(STAGES_KEY);
+        renderStages();
+        showToast('Alle Stages gelöscht');
+      };
+      $('#scoreBtn').onclick=()=>{closePanels();showView('score')};
+
+      function initScore(){
+        shooters=readJson(SHOOTERS_KEY,[]).filter(s=>s&&s.id&&s.name).map(s=>({
+          id:String(s.id),name:String(s.name),pf:s.pf==='major'?'major':'minor'
+        }));
+        loadDraft();
+        $('#stageName').placeholder=defaultStageName();
+        renderEntries();
+        renderScore();
+      }
 
       /* ---------- Start ---------- */
       function init(){
@@ -842,6 +1493,7 @@
         $('#simulateBtn').classList.toggle('show',settings.testButton);
         renderShots();
         renderHistory();
+        initScore();
       }
       init();
     })();

@@ -4,9 +4,43 @@ Shot Timer für Live Fire und Dry Fire. Die App erkennt Schüsse bzw. Trigger-Kl
 über das Mikrofon, misst Draw- und Split-Zeiten und speichert Trainings lokal auf
 dem Gerät.
 
+Dazu kommt eine Hit-Factor-Wertung nach Comstock: mehrere Schützen auf einer
+Stage, Live-Rangliste und ein Verlauf je Schütze, um den Fortschritt zu sehen.
+
 Die Oberfläche ist eine eigenständige Web-App. Für die Stores wird sie mit
 [Capacitor](https://capacitorjs.com) in ein natives Android- und iOS-Projekt
 verpackt, damit der Mikrofonzugriff über die regulären Systemberechtigungen läuft.
+
+## Hit Factor
+
+Die Ansicht *Score* rechnet nach IPSC/USPSA-Comstock:
+
+| | A | C | D | M · NS · PE |
+| --- | --- | --- | --- | --- |
+| **Major** | 5 | 4 | 2 | je −10 |
+| **Minor** | 5 | 3 | 1 | je −10 |
+
+```
+Punkte     = max(0, A·wA + C·wC + D·wD − 10·(M + NS + PE))
+Hit Factor = Punkte / Zeit
+Prozent    = Hit Factor / bester Hit Factor der Stage
+Stage-Pkt  = Prozent · (Schüsse · 5)
+```
+
+Bedienung: *+ Schütze hinzufügen* legt einen Schützen an oder holt einen
+gespeicherten dazu. Das Badge neben dem Namen schaltet zwischen Minor und Major.
+Die Trefferzonen zählt ein Tipp auf die Kachel hoch, das kleine − wieder herunter.
+*Aus Timer* übernimmt die zuletzt im Timer gemessene Zeit und trägt – solange noch
+keine Treffer stehen – die gezählten Schüsse als A ein.
+
+*Stage speichern* legt die Wertung im Verlauf ab, *Neue Stage* leert die Zeiten und
+behält die Schützen für den nächsten Durchgang. Das Diagramm-Symbol in jeder
+Karte und ein Tipp auf eine Zeile der Rangliste öffnen den Fortschritt eines
+Schützen: bester und durchschnittlicher Hit Factor, Stage-Siege und der Verlauf
+als Kurve.
+
+Eine laufende Stage wird nach jeder Eingabe gesichert und übersteht damit auch
+ein Beenden der App durch das System.
 
 ## Aufbau
 
@@ -165,3 +199,6 @@ an App Store Connect übergeben.
   verbessern.
 - Englische Übersetzung. Die Sprachauswahl unter *Mehr* ist bewusst deaktiviert,
   bis sie hinterlegt ist.
+- Match über mehrere Stages. Die Stage-Punkte werden bereits je Stage berechnet
+  und gespeichert; es fehlt die Ansicht, die sie über mehrere Stages summiert.
+- Export der Wertungen, etwa als CSV.

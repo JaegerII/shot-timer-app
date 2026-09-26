@@ -1,6 +1,6 @@
 # Datenschutzerklärung – Shot Timer
 
-**Stand:** 22.09.2026
+**Stand:** 26.09.2026
 **Verantwortlich:** *(Name, Anschrift und E-Mail der verantwortlichen Stelle hier eintragen)*
 
 > **Hinweis:** Dieser Text beschreibt das tatsächliche Verhalten der App zum oben
@@ -33,14 +33,19 @@ erkennen und die Zeiten zu messen.
 Im lokalen Speicher der App (`localStorage` der eingebetteten Web-Ansicht) werden
 abgelegt:
 
-| Schlüssel | Inhalt |
-| --- | --- |
-| `shot-timer-settings-v1` | Einstellungen: Modus, Startverzögerung, Par Time, Durchgänge, Lautstärke, Vibration, Make Ready, Empfindlichkeit und gemessener Rauschpegel je Modus |
-| `shot-timer-history-v2` | Bis zu 50 gespeicherte Trainings mit Zeitstempel, Modus, Drill-Name, Gesamtzeit, Anzahl der Signale und Splits |
+| Schlüssel | Inhalt | Löschen in der App |
+| --- | --- | --- |
+| `shot-timer-settings-v1` | Einstellungen: Modus, Startverzögerung, Par Time, Durchgänge, Lautstärke, Vibration, Make Ready, Empfindlichkeit und gemessener Rauschpegel je Modus | – |
+| `shot-timer-history-v2` | Bis zu 50 gespeicherte Trainings mit Zeitstempel, Modus, Drill-Name, Gesamtzeit, Anzahl der Signale und Splits | *Mehr → Trainingsdaten → Verlauf löschen* |
+| `shot-timer-shooters-v1` | Selbst angelegte Schützen der Hit-Factor-Wertung: frei gewählter Name und Power Factor | *Score → Schütze hinzufügen → ×* je Eintrag |
+| `shot-timer-stages-v1` | Bis zu 100 gespeicherte Stages mit Zeitstempel, Stage-Name und je Schütze Zeit, Trefferzonen, Punkten, Hit Factor, Prozent und Platzierung | *Score → Gespeichert → ×* je Stage oder *Alle Stages löschen* |
+| `shot-timer-stage-draft-v1` | Die gerade laufende, noch nicht gespeicherte Stage, damit sie ein Beenden der App übersteht | wird von *Score → Neue Stage* überschrieben |
 
-Diese Daten verbleiben auf dem Gerät. Sie lassen sich in der App unter
-*Mehr → Trainingsdaten → Verlauf löschen* entfernen und werden beim Deinstallieren
-der App vollständig gelöscht.
+Die Namen der Schützen gibt die nutzende Person selbst ein. Es findet kein
+Abgleich mit Kontakten, Konten oder anderen Quellen statt.
+
+Diese Daten verbleiben auf dem Gerät und werden beim Deinstallieren der App
+vollständig gelöscht.
 
 ## Berechtigungen
 
