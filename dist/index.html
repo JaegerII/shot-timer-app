@@ -137,6 +137,9 @@
     .sound-meter{width:min(100%,300px);height:5px;background:var(--surface-3);border-radius:999px;overflow:hidden}
     .sound-meter i{display:block;height:100%;width:3%;background:linear-gradient(90deg,var(--accent-dark,var(--accent)),var(--accent-fill));border-radius:inherit;transition:width .06s linear}
     .meter-caption{display:flex;justify-content:space-between;width:min(100%,300px);color:var(--faint);font-size:.68rem}
+    .debug{display:grid;grid-template-columns:repeat(2,auto);gap:2px 16px;margin:0;font-family:var(--font-display);font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums;border:1px dashed var(--line);border-radius:10px;padding:7px 11px}
+    .debug[hidden]{display:none}
+    .debug b{color:var(--text);font-weight:700}
     .mic-warn{display:none;align-items:center;gap:7px;color:var(--warm);font-size:.72rem;font-weight:700}
     .mic-warn.show{display:flex}
     .mic-warn svg{width:15px;height:15px;flex:0 0 auto}
@@ -202,6 +205,12 @@
     .option-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
     .option{border:1px solid var(--line);background:var(--surface-2);border-radius:13px;padding:11px 8px;cursor:pointer;font-weight:700;font-size:.84rem}
     .option.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+    .stepper-sheet{display:flex;align-items:center;justify-content:center;gap:18px;padding:6px 0 14px}
+    .step.big{width:56px;height:56px;border-radius:17px;font-size:1.5rem}
+    .stepper-value{font-size:2.6rem;font-weight:850;font-variant-numeric:tabular-nums;min-width:4.5ch;text-align:center}
+    .quick-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+    .quick-row button{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:999px;padding:7px 13px;font-size:.78rem;font-weight:700;cursor:pointer}
+    .quick-row button.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
     .segment{flex:0 0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:13px;padding:4px;margin-bottom:14px}
     .segment button{border:0;background:transparent;border-radius:9px;padding:9px 8px;font-weight:800;font-size:.82rem;color:var(--muted);cursor:pointer}
     .segment button.selected{background:var(--surface-3);color:var(--text)}
@@ -421,6 +430,12 @@
           <div class="last-split" id="lastSplit">Noch keine Aufnahme</div>
           <div class="sound-meter"><i id="soundLevel"></i></div>
           <div class="meter-caption"><span>Umgebung</span><span id="thresholdLabel">Schwelle 36 %</span></div>
+          <p class="debug" id="debugBox" hidden>
+            <span>Peak <b id="dbgPeak">0 %</b></span>
+            <span>Schwelle <b id="dbgThr">0 %</b></span>
+            <span>Treffer <b id="dbgHit">–</b></span>
+            <span>bei <b id="dbgTime">–</b></span>
+          </p>
           <p class="mic-warn" id="micWarn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg><span id="micWarnText"></span></p>
         </div>
 
@@ -514,7 +529,15 @@
     <div class="sheet">
       <div class="sheet-grab"></div>
       <div class="sheet-head"><div><h2 id="sheetTitle">Verzögerung</h2></div><button id="closeModal" aria-label="Schließen">×</button></div>
-      <div class="sheet-body"><div class="option-grid" id="optionGrid"></div></div>
+      <div class="sheet-body">
+        <div class="option-grid" id="optionGrid"></div>
+        <div class="stepper-sheet" id="stepperBox" hidden>
+          <button class="step big" id="sheetDown" type="button" aria-label="Weniger">−</button>
+          <b class="stepper-value" id="sheetValue">0</b>
+          <button class="step big" id="sheetUp" type="button" aria-label="Mehr">+</button>
+        </div>
+        <div class="quick-row" id="quickRow" hidden></div>
+      </div>
       <button class="sheet-action" id="applyOption">ÜBERNEHMEN</button>
     </div>
   </div>
@@ -603,6 +626,7 @@
           <div class="setting-tile"><div><b>Signalton</b><small>Start- und Par-Signal</small></div><div class="tile-control"><select id="volume"><option value="0.35">Leise</option><option value="0.65" selected>Normal</option><option value="1">Laut</option></select></div></div>
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Vibration</b><small>Zusätzliches Startsignal</small></div><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div></div>
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Testtaste</b><small>Treffer ohne Mikrofon eintragen</small></div><button class="toggle" id="testToggle" aria-label="Testtaste" aria-pressed="false"></button></div></div>
+        <div class="setting-tile"><div class="setting-tile-head"><div><b>Messwerte</b><small>Pegel und Schwelle einblenden</small></div><button class="toggle" id="debugToggle" aria-label="Messwerte" aria-pressed="false"></button></div></div>
         </div>
 
         <span class="field-label">Erkennung</span>
@@ -683,6 +707,19 @@
       const HISTORY_LIMIT=50;
       /* Vorlaufzeit, mit der das Startsignal im AudioContext eingeplant wird. */
       const CUE_LEAD=.08;
+      // Erzeugtes Startsignal: kurz und hart, damit die Sperrzeit danach klein bleibt.
+      const BEEP_HZ=2700, BEEP_MS=130, BEEP_ATTACK=.004, BEEP_RELEASE=.03;
+      // Vorlauf der Signaldatei, gemessen: erst nach 110 ms wird sie hörbar.
+      // Gilt nur für den Notweg ohne AudioContext.
+      const FALLBACK_LEAD_MS=110;
+      // Sperrzeit nach dem Startsignal, damit der Piep sich nicht selbst als
+      // Treffer meldet. Nur so lang wie nötig – früher 520 ms, was jeden
+      // Draw unter einer halben Sekunde verworfen hat.
+      const BLANK_MS=BEEP_MS+60;
+      // Par Time: frei waehlbar in halben Sekunden. PAR_TAIL ist der Nachlauf,
+      // nach dem bei mehreren Durchgaengen der naechste startet - die Par-Zeit
+      // selbst beendet die Messung nicht.
+      const PAR_MAX=20, PAR_STEP=.5, PAR_TAIL=2;
 
       const OPTIONS={
         delay:[['random','Zufall 2–4 s'],['1','Fix 1,0 s'],['3','Fix 3,0 s']],
@@ -705,7 +742,7 @@
       let drillDraft=null;
       const DEFAULTS={
         mode:'live',delay:'random',par:0,reps:1,
-        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,
+        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,debug:false,
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
       };
@@ -718,7 +755,7 @@
         return {
           mode:stored.mode==='dry'?'dry':'live',
           delay:OPTIONS.delay.some(o=>o[0]===stored.delay)?stored.delay:DEFAULTS.delay,
-          par:num(stored.par,DEFAULTS.par,0,60),
+          par:num(stored.par,DEFAULTS.par,0,20),
           reps:Math.round(num(stored.reps,DEFAULTS.reps,1,99)),
           theme:['auto','light','dark'].includes(stored.theme)?stored.theme:DEFAULTS.theme,
           volume:num(stored.volume,DEFAULTS.volume,0,1),
@@ -726,6 +763,7 @@
           makeReady:typeof stored.makeReady==='boolean'?stored.makeReady:DEFAULTS.makeReady,
           readySeconds:Math.round(num(stored.readySeconds,DEFAULTS.readySeconds,5,120)),
           testButton:typeof stored.testButton==='boolean'?stored.testButton:DEFAULTS.testButton,
+          debug:typeof stored.debug==='boolean'?stored.debug:DEFAULTS.debug,
           sensitivity:{
             live:Math.round(num(stored.sensitivity?.live,DEFAULTS.sensitivity.live,10,95)),
             dry:Math.round(num(stored.sensitivity?.dry,DEFAULTS.sensitivity.dry,10,95))
@@ -745,7 +783,7 @@
         running:false,counting:false,startAt:0,shots:[],repNow:1,
         lastDetected:0,ignoreUntil:0,runId:0,drillStop:0,drillLabel:null,
         audio:null,analyser:null,stream:null,raf:null,clock:null,wakeLock:null,
-        threshold:0,monitoring:false
+        threshold:0,monitoring:false,audioT0:null,peakMax:0,debugStamp:0
       };
 
       /* ---------- Timer-Verwaltung ---------- */
@@ -818,27 +856,60 @@
           }catch(e){a.muted=false}
         });
       }
-      /* Gibt den performance.now()-Zeitpunkt zurück, an dem der Ton tatsächlich hörbar wird. */
+      /* Startsignal: erzeugter Ton statt Datei.
+         Die frühere Datei begann mit 110 ms Stille – t=0 lag damit vor dem
+         hörbaren Piep und jede Messung war um diesen Betrag zu lang. Ein
+         Oszillator startet exakt zum geplanten Zeitpunkt der AudioContext-Uhr.
+         Kurz gehalten, damit die Sperrzeit danach klein bleibt und auch ein
+         schneller Draw unter einer halben Sekunde messbar ist. */
+      function playBeep(){
+        if(!rt.audio||rt.audio.state!=='running')return null;
+        const when=rt.audio.currentTime+CUE_LEAD;
+        const dauer=BEEP_MS/1000;
+        const osz=rt.audio.createOscillator();
+        const gain=rt.audio.createGain();
+        osz.type='square';
+        osz.frequency.setValueAtTime(BEEP_HZ,when);
+        gain.gain.setValueAtTime(0,when);
+        gain.gain.linearRampToValueAtTime(settings.volume,when+BEEP_ATTACK);
+        gain.gain.setValueAtTime(settings.volume,when+dauer-BEEP_RELEASE);
+        gain.gain.linearRampToValueAtTime(0,when+dauer);
+        osz.connect(gain);gain.connect(rt.audio.destination);
+        osz.start(when);osz.stop(when+dauer+.02);
+        return when;
+      }
+      /* Gibt den performance.now()-Zeitpunkt zurück, an dem der Ton hörbar wird. */
       function playCue(type){
-        const buffer=type==='standby'?standbyBuffer:beepBuffer;
         if(type==='signal'&&settings.vibration&&navigator.vibrate)navigator.vibrate(35);
-        if(rt.audio&&rt.audio.state==='running'&&buffer){
+        const latenz=()=>rt.audio.outputLatency||rt.audio.baseLatency||0;
+
+        if(type==='signal'){
+          const when=playBeep();
+          if(when!==null){
+            rt.audioT0=when+latenz();
+            return performance.now()+(when-rt.audio.currentTime+latenz())*1000;
+          }
+        } else if(rt.audio&&rt.audio.state==='running'&&standbyBuffer){
           const when=rt.audio.currentTime+CUE_LEAD;
           const src=rt.audio.createBufferSource();
           const gain=rt.audio.createGain();
           gain.gain.value=settings.volume;
-          src.buffer=buffer;src.connect(gain);gain.connect(rt.audio.destination);
+          src.buffer=standbyBuffer;src.connect(gain);gain.connect(rt.audio.destination);
           src.start(when);
-          const latency=rt.audio.outputLatency||rt.audio.baseLatency||0;
-          return performance.now()+(when-rt.audio.currentTime+latency)*1000;
+          return performance.now()+(when-rt.audio.currentTime+latenz())*1000;
         }
+
+        // Ohne AudioContext bleibt nur das Audio-Element; dort ist der
+        // Startzeitpunkt ungenau und beim Signal zusätzlich um den Vorlauf
+        // der Datei verschoben.
         const a=$(type==='standby'?'#standbyAudio':'#signalAudio');
         try{
           a.pause();a.currentTime=0;a.volume=settings.volume;
           const p=a.play();
           if(p?.catch)p.catch(()=>showToast('Audiosignal konnte nicht abgespielt werden'));
         }catch(e){}
-        return performance.now();
+        rt.audioT0=null;
+        return performance.now()+(type==='signal'?FALLBACK_LEAD_MS:0);
       }
 
       /* ---------- Mikrofon ---------- */
@@ -884,11 +955,18 @@
       }
 
       /* ---------- Pegel und Erkennung ---------- */
+      /* Die Schwelle wächst aus dem gemessenen Rauschpegel: der Regler legt
+         nur fest, wie weit darüber ausgelöst wird. Vorher stand ein fester
+         Grundwert davor, den das Kalibrieren nur anheben konnte – an einem
+         leisen Stand hatte es deshalb gar keine Wirkung. */
+      const FAKTOR_MAX=14, FAKTOR_MIN=1.8;
       function currentThreshold(){
-        const sens=(100-settings.sensitivity[settings.mode])/100;
+        const s=settings.sensitivity[settings.mode];                 // 10..95
+        const anteil=(s-10)/85;                                      // 0..1
+        const faktor=FAKTOR_MAX-anteil*(FAKTOR_MAX-FAKTOR_MIN);
         const floor=settings.noiseFloor[settings.mode];
-        const base=settings.mode==='dry'?.025+sens*.22:.08+sens*.48;
-        return Math.max(floor*(settings.mode==='dry'?2.2:5),base);
+        const minimum=settings.mode==='dry'?.012:.03;
+        return Math.max(minimum,Math.min(.95,floor*faktor));
       }
       function startMonitor(){
         if(rt.monitoring||!rt.analyser)return;
@@ -909,11 +987,21 @@
         for(const v of data){const n=Math.abs((v-128)/128);sum+=n*n;if(n>peak)peak=n}
         const rms=Math.sqrt(sum/data.length);
         $('#soundLevel').style.width=Math.min(100,Math.max(2,rms*420))+'%';
+        if(settings.debug){
+          if(peak>rt.peakMax)rt.peakMax=peak;
+          const jetzt=performance.now();
+          if(jetzt-rt.debugStamp>100){
+            rt.debugStamp=jetzt;
+            $('#dbgPeak').textContent=Math.round(rt.peakMax*100)+' %';
+            $('#dbgThr').textContent=Math.round(rt.threshold*100)+' %';
+            rt.peakMax=0;
+          }
+        }
         if(rt.counting){
           const lock=settings.mode==='dry'?170:85;
           const now=performance.now();
           if(now>rt.ignoreUntil&&peak>rt.threshold&&now-rt.lastDetected>lock){
-            recordShot(now);
+            recordShot(now,peak);
             rt.lastDetected=now;
           }
         }
@@ -972,14 +1060,26 @@
           const t0=playCue('signal');
           rt.startAt=t0;
           rt.lastDetected=t0;
-          rt.ignoreUntil=t0+520;
+          rt.ignoreUntil=t0+BLANK_MS;
           rt.counting=true;
           $('#stateLabel').textContent='GO';
           rt.clock=requestAnimationFrame(tick);
           if(settings.par>0){
+            // Par ist nur ein Signal: die Messung läuft weiter, ein Treffer
+            // danach wird weiter erfasst.
             later(()=>{
-              if(rt.running&&rt.counting&&rt.runId===runId){playCue('signal');finishRep(runId,true)}
+              if(rt.running&&rt.counting&&rt.runId===runId){
+                playCue('signal');
+                $('#stateLabel').textContent='NACH PAR';
+              }
             },settings.par*1000+(t0-performance.now()));
+            // Bei mehreren Durchgängen muss der Lauf trotzdem enden, sonst
+            // startet der nächste nie. Einzelne Durchgänge laufen bis STOP.
+            if(settings.reps>1){
+              later(()=>{
+                if(rt.running&&rt.counting&&rt.runId===runId)finishRep(runId,true);
+              },(settings.par+PAR_TAIL)*1000+(t0-performance.now()));
+            }
           }
         },getDelay()*1000);
       }
@@ -988,10 +1088,14 @@
         renderTime((now-rt.startAt)/1000);
         rt.clock=requestAnimationFrame(tick);
       }
-      function recordShot(now=performance.now()){
+      function recordShot(now=performance.now(),peak=null){
         if(!rt.counting)return;
         const t=(now-rt.startAt)/1000;
         if(t<.05)return;
+        if(settings.debug){
+          $('#dbgHit').textContent=peak===null?'manuell':Math.round(peak*100)+' %';
+          $('#dbgTime').textContent=t.toFixed(3)+' s';
+        }
         const prev=rt.shots.length?rt.shots[rt.shots.length-1].time:0;
         const split=t-prev;
         rt.shots.push({time:t,split});
@@ -1189,19 +1293,55 @@
         if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
         else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
       }
+      // Par und Durchgänge sind frei einstellbar, die Verzögerung bleibt
+      // eine Auswahl – zufällig und fest sind keine Punkte einer Skala.
+      const STEPPER={
+        par:{min:0,max:PAR_MAX,step:PAR_STEP,einheit:' s',aus:'Aus',schnell:[0,1,1.5,2,3,5]},
+        reps:{min:1,max:99,step:1,einheit:'',schnell:[1,2,3,5,10,20]}
+      };
+      function stepperText(key,wert){
+        const s=STEPPER[key];
+        if(s.aus&&wert<=0)return s.aus;
+        return (s.step<1?de(wert):String(wert))+s.einheit;
+      }
+      function renderStepper(){
+        const s=STEPPER[pendingKey];
+        if(!s)return;
+        const wert=Number(pendingValue);
+        $('#sheetValue').textContent=stepperText(pendingKey,wert);
+        $$('#quickRow button').forEach(b=>b.classList.toggle('selected',Number(b.dataset.quick)===wert));
+      }
       function openSheet(key){
         pendingKey=key;pendingValue=String(settings[key]);
-        const titles={delay:'Startverzögerung',par:'Par Time',reps:'Wiederholungen'};
+        const titles={delay:'Startverzögerung',par:'Par Time',reps:'Durchgänge'};
         $('#sheetTitle').textContent=titles[key];
-        $('#optionGrid').innerHTML=OPTIONS[key].map(o=>
-          '<button class="option '+(o[0]===pendingValue?'selected':'')+'" data-value="'+o[0]+'">'+o[1]+'</button>'
-        ).join('');
-        $$('#optionGrid .option').forEach(b=>b.onclick=()=>{
-          $$('#optionGrid .option').forEach(x=>x.classList.remove('selected'));
-          b.classList.add('selected');
-          pendingValue=b.dataset.value;
-        });
+        const s=STEPPER[key];
+        $('#stepperBox').hidden=!s;
+        $('#quickRow').hidden=!s;
+        $('#optionGrid').hidden=!!s;
+        if(s){
+          $('#quickRow').innerHTML=s.schnell.map(w=>
+            '<button type="button" data-quick="'+w+'">'+stepperText(key,w)+'</button>').join('');
+          $$('#quickRow button').forEach(b=>b.onclick=()=>{pendingValue=b.dataset.quick;renderStepper()});
+          renderStepper();
+        }else{
+          $('#optionGrid').innerHTML=OPTIONS[key].map(o=>
+            '<button class="option '+(o[0]===pendingValue?'selected':'')+'" data-value="'+o[0]+'">'+o[1]+'</button>'
+          ).join('');
+          $$('#optionGrid .option').forEach(b=>b.onclick=()=>{
+            $$('#optionGrid .option').forEach(x=>x.classList.remove('selected'));
+            b.classList.add('selected');
+            pendingValue=b.dataset.value;
+          });
+        }
         openModalById('settingsModal');
+      }
+      function stepSheet(richtung){
+        const s=STEPPER[pendingKey];
+        if(!s)return;
+        const wert=Math.min(s.max,Math.max(s.min,Number(pendingValue)+richtung*s.step));
+        pendingValue=String(Number(wert.toFixed(2)));
+        renderStepper();
       }
       function applySheet(){
         settings[pendingKey]=pendingKey==='delay'?pendingValue:Number(pendingValue);
@@ -1372,6 +1512,8 @@
       $('#saveSession').onclick=saveSession;
       $$('[data-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.open));
       $('#applyOption').onclick=applySheet;
+      $('#sheetUp').onclick=()=>stepSheet(1);
+      $('#sheetDown').onclick=()=>stepSheet(-1);
       $('#timerBtn').onclick=()=>{closeModals();showView('timer')};
       $('#drillsBtn').onclick=()=>openModalById('drillsModal');
       $('#historyBtn').onclick=()=>{closeModals();showView('history')};
@@ -1395,6 +1537,12 @@
         settings.testButton=!settings.testButton;
         setToggle(e.currentTarget,settings.testButton);
         $('#simulateBtn').hidden=!settings.testButton;
+        saveSettings();
+      };
+      $('#debugToggle').onclick=e=>{
+        settings.debug=!settings.debug;
+        setToggle(e.currentTarget,settings.debug);
+        $('#debugBox').hidden=!settings.debug;
         saveSettings();
       };
       $('#clearHistory').onclick=()=>{
@@ -1908,6 +2056,8 @@
         setToggle($('#makeReady'),settings.makeReady);
         setToggle($('#vibration'),settings.vibration);
         setToggle($('#testToggle'),settings.testButton);
+        setToggle($('#debugToggle'),settings.debug);
+        $('#debugBox').hidden=!settings.debug;
         $('#simulateBtn').hidden=!settings.testButton;
         renderShots();
         renderHistory();
