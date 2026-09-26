@@ -164,6 +164,8 @@ const targets = [
   ['dist/assets/icon-512.png', 512, { rounded: true }, true],
   ['dist/assets/icon-maskable-512.png', 512, { glyph: 0.76 }, true],
   ['dist/assets/icon-appstore-1024.png', 1024, {}, false],
+  // iOS nimmt fuer den Home-Bildschirm dieses Bild, nicht das Manifest.
+  ['dist/assets/apple-touch-icon.png', 180, { square: true }, false],
   // Quellbilder für @capacitor/assets
   ['assets/icon-only.png', 1024, {}, false],
   ['assets/icon-foreground.png', 1024, { glyph: 0.62, transparent: true }, true],
