@@ -215,7 +215,7 @@
     .stepper-sheet[hidden],.quick-row[hidden],.option-grid[hidden]{display:none}
     #optionGrid:not([hidden])+.stepper-sheet{padding-top:18px}
     .step.big{width:56px;height:56px;border-radius:17px;font-size:1.5rem}
-    .stepper-value{font-size:2.6rem;font-weight:850;font-variant-numeric:tabular-nums;min-width:4.5ch;text-align:center}
+    .stepper-value{font-size:2rem;font-weight:850;font-variant-numeric:tabular-nums;min-width:4.5ch;text-align:center}
     .quick-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
     .quick-row button{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:999px;padding:7px 13px;font-size:.78rem;font-weight:700;cursor:pointer}
     .quick-row button.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
@@ -266,6 +266,9 @@
     .setting-tile small{display:block;color:var(--muted);font-size:.67rem;line-height:1.25;margin-top:2px}
     .tile-control{display:flex;align-items:center;justify-content:flex-end;gap:7px}
     /* 16px ist die Grenze, unterhalb derer iOS beim Antippen hineinzoomt. */
+    .seg-mini{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;width:100%;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:3px}
+    .seg-mini button{border:0;background:transparent;border-radius:7px;min-height:30px;padding:6px 2px;font-weight:800;font-size:.72rem;color:var(--muted);cursor:pointer;font-variant-numeric:tabular-nums}
+    .seg-mini button.selected{background:var(--surface-3);color:var(--text)}
     .tile-control select{min-height:32px;background:var(--sunken);border:1px solid var(--line);border-radius:9px;padding:4px 6px;color:var(--text);font-size:16px}
     .toggle{flex:0 0 auto;width:46px;height:26px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line);padding:2px;cursor:pointer}
     .toggle:after{content:"";display:block;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:.2s}
@@ -633,8 +636,8 @@
 
         <span class="field-label">Signale</span>
         <div class="settings-grid">
-          <div class="setting-tile"><div class="setting-tile-head"><div><b>Make Ready</b><small>Vorbereitungszeit</small></div><button class="toggle" id="makeReady" aria-label="Make Ready" aria-pressed="false"></button></div><div class="tile-control"><select id="readySeconds"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option></select></div></div>
-          <div class="setting-tile"><div><b>Lautstärke</b><small>Start- und Par-Signal</small></div><div class="tile-control"><select id="volume"><option value="0.35">Leise</option><option value="0.65" selected>Normal</option><option value="1">Laut</option></select></div></div>
+          <div class="setting-tile"><div class="setting-tile-head"><div><b>Make Ready</b><small>Vorbereitungszeit</small></div><button class="toggle" id="makeReady" aria-label="Make Ready" aria-pressed="false"></button></div><div class="tile-control"><div class="seg-mini" id="readySeconds" role="radiogroup" aria-label="Vorbereitungszeit"><button type="button" data-v="10">10 s</button><button type="button" data-v="20">20 s</button><button type="button" data-v="30">30 s</button></div></div></div>
+          <div class="setting-tile"><div><b>Lautstärke</b><small>Start- und Par-Signal</small></div><div class="tile-control"><div class="seg-mini" id="volume" role="radiogroup" aria-label="Lautstärke"><button type="button" data-v="0.35">Leise</button><button type="button" data-v="0.65">Normal</button><button type="button" data-v="1">Laut</button></div></div></div>
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Vibration</b><small>Zusätzliches Startsignal</small></div><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div></div>
         </div>
 
@@ -653,7 +656,7 @@
 
         <span class="field-label">Sprache</span>
         <div class="settings-grid">
-          <div class="setting-tile wide"><div class="setting-tile-head"><div><b>Deutsch</b><small>Weitere Sprachen folgen</small></div><select id="langSelect" aria-label="Sprache" disabled><option>Deutsch</option></select></div></div>
+          <div class="setting-tile wide"><div class="setting-tile-head"><div><b>Deutsch</b><small>Weitere Sprachen folgen</small></div></div></div>
         </div>
       </div>
     </div>
@@ -1727,8 +1730,25 @@
 
 
       $('#makeReady').onclick=e=>{settings.makeReady=!settings.makeReady;setToggle(e.currentTarget,settings.makeReady);saveSettings()};
-      $('#readySeconds').onchange=e=>{settings.readySeconds=Number(e.target.value);saveSettings()};
-      $('#volume').onchange=e=>{settings.volume=Number(e.target.value);saveSettings()};
+      // Kleine Segment-Auswahl statt nativer Dropdowns: alle Werte sind auf
+      // einen Blick sichtbar, ein Tipp genügt.
+      function bindSeg(id,key){
+        $$('#'+id+' button').forEach(b=>b.onclick=()=>{
+          settings[key]=Number(b.dataset.v);
+          renderSeg(id,settings[key]);
+          saveSettings();
+        });
+      }
+      function renderSeg(id,wert){
+        $$('#'+id+' button').forEach(b=>{
+          const an=Number(b.dataset.v)===Number(wert);
+          b.classList.toggle('selected',an);
+          b.setAttribute('aria-checked',String(an));
+          b.setAttribute('role','radio');
+        });
+      }
+      bindSeg('readySeconds','readySeconds');
+      bindSeg('volume','volume');
       $('#vibration').onclick=e=>{settings.vibration=!settings.vibration;setToggle(e.currentTarget,settings.vibration);saveSettings()};
       $('#clearHistory').onclick=()=>{
         [HISTORY_KEY,...LEGACY_HISTORY_KEYS].forEach(k=>localStorage.removeItem(k));
@@ -2236,9 +2256,9 @@
         renderProfile();
         renderSensitivity();
         renderQuickSettings();
-        $('#volume').value=String(settings.volume);
+        renderSeg('volume',settings.volume);
         aktualisiereSperrzeit();
-        $('#readySeconds').value=String(settings.readySeconds);
+        renderSeg('readySeconds',settings.readySeconds);
         setToggle($('#makeReady'),settings.makeReady);
         setToggle($('#vibration'),settings.vibration);
         $('#debugBox').hidden=!settings.debug;
