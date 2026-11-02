@@ -1,5 +1,6 @@
 // Svenska – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).sv={
+  "Sprache wählen": "Välj språk",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibrera</b> mäter bakgrundsljudet i 1,5 sekunder och lägger utlösningströskeln strax över. Tryck en gång på banan medan det är tyst – sedan löser varken ventilation eller grannbanor ut av misstag.",
   "Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.": "Under <b>Score</b> skapar du en match och i den hur många stages som helst. För varje stage förs tid och träffzoner in för flera skyttar, och allt sparas direkt. Poäng enligt Power Factor, minus 10 per Miss, No-Shoot och procedurfel. Hit Factor = poäng delat med tid; den bästa på stagen får 100 %. Totalresultatet summerar stagepoängen från alla stages.",
   "LIVE FIRE": "LIVE FIRE",

@@ -1,5 +1,6 @@
 // Čeština – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).cs={
+  "Sprache wählen": "Vyber jazyk",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibrace</b> po dobu 1,5 sekundy měří okolní hluk a nastaví práh spouštění těsně nad něj. Jednou ťukni na střelnici, dokud je ticho – pak už ventilace ani sousední stanoviště nebudou omylem spouštět měření.",
   "Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.": "V sekci <b>Score</b> založíš závod a v něm libovolný počet stage. Na každé stage se zapisuje čas a zásahové zóny více střelců, vše se hned ukládá. Body podle Power Factoru, minus 10 za každý Miss, No-Shoot a procedurální chybu. Hit Factor = body dělené časem; nejlepší na stage má 100 %. Celkové pořadí sčítá body ze všech stage.",
   "LIVE FIRE": "LIVE FIRE",

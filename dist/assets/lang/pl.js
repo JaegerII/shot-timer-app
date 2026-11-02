@@ -1,5 +1,6 @@
 // Polski – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).pl={
+  "Sprache wählen": "Wybierz język",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibracja</b> przez 1,5 sekundy mierzy hałas otoczenia i ustawia próg wyzwalania tuż nad nim. Dotknij raz na strzelnicy, gdy jest cicho – potem wentylacja i sąsiednie stanowiska nie będą już przypadkowo wyzwalać pomiaru.",
   "Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.": "W zakładce <b>Score</b> tworzysz zawody, a w nich dowolną liczbę torów. Na każdym torze wpisujesz czas i strefy trafień kilku zawodników, wszystko zapisuje się od razu. Punkty zależą od Power Factor, minus 10 za każdy Miss, No-Shoot i błąd proceduralny. Hit Factor = punkty podzielone przez czas; najlepszy na torze ma 100 %. Klasyfikacja generalna sumuje punkty ze wszystkich torów.",
   "LIVE FIRE": "LIVE FIRE",
