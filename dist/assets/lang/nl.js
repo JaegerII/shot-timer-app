@@ -1,5 +1,6 @@
 // Nederlands – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).nl={
+  "WEITER": "VERDER",
   "Sprache wählen": "Kies je taal",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibreren</b> meet 1,5 seconde het omgevingsgeluid en legt de triggerdrempel net daarboven. Tik er op de baan één keer op terwijl het stil is – daarna zorgen ventilatie en naastgelegen banen niet meer per ongeluk voor een trigger.",
   "Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.": "Onder <b>Score</b> maak je een match aan met zoveel stages als je wilt. Per stage vul je tijd en scorezones van meerdere schutters in, alles wordt direct opgeslagen. Punten per Power Factor, min 10 per Miss, No-Shoot en procedurele fout. Hit Factor = punten gedeeld door tijd; de beste van de stage is 100 %. Het totaalklassement telt de stagepunten van alle stages op.",

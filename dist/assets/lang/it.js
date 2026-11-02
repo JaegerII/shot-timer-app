@@ -1,5 +1,6 @@
 // Italiano – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).it={
+  "WEITER": "CONTINUA",
   "Sprache wählen": "Scegli la lingua",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Calibra</b> misura per 1,5 secondi il rumore ambientale e imposta la soglia di attivazione appena sopra. Toccalo una volta al poligono quando c'è silenzio – così ventilazione e linee vicine non attivano più il timer per errore.",
   "Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.": "In <b>Score</b> crei un match e al suo interno tutte le stage che vuoi. Per ogni stage inserisci tempo e zone colpite di più tiratori, tutto viene salvato subito. Punti in base al Power Factor, meno 10 per ogni Miss, No-Shoot e penalità procedurale. Hit Factor = punti diviso tempo; il migliore della stage vale 100 %. La classifica generale somma i punti stage di tutte le stage.",
