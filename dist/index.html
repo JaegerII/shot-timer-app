@@ -142,9 +142,10 @@
     .debug{display:grid;grid-template-columns:repeat(2,auto);gap:2px 16px;margin:0;font-family:var(--font-display);font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums;border:1px dashed var(--line);border-radius:10px;padding:7px 11px}
     .debug[hidden]{display:none}
     .debug b{color:var(--text);font-weight:700}
-    .mic-warn{display:none;align-items:center;gap:7px;color:var(--warm);font-size:.72rem;font-weight:700}
+    /* Mikrofon-Hinweis als ruhige Karte statt loser roter Zeile. */
+    .mic-warn{display:none;align-items:center;gap:11px;width:min(100%,330px);margin:6px auto 0;padding:10px 14px 10px 10px;border-radius:14px;background:rgba(222,108,81,.1);border:1px solid rgba(222,108,81,.32);color:var(--text);font-size:.74rem;font-weight:650;line-height:1.35;text-align:left}
     .mic-warn.show{display:flex}
-    .mic-warn svg{width:15px;height:15px;flex:0 0 auto}
+    .mic-warn svg{width:30px;height:30px;flex:0 0 auto;padding:7px;border-radius:9px;background:rgba(222,108,81,.18);color:var(--warm)}
 
     /* Letzte Splits als Streifen; der volle Verlauf liegt im Sheet dahinter. */
     .splits{flex:0 0 auto;display:flex;gap:5px;align-items:center;width:100%;border:1px dashed var(--line);background:var(--surface-2);border-radius:13px;padding:7px 8px;cursor:pointer;min-height:44px;text-align:left}
