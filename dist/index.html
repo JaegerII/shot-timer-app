@@ -212,6 +212,8 @@
     .option{border:1px solid var(--line);background:var(--surface-2);border-radius:13px;padding:11px 8px;cursor:pointer;font-weight:700;font-size:.84rem}
     .option.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
     .stepper-sheet{display:flex;align-items:center;justify-content:center;gap:18px;padding:6px 0 14px}
+    .stepper-sheet[hidden],.quick-row[hidden],.option-grid[hidden]{display:none}
+    #optionGrid:not([hidden])+.stepper-sheet{padding-top:18px}
     .step.big{width:56px;height:56px;border-radius:17px;font-size:1.5rem}
     .stepper-value{font-size:2.6rem;font-weight:850;font-variant-numeric:tabular-nums;min-width:4.5ch;text-align:center}
     .quick-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
@@ -633,10 +635,7 @@
         <div class="settings-grid">
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Make Ready</b><small>Vorbereitungszeit</small></div><button class="toggle" id="makeReady" aria-label="Make Ready" aria-pressed="false"></button></div><div class="tile-control"><select id="readySeconds"><option value="10">10 s</option><option value="20">20 s</option><option value="30">30 s</option></select></div></div>
           <div class="setting-tile"><div><b>Lautstärke</b><small>Start- und Par-Signal</small></div><div class="tile-control"><select id="volume"><option value="0.35">Leise</option><option value="0.65" selected>Normal</option><option value="1">Laut</option></select></div></div>
-        <div class="setting-tile"><div><b>Startton</b><small>Kurz sperrt das Mikrofon nur 190 statt 430 ms</small></div><div class="tile-control"><select id="beepStyle"><option value="original">Original</option><option value="kurz">Kurz</option></select></div></div>
           <div class="setting-tile"><div class="setting-tile-head"><div><b>Vibration</b><small>Zusätzliches Startsignal</small></div><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div></div>
-          <div class="setting-tile"><div class="setting-tile-head"><div><b>Testtaste</b><small>Treffer ohne Mikrofon eintragen</small></div><button class="toggle" id="testToggle" aria-label="Testtaste" aria-pressed="false"></button></div></div>
-        <div class="setting-tile"><div class="setting-tile-head"><div><b>Messwerte</b><small>Pegel und Schwelle einblenden</small></div><button class="toggle" id="debugToggle" aria-label="Messwerte" aria-pressed="false"></button></div></div>
         </div>
 
         <span class="field-label">Erkennung</span>
@@ -650,7 +649,7 @@
           <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
         </div>
         <button class="ghost-btn wide" id="calibrateText" type="button" style="margin-top:12px">Jetzt kalibrieren</button>
-        <p class="tip"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11.5v4.5M12 8h.01" stroke-linecap="round"/></svg><span><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
+        <p class="tip"><span><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
 
         <span class="field-label">Sprache</span>
         <div class="settings-grid">
@@ -749,13 +748,15 @@
       // beschnittenen Tons; der Wert hier gilt, bis die Datei geladen ist.
       const BLANK_MARGIN_MS=50;
       const BLANK_MS=BEEP_MS+BLANK_MARGIN_MS;
-      // Par Time: frei waehlbar in halben Sekunden. PAR_TAIL ist der Nachlauf,
+      // Par Time: frei waehlbar in Zehntelsekunden. PAR_TAIL ist der Nachlauf,
       // nach dem bei mehreren Durchgaengen der naechste startet - die Par-Zeit
       // selbst beendet die Messung nicht.
-      const PAR_MAX=20, PAR_STEP=.5, PAR_TAIL=2;
+      const PAR_MAX=20, PAR_STEP=.1, PAR_TAIL=2;
+      // Startverzögerung: zufällig 2–4 s oder eine selbst gewählte feste Zeit.
+      const DELAY_MAX=10;
 
       const OPTIONS={
-        delay:[['random','Zufall 2–4 s'],['1','Fix 1,0 s'],['3','Fix 3,0 s']],
+        delay:[['random','Zufall 2–4 s'],['manual','Manuell']],
         par:[['0','Aus'],['1.5','1,50 s'],['2','2,00 s']],
         reps:[['1','1 Durchgang'],['5','5 Durchgänge'],['10','10 Durchgänge']]
       };
@@ -774,8 +775,8 @@
       let customDrills=[];
       let drillDraft=null;
       const DEFAULTS={
-        mode:'live',delay:'random',par:0,reps:1,
-        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,testButton:false,debug:false,drySeen:false,beep:'original',
+        mode:'live',delay:'random',delayManual:2,par:0,reps:1,
+        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,debug:false,drySeen:false,beep:'kurz',
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
       };
@@ -787,7 +788,10 @@
         const num=(v,fallback,min,max)=>{const n=Number(v);return Number.isFinite(n)&&n>=min&&n<=max?n:fallback};
         return {
           mode:stored.mode==='dry'?'dry':'live',
-          delay:OPTIONS.delay.some(o=>o[0]===stored.delay)?stored.delay:DEFAULTS.delay,
+          // 'random' oder eine feste Zeit in Sekunden als Zeichenkette.
+          delay:typeof stored.delay==='string'&&stored.delay.trim()!==''&&Number.isFinite(Number(stored.delay))
+            ?String(num(stored.delay,DEFAULTS.delayManual,0,DELAY_MAX)):DEFAULTS.delay,
+          delayManual:num(stored.delayManual??stored.delay,DEFAULTS.delayManual,0,DELAY_MAX),
           par:num(stored.par,DEFAULTS.par,0,20),
           reps:Math.round(num(stored.reps,DEFAULTS.reps,1,99)),
           theme:['auto','light','dark'].includes(stored.theme)?stored.theme:DEFAULTS.theme,
@@ -795,10 +799,11 @@
           vibration:typeof stored.vibration==='boolean'?stored.vibration:DEFAULTS.vibration,
           makeReady:typeof stored.makeReady==='boolean'?stored.makeReady:DEFAULTS.makeReady,
           readySeconds:Math.round(num(stored.readySeconds,DEFAULTS.readySeconds,5,120)),
-          testButton:typeof stored.testButton==='boolean'?stored.testButton:DEFAULTS.testButton,
-          debug:typeof stored.debug==='boolean'?stored.debug:DEFAULTS.debug,
+          // Testtaste, Messwerte und Startton-Auswahl gibt es nicht mehr in den
+          // Einstellungen. Alte gespeicherte Werte werden bewusst ignoriert.
+          debug:DEFAULTS.debug,
           drySeen:typeof stored.drySeen==='boolean'?stored.drySeen:DEFAULTS.drySeen,
-          beep:stored.beep==='kurz'?'kurz':DEFAULTS.beep,
+          beep:DEFAULTS.beep,
           sensitivity:{
             live:Math.round(num(stored.sensitivity?.live,DEFAULTS.sensitivity.live,10,95)),
             dry:Math.round(num(stored.sensitivity?.dry,DEFAULTS.sensitivity.dry,10,95))
@@ -1031,9 +1036,9 @@
         rt.stream=null;rt.analyser=null;
         setMicState('off','');
       }
+      // Ohne Mikrofon bleibt nur das Eintragen von Hand: dann erscheint die
+      // Testtaste neben START, nur für diese Sitzung.
       function forceTestButton(){
-        settings.testButton=true;saveSettings();
-        setToggle($('#testToggle'),true);
         $('#simulateBtn').hidden=false;
       }
 
@@ -1279,7 +1284,7 @@
         renderThreshold();
       }
       function renderQuickSettings(){
-        $('#delayValue').textContent=OPTIONS.delay.find(o=>o[0]===settings.delay)?.[1]||settings.delay;
+        $('#delayValue').textContent=settings.delay==='random'?'Zufall 2–4 s':de(Number(settings.delay))+' s';
         $('#parValue').textContent=settings.par?de(settings.par)+' s':'Aus';
         $('#repsValue').textContent=settings.reps===1?'1 Durchgang':settings.reps+' Durchgänge';
       }
@@ -1384,7 +1389,7 @@
           ['Treffer',String(lauf.count)],
           ['Bester Split',typeof lauf.best==='number'?lauf.best.toFixed(2)+' s':'–'],
           ['Par Time',lauf.par?de(lauf.par)+' s':'Aus'],
-          ['Verzögerung',lauf.delay==='random'?'Zufall 2–4 s':'Fix '+de(Number(lauf.delay))+' s']
+          ['Verzögerung',lauf.delay==='random'?'Zufall 2–4 s':de(Number(lauf.delay))+' s']
         ];
         $('#runDetailBody').innerHTML=
           '<div class="stat-grid">'+fakten.map(([k,v])=>statTile(k,v)).join('')+'</div>'+
@@ -1436,8 +1441,10 @@
       // Par und Durchgänge sind frei einstellbar, die Verzögerung bleibt
       // eine Auswahl – zufällig und fest sind keine Punkte einer Skala.
       const STEPPER={
-        par:{min:0,max:PAR_MAX,step:PAR_STEP,einheit:' s',aus:'Aus',schnell:[0,1,1.5,2,3,5]},
-        reps:{min:1,max:99,step:1,einheit:'',schnell:[1,2,3,5,10,20]}
+        par:{min:0,max:PAR_MAX,step:PAR_STEP,einheit:' s',aus:'Aus',schnell:[]},
+        reps:{min:1,max:99,step:1,einheit:'',schnell:[]},
+        // Verzögerung: erst die Wahl Zufall/Manuell, nur bei Manuell der Regler.
+        delay:{min:0,max:DELAY_MAX,step:.1,einheit:' s',schnell:[],wahl:true}
       };
       function stepperText(key,wert){
         const s=STEPPER[key];
@@ -1457,9 +1464,26 @@
         $('#sheetTitle').textContent=titles[key];
         const s=STEPPER[key];
         $('#stepperBox').hidden=!s;
-        $('#quickRow').hidden=!s;
-        $('#optionGrid').hidden=!!s;
-        if(s){
+        $('#quickRow').hidden=!s||!s.schnell.length;
+        $('#optionGrid').hidden=!!s&&!s.wahl;
+        $('#optionGrid').style.gridTemplateColumns='';
+        if(s&&s.wahl){
+          const waehle=wert=>{
+            pendingValue=wert==='random'?'random':String(settings.delayManual);
+            const manuell=pendingValue!=='random';
+            $$('#optionGrid .option').forEach(b=>b.classList.toggle('selected',(b.dataset.value==='manual')===manuell));
+            $('#stepperBox').hidden=!manuell;
+            if(manuell)renderStepper();
+          };
+          $('#optionGrid').style.gridTemplateColumns='repeat(2,1fr)';
+          $('#optionGrid').innerHTML=OPTIONS[key].map(o=>
+            '<button class="option" type="button" data-value="'+o[0]+'">'+o[1]+'</button>').join('');
+          $$('#optionGrid .option').forEach(b=>b.onclick=()=>waehle(b.dataset.value));
+          // Beim Öffnen die gespeicherte feste Zeit zeigen, nicht den Merkwert.
+          const fest=settings.delay!=='random';
+          waehle(fest?'manual':'random');
+          if(fest){pendingValue=settings.delay;renderStepper()}
+        }else if(s){
           $('#quickRow').innerHTML=s.schnell.map(w=>
             '<button type="button" data-quick="'+w+'">'+stepperText(key,w)+'</button>').join('');
           $$('#quickRow button').forEach(b=>b.onclick=()=>{pendingValue=b.dataset.quick;renderStepper()});
@@ -1478,13 +1502,38 @@
       }
       function stepSheet(richtung){
         const s=STEPPER[pendingKey];
-        if(!s)return;
-        const wert=Math.min(s.max,Math.max(s.min,Number(pendingValue)+richtung*s.step));
+        if(!s||pendingValue==='random')return;
+        const roh=Math.round((Number(pendingValue)+richtung*s.step)/s.step)*s.step;
+        const wert=Math.min(s.max,Math.max(s.min,roh));
         pendingValue=String(Number(wert.toFixed(2)));
         renderStepper();
       }
+      // Gedrückt halten zählt weiter, erst langsam, dann schneller – bei
+      // Zehntelschritten wäre der Weg zu 5,00 s sonst 50 einzelne Tipps.
+      function holdStep(btn,richtung){
+        let warte=null,takt=null;
+        const stop=()=>{clearTimeout(warte);clearInterval(takt);warte=takt=null};
+        btn.addEventListener('pointerdown',e=>{
+          e.preventDefault();
+          stop();
+          stepSheet(richtung);
+          const start=performance.now();
+          warte=setTimeout(()=>{
+            takt=setInterval(()=>{
+              stepSheet(richtung);
+              if(performance.now()-start>2000){clearInterval(takt);takt=setInterval(()=>stepSheet(richtung),35)}
+            },90);
+          },400);
+        });
+        ['pointerup','pointerleave','pointercancel'].forEach(t=>btn.addEventListener(t,stop));
+        // Tastatur und Screenreader lösen nur click aus, ohne pointerdown.
+        btn.addEventListener('click',e=>{if(e.detail===0)stepSheet(richtung)});
+      }
       function applySheet(){
-        settings[pendingKey]=pendingKey==='delay'?pendingValue:Number(pendingValue);
+        if(pendingKey==='delay'){
+          settings.delay=pendingValue;
+          if(pendingValue!=='random')settings.delayManual=Number(pendingValue);
+        }else settings[pendingKey]=Number(pendingValue);
         saveSettings();
         renderQuickSettings();
         closeModals();
@@ -1655,8 +1704,8 @@
       $('#simulateBtn').onclick=()=>rt.counting?recordShot():showToast('Timer zuerst starten');
       $$('[data-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.open));
       $('#applyOption').onclick=applySheet;
-      $('#sheetUp').onclick=()=>stepSheet(1);
-      $('#sheetDown').onclick=()=>stepSheet(-1);
+      holdStep($('#sheetUp'),1);
+      holdStep($('#sheetDown'),-1);
       $('#timerBtn').onclick=()=>{closeModals();showView('timer')};
       $('#drillsBtn').onclick=()=>openModalById('drillsModal');
       $('#historyBtn').onclick=()=>{closeModals();showView('history')};
@@ -1680,20 +1729,7 @@
       $('#makeReady').onclick=e=>{settings.makeReady=!settings.makeReady;setToggle(e.currentTarget,settings.makeReady);saveSettings()};
       $('#readySeconds').onchange=e=>{settings.readySeconds=Number(e.target.value);saveSettings()};
       $('#volume').onchange=e=>{settings.volume=Number(e.target.value);saveSettings()};
-      $('#beepStyle').onchange=e=>{settings.beep=e.target.value;aktualisiereSperrzeit();saveSettings()};
       $('#vibration').onclick=e=>{settings.vibration=!settings.vibration;setToggle(e.currentTarget,settings.vibration);saveSettings()};
-      $('#testToggle').onclick=e=>{
-        settings.testButton=!settings.testButton;
-        setToggle(e.currentTarget,settings.testButton);
-        $('#simulateBtn').hidden=!settings.testButton;
-        saveSettings();
-      };
-      $('#debugToggle').onclick=e=>{
-        settings.debug=!settings.debug;
-        setToggle(e.currentTarget,settings.debug);
-        $('#debugBox').hidden=!settings.debug;
-        saveSettings();
-      };
       $('#clearHistory').onclick=()=>{
         [HISTORY_KEY,...LEGACY_HISTORY_KEYS].forEach(k=>localStorage.removeItem(k));
         renderHistory();
@@ -2201,15 +2237,12 @@
         renderSensitivity();
         renderQuickSettings();
         $('#volume').value=String(settings.volume);
-        $('#beepStyle').value=settings.beep;
         aktualisiereSperrzeit();
         $('#readySeconds').value=String(settings.readySeconds);
         setToggle($('#makeReady'),settings.makeReady);
         setToggle($('#vibration'),settings.vibration);
-        setToggle($('#testToggle'),settings.testButton);
-        setToggle($('#debugToggle'),settings.debug);
         $('#debugBox').hidden=!settings.debug;
-        $('#simulateBtn').hidden=!settings.testButton;
+        $('#simulateBtn').hidden=true;
         renderShots();
         renderHistory();
         initScore();
