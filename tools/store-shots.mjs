@@ -1,12 +1,13 @@
 // Erzeugt die App-Store-Screenshots aus store/shots.html: fünf Motive je Sprache,
-// 1320 x 2868 px (iPhone 6,9"). Start: node tools/store-shots.mjs [de,en]
+// 1320 x 2868 px (iPhone 6,9"). Start: node tools/store-shots.mjs [en]
+// Standard ist ein englischer Satz; Apple nutzt ihn für alle Store-Sprachen.
 // Ausgabe: store/screenshots/<sprache>/<nr>.png
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer-core';
 
-const LANGS = (process.argv[2] || 'de,en').split(',');
+const LANGS = (process.argv[2] || 'en').split(',');
 const PORT = 8139;
 const CHROME = [
   process.env.CHROME_PATH,
