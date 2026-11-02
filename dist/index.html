@@ -747,8 +747,10 @@
       const HISTORY_LIMIT=50;
       /* Vorlaufzeit, mit der das Startsignal im AudioContext eingeplant wird. */
       const CUE_LEAD=.08;
-      // Erzeugtes Startsignal: kurz und hart, damit die Sperrzeit danach klein bleibt.
-      const BEEP_HZ=2700, BEEP_MS=130, BEEP_ATTACK=.004, BEEP_RELEASE=.03;
+      // Erzeugtes Startsignal: hart und gut hörbar. Das Mikrofon ist für die
+      // Dauer des Tons plus BLANK_MARGIN_MS gesperrt (hier 300 ms) – weit
+      // unter jedem realistischen ersten Schuss.
+      const BEEP_HZ=2700, BEEP_MS=250, BEEP_ATTACK=.004, BEEP_RELEASE=.03;
       // Vorlauf der Signaldatei, gemessen: erst nach 110 ms wird sie hörbar.
       // Gilt nur für den Notweg ohne AudioContext.
       const FALLBACK_LEAD_MS=110;
