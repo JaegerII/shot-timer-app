@@ -1141,7 +1141,7 @@
          während beider Töne nicht hin, sonst zählten sie als Treffer. */
       const PAR_GAP_MS=110;
       function playParSignal(){
-        if(settings.vibration&&navigator.vibrate)navigator.vibrate([35,80,35]);
+        vibrate('double');
         const zweiter=(BEEP_MS+PAR_GAP_MS)/1000;
         if(playBeep()!==null)playBeep(zweiter);
         else{
@@ -1151,9 +1151,23 @@
         }
         rt.ignoreUntil=Math.max(rt.ignoreUntil,performance.now()+CUE_LEAD*1000+2*BEEP_MS+PAR_GAP_MS+BLANK_MARGIN_MS);
       }
+      /* Vibration. Auf dem iPhone kennt der Browser navigator.vibrate nicht; in der
+         App übernimmt das Haptics-Plugin von Capacitor die Taptic Engine. */
+      const HAPTICS=window.Capacitor?.Plugins?.Haptics||null;
+      const CAN_VIBRATE=!!HAPTICS||typeof navigator.vibrate==='function';
+      function vibrate(kind){
+        if(!settings.vibration||!CAN_VIBRATE)return;
+        if(HAPTICS){
+          const stoss=style=>HAPTICS.impact({style}).catch(()=>{});
+          if(kind==='tap')stoss('LIGHT');
+          else{stoss('HEAVY');if(kind==='double')setTimeout(()=>stoss('HEAVY'),BEEP_MS+PAR_GAP_MS)}
+          return;
+        }
+        navigator.vibrate(kind==='tap'?8:kind==='double'?[35,80,35]:35);
+      }
       /* Gibt den performance.now()-Zeitpunkt zurück, an dem der Ton hörbar wird. */
       function playCue(type){
-        if(type==='signal'&&settings.vibration&&navigator.vibrate)navigator.vibrate(35);
+        if(type==='signal')vibrate('strong');
         const latenz=()=>rt.audio.outputLatency||rt.audio.baseLatency||0;
 
         // Der Originalton, vorne und hinten beschnitten. Er startet exakt
@@ -1429,7 +1443,11 @@
       }
 
       /* ---------- Wake Lock ---------- */
+      // In der App hält das native KeepAwake-Plugin den Bildschirm an; die
+      // Browser-Variante (navigator.wakeLock) gilt nur für die Web-App.
+      const KEEP_AWAKE=window.Capacitor?.Plugins?.KeepAwake||null;
       async function requestWakeLock(){
+        if(KEEP_AWAKE){KEEP_AWAKE.keepAwake().catch(()=>{});return}
         if(!('wakeLock' in navigator)||rt.wakeLock)return;
         try{
           rt.wakeLock=await navigator.wakeLock.request('screen');
@@ -1437,6 +1455,7 @@
         }catch(e){}
       }
       function releaseWakeLock(){
+        if(KEEP_AWAKE){KEEP_AWAKE.allowSleep().catch(()=>{});return}
         try{rt.wakeLock?.release?.()}catch(e){}
         rt.wakeLock=null;
       }
@@ -1786,7 +1805,7 @@
         const lautst={0.35:t('Leise'),0.65:t('Normal'),1:t('Laut')};
         $('#lookSummary').textContent=themes[settings.theme]||'';
         $('#signalsSummary').textContent=
-          t('Lautstärke')+' '+(lautst[settings.volume]||t('Normal'))+' · '+t('Vibration')+' '+(settings.vibration?t('an'):t('aus'));
+          t('Lautstärke')+' '+(lautst[settings.volume]||t('Normal'))+(CAN_VIBRATE?' · '+t('Vibration')+' '+(settings.vibration?t('an'):t('aus')):'');
         $('#detectSummary').textContent='Live Fire '+settings.sensitivity.live+' % · Dry Fire '+settings.sensitivity.dry+' %';
         $('#langSummary').textContent=LANGS.find(l=>l[0]===LANG)[1];
       }
@@ -2481,7 +2500,7 @@
           const key=main.closest('.counter').dataset.zone;
           entry[key]=Math.min(99,entry[key]+1);
           updated(entry);
-          if(settings.vibration&&navigator.vibrate)navigator.vibrate(8);
+          vibrate('tap');
         }
       });
       $('#entryList').addEventListener('input',ev=>{
@@ -2564,6 +2583,8 @@
         renderSeg('volume',settings.volume);
         aktualisiereSperrzeit();
         setToggle($('#vibration'),settings.vibration);
+        // Ohne Vibration (z. B. Safari auf dem iPhone) den Schalter gar nicht anbieten.
+        if(!CAN_VIBRATE)$('#vibration').closest('.set-row').style.display='none';
         $('#debugBox').hidden=!settings.debug;
         renderShots();
         renderHistory();
