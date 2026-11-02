@@ -748,9 +748,10 @@
         </div>
 
         <div class="set-page" data-page="detect" data-title="Erkennung und Kalibrierung" hidden>
-          <div class="profile">
-            <div class="profile-icon" id="profileIcon">9</div>
-            <div><b id="profileName">9 mm / Standard</b><span id="profileDesc">Für die meisten Indoor-Stände</span></div>
+          <!-- Schüsse sind laut, Trigger-Klicks leise: beide Modi haben eigene Werte. -->
+          <div class="segment" id="detectSwitch">
+            <button type="button" data-dm="live">Live Fire</button>
+            <button type="button" data-dm="dry">Dry Fire</button>
           </div>
           <div class="range-line">
             <div class="range-head"><span>Empfindlichkeit</span><b id="sensitivityValue">42 %</b></div>
@@ -929,8 +930,8 @@
         reps:[['1','1 Durchgang'],['5','5 Durchgänge'],['10','10 Durchgänge']]
       };
       const PROFILES={
-        live:{icon:'9',name:t('9 mm / Standard'),desc:t('Für die meisten Indoor-Stände'),sensitivity:42},
-        dry:{icon:'DF',name:t('Dry Fire / Striker'),desc:t('Hohe Empfindlichkeit für Trigger-Klicks'),sensitivity:78}
+        live:{sensitivity:42},
+        dry:{sensitivity:78}
       };
       const DEFAULTS={
         mode:'live',delay:'random',delayRandom:true,delayManual:2,par:0,reps:1,
@@ -1273,7 +1274,8 @@
         }
         rt.raf=requestAnimationFrame(monitor);
       }
-      async function calibrate(){
+      // Kalibriert den Grundpegel für einen Modus; ohne Angabe den aktiven.
+      async function calibrate(mode=settings.mode){
         if(rt.running){showToast(t('Erst den Durchgang beenden'));return}
         if(!await ensureMic())return;
         $('#stateLabel').textContent=t('RUHE BITTE');
@@ -1289,7 +1291,7 @@
         const id=setInterval(take,50);
         later(()=>{
           clearInterval(id);
-          settings.noiseFloor[settings.mode]=Math.max(.006,samples.reduce((a,b)=>a+b,0)/(samples.length||1));
+          settings.noiseFloor[mode]=Math.max(.006,samples.reduce((a,b)=>a+b,0)/(samples.length||1));
           saveSettings();
           $('#stateLabel').textContent=t('BEREIT');
           showToast(t('Kalibriert'));
@@ -1463,8 +1465,11 @@
           : t('Noch keine Aufnahme');
         openModalById('runModal');
       }
+      // Die Erkennungsseite kann Live und Dry unabhängig vom aktiven Modus einstellen.
+      let detectMode='live';
       function renderSensitivity(){
-        const value=settings.sensitivity[settings.mode];
+        $$('#detectSwitch button').forEach(b=>b.classList.toggle('selected',b.dataset.dm===detectMode));
+        const value=settings.sensitivity[detectMode];
         $('#sensitivity').value=value;
         $('#sensitivityValue').textContent=value+' %';
       }
@@ -1472,12 +1477,6 @@
         $('#delayValue').textContent=settings.delay==='instant'?t('Instant'):settings.delay==='random'?t('Zufall 1–4 s'):de(Number(settings.delay))+' s';
         $('#parValue').textContent=settings.par?de(settings.par)+' s':t('Aus');
         $('#repsValue').textContent=settings.reps===1?t('1 Durchgang'):t('{0} Durchgänge',settings.reps);
-      }
-      function renderProfile(){
-        const p=PROFILES[settings.mode];
-        $('#profileIcon').textContent=p.icon;
-        $('#profileName').textContent=p.name;
-        $('#profileDesc').textContent=p.desc;
       }
       function setMode(mode){
         // Beim ersten Wechsel auf Dry Fire einmalig auf die Grenzen der
@@ -1489,15 +1488,15 @@
         settings.mode=mode;
         saveSettings();
         $$('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
-        renderProfile();
+        detectMode=mode;
         renderSensitivity();
         reset();
       }
       function updateSensitivity(){
-        settings.sensitivity[settings.mode]=Number($('#sensitivity').value);
+        settings.sensitivity[detectMode]=Number($('#sensitivity').value);
         saveSettings();
         renderSensitivity();
-        if(rt.counting)rt.threshold=currentThreshold();
+        if(rt.counting&&detectMode===settings.mode)rt.threshold=currentThreshold();
       }
 
       /* ---------- Verlauf ---------- */
@@ -1762,8 +1761,8 @@
       $('#sensitivity').oninput=updateSensitivity;
       $('#startBtn').onclick=start;
       $('#resetBtn').onclick=()=>reset();
-      $('#calibrateBtn').onclick=calibrate;
-      $('#calibrateText').onclick=calibrate;
+      $('#calibrateBtn').onclick=()=>calibrate();
+      $('#calibrateText').onclick=()=>calibrate(detectMode);
       $$('[data-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.open));
       $('#applyOption').onclick=applySheet;
       holdStep($('#sheetUp'),1);
@@ -1777,7 +1776,7 @@
         $('#lookSummary').textContent=themes[settings.theme]||'';
         $('#signalsSummary').textContent=
           t('Lautstärke')+' '+(lautst[settings.volume]||t('Normal'))+' · '+t('Vibration')+' '+(settings.vibration?t('an'):t('aus'));
-        $('#detectSummary').textContent=$('#profileName').textContent+' · '+$('#sensitivityValue').textContent;
+        $('#detectSummary').textContent='Live Fire '+settings.sensitivity.live+' % · Dry Fire '+settings.sensitivity.dry+' %';
         $('#langSummary').textContent=LANGS.find(l=>l[0]===LANG)[1];
       }
       // Sprachliste: die Namen stehen immer in der eigenen Sprache.
@@ -1848,10 +1847,15 @@
         $('#moreBody').scrollTop=0;
         settingsSummary();
       }
-      $$('#moreBody [data-go]').forEach(b=>b.onclick=()=>showSettingsPage(b.dataset.go));
+      $$('#moreBody [data-go]').forEach(b=>b.onclick=()=>{
+        // Erkennung öffnet beim aktiven Modus; umschalten geht dort selbst.
+        if(b.dataset.go==='detect'){detectMode=settings.mode;renderSensitivity()}
+        showSettingsPage(b.dataset.go);
+      });
+      $$('#detectSwitch button').forEach(b=>b.onclick=()=>{detectMode=b.dataset.dm;renderSensitivity()});
       $('#moreBack').onclick=()=>showSettingsPage('root');
       // Aus dem Dry-Fire-Hinweis direkt zur Erkennung in den Einstellungen.
-      $('#dryInfoCalibrate').onclick=()=>{showSettingsPage('detect');openModalById('moreModal')};
+      $('#dryInfoCalibrate').onclick=()=>{showSettingsPage('detect');detectMode='dry';renderSensitivity();openModalById('moreModal')};
       $('#moreBtn').onclick=()=>{showSettingsPage('root');openModalById('moreModal')};
       $('#helpBtn').onclick=()=>openModalById('helpModal');
       $('#splitStrip').onclick=openRunSheet;
@@ -2529,7 +2533,7 @@
         applyTheme();
         setMicState('off','');
         $$('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===settings.mode));
-        renderProfile();
+        detectMode=settings.mode;
         renderSensitivity();
         renderQuickSettings();
         renderSeg('volume',settings.volume);
