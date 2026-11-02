@@ -1,0 +1,2 @@
+/* Text der iOS-Abfrage zum Mikrofonzugriff. */
+"NSMicrophoneUsageDescription" = "FORTH TRACE Shot Timer listens through the microphone to detect shots and trigger clicks and measure your times. Nothing is recorded or transmitted.";

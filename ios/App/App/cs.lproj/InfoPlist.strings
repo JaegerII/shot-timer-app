@@ -1,0 +1,2 @@
+/* Text der iOS-Abfrage zum Mikrofonzugriff. */
+"NSMicrophoneUsageDescription" = "FORTH TRACE Shot Timer poslouchá přes mikrofon, aby rozpoznal výstřely a cvaknutí spouště a změřil tvé časy. Nic se nenahrává ani neodesílá.";
