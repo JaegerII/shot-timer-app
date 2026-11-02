@@ -1,7 +1,7 @@
 {
-  "name": "FORTH TRACE Timer",
+  "name": "FORTH TRACE Shot Timer",
   "short_name": "FT Timer",
-  "description": "FORTH TRACE Timer für Live Fire und Dry Fire mit akustischer Schusserkennung.",
+  "description": "FORTH TRACE Shot Timer für Live Fire und Dry Fire mit akustischer Schusserkennung.",
   "lang": "de",
   "dir": "ltr",
   "start_url": ".",

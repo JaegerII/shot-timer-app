@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-title" content="FT Timer">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  <meta name="description" content="FORTH TRACE Timer für Live Fire und Dry Fire.">
-  <title>FORTH TRACE Timer</title>
+  <meta name="description" content="FORTH TRACE Shot Timer für Live Fire und Dry Fire.">
+  <title>FORTH TRACE Shot Timer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1010'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23ff3131' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%23ff3131' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
   <style>
     /* Lokal gebuendelt, damit die App ohne Netz laeuft. SIL OFL 1.1,
@@ -106,7 +106,9 @@
     .topbar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand{font-family:var(--font-display);display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.09em;font-size:.86rem;min-width:0}
     .brand>div:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .brand-mark{flex:0 0 auto;width:34px;height:34px;border-radius:10px;background:var(--accent-fill);display:grid;place-items:center;color:var(--accent-ink);box-shadow:0 0 26px #ff31312e}
+    /* „FORTH TRACE SHOT TIMER“ soll auch auf schmalen iPhones ganz sichtbar sein. */
+    @media(max-width:420px){.brand{font-size:.78rem;letter-spacing:.05em;gap:8px}}
+    .brand-mark{flex:0 0 auto;width:34px;height:34px;border-radius:10px;background:#1c1f1d;border:1px solid #ffffff14;display:grid;place-items:center;color:#fff}
     .top-tools{display:flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:var(--shadow-soft)}
     .tool-btn{width:40px;height:40px;border:0;border-radius:999px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
     .tool-btn:hover{background:var(--surface-3);color:var(--text)}
@@ -204,7 +206,9 @@
     .sheet-head h2{font-family:var(--font-display);margin:0;font-size:1.06rem}
     .sheet-head small{display:block;color:var(--muted);font-size:.7rem;margin-top:3px}
     .sheet-head button{flex:0 0 auto;border:0;background:var(--surface-3);color:var(--text);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:1.1rem;line-height:1}
-    .sheet-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+    /* Nur senkrecht scrollen: auf iOS ließ sich der Inhalt sonst seitlich verschieben. */
+    .sheet-body{flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+    .modal{overflow:hidden;touch-action:pan-y}
     .sheet-foot{flex:0 0 auto;display:flex;justify-content:flex-end;padding-top:12px;margin-top:4px;border-top:1px solid var(--line)}
     .field-label{display:block;color:var(--muted);font-size:.74rem;font-weight:700;margin:16px 0 8px}
     .field-label:first-child{margin-top:0}
@@ -258,6 +262,23 @@
     .shot-row .split{text-align:right;color:var(--muted);font-size:.83rem}
 
     /* ============ Einstellungen ============ */
+    /* Übersicht als Liste, jeder Bereich öffnet eine eigene Unterseite im Sheet. */
+    .set-page[hidden]{display:none}
+    .set-list{background:var(--surface-2);border:1px solid var(--line);border-radius:15px;overflow:hidden}
+    .set-list+.set-list{margin-top:10px}
+    .set-row{width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;font:inherit;text-align:left}
+    .set-row:last-child{border-bottom:0}
+    button.set-row{cursor:pointer}
+    button.set-row:active{background:var(--surface-3)}
+    .set-row.col{flex-direction:column;align-items:stretch;gap:9px}
+    .set-ico{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--surface-3);display:grid;place-items:center;color:var(--accent)}
+    .set-txt{flex:1;min-width:0}
+    .set-txt b{display:block;font-size:.86rem}
+    .set-txt small{display:block;color:var(--muted);font-size:.7rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .set-chev{flex:0 0 auto;color:var(--faint);font-size:1.2rem;line-height:1}
+    .set-row.dim .seg-mini{opacity:.45}
+    .sheet-back{margin-right:8px}
+    .sheet-head .title-wrap{display:flex;align-items:center;min-width:0}
     .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
     .setting-tile{min-height:80px;background:var(--surface-2);border:1px solid var(--line);border-radius:15px;padding:11px;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
     .setting-tile.wide{grid-column:1/-1;min-height:0}
@@ -300,6 +321,16 @@
     .text-field:focus{outline:2px solid var(--accent);outline-offset:1px}
     .text-field::placeholder{color:var(--faint);font-weight:600}
     #stageName{flex:1 1 150px}
+    #matchName{flex:1 1 auto}
+    /* Score: Matches -> Match -> Stage, jede Ebene füllt die Ansicht. */
+    .score-page{flex:1;min-height:0;display:flex;flex-direction:column}
+    .score-page[hidden]{display:none}
+    .panel-head .title-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+    .panel-head .title-text{min-width:0}
+    .panel-head h1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .score-back{flex:0 0 auto;width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-size:1.3rem;line-height:1;cursor:pointer;padding:0}
+    .history-card .chev{color:var(--faint);font-size:1.2rem;margin-left:6px}
+    .ghost-btn.danger{color:var(--danger);border-color:var(--danger)}
     .shots-field{display:flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:4px 6px}
     .shots-field>span{color:var(--muted);font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;padding:0 2px}
     .step{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface-3);color:var(--text);font-weight:800;font-size:1rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
@@ -423,8 +454,8 @@
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="13" r="7"/><path d="M12 6V3M8.5 3h7M12 13l3-2.5"/></svg></div>
-        <div>FORTH TRACE TIMER</div>
+        <div class="brand-mark" aria-hidden="true"><svg viewBox="130 132 760 760" width="24" height="24" fill="none" stroke="currentColor" stroke-width="40" aria-hidden="true"><path d="M 227 466 H 298.8 A 70 70 0 0 0 360.0 429.9 A 265 265 0 1 1 360.0 686.1 A 70 70 0 0 0 298.8 650 H 227" stroke-linecap="round"/><path d="M 162 558 H 357 M 537 201 H 647" stroke-linecap="round"/><path d="M 592 201 V 293"/><path transform="translate(592 558) rotate(-130) scale(0.2679) translate(-83.3 -83)" d="M73.9 0.4L79.1 0.0L91.1 0.1L107.1 3.3L115.1 6.1L123.1 10.0L130.1 14.0L137.0 19.4L142.4 24.4L149.4 32.4L155.4 41.4L159.5 49.4L163.2 59.4L165.3 67.4L166.4 75.4L166.6 82.4L166.4 91.4L164.5 102.4L161.5 112.4L156.4 123.4L153.5 128.4L148.4 135.4L142.1 142.3L135.1 148.7L128.1 153.6L125.1 155.2L124.6 156.4L124.6 417.4L125.1 418.4L133.1 424.8L158.1 443.0L164.6 449.4L165.7 451.4L165.9 453.4L165.1 454.7L155.1 457.1L151.1 459.2L147.7 462.4L144.8 466.4L142.9 471.4L142.7 480.4L144.6 487.4L147.9 492.4L154.6 497.4L154.9 498.4L153.4 530.4L150.4 573.4L146.4 616.4L141.4 659.4L135.4 701.4L129.4 737.4L123.5 768.4L117.4 796.4L111.3 821.4L101.4 857.4L92.4 885.4L85.9 902.4L84.5 906.4L83.1 908.7L79.7 900.4L73.8 884.4L66.8 862.4L55.9 823.4L48.9 794.4L40.9 756.4L33.9 717.4L28.8 684.4L22.8 638.4L18.8 600.4L14.8 552.4L11.7 498.4L19.1 492.2L22.3 487.4L24.3 479.4L24.3 474.4L22.3 467.4L20.5 464.4L16.8 460.4L12.1 457.3L2.1 454.9L0.7 453.4L0.7 452.4L2.7 448.4L8.1 443.1L38.1 421.5L41.6 418.4L42.2 416.4L42.2 156.4L41.1 155.0L37.1 152.6L31.5 148.4L23.7 141.4L13.9 129.4L8.8 120.4L5.7 113.4L3.7 107.4L1.8 100.4L0.8 94.4L0.0 83.4L0.9 71.4L3.8 58.4L5.9 52.4L9.7 44.4L13.7 37.4L18.9 30.4L26.5 22.4L30.1 19.0L35.1 15.1L47.1 8.1L60.1 3.1L73.9 0.4ZM75.1 17.4L83.1 16.9L90.1 17.1L101.1 19.2L107.1 21.1L114.1 24.2L123.1 30.1L130.1 36.0L134.3 40.4L141.4 50.4L145.3 58.4L147.4 64.4L149.4 75.4L149.5 90.4L147.5 101.4L145.5 107.4L142.1 114.4L135.5 124.4L130.0 130.4L124.1 135.8L115.1 141.8L109.1 144.7L103.1 146.9L96.1 148.6L91.1 149.2L84.1 149.7L78.1 149.5L67.1 147.8L58.1 144.9L50.1 140.9L45.1 137.6L36.1 129.9L29.7 122.4L27.0 118.4L21.7 108.4L19.9 103.4L17.8 94.4L16.9 82.4L17.7 72.4L18.9 66.4L21.8 57.4L23.7 53.4L27.9 46.4L30.8 42.4L36.1 36.6L41.1 32.0L51.1 25.0L57.1 22.0L62.1 20.3L70.1 18.1L75.1 17.4ZM81.6 488.4L84.1 488.2L88.1 489.1L90.1 490.7L92.2 493.4L93.4 496.4L94.0 501.4L88.0 726.4L88.3 728.4L86.6 733.4L84.1 737.0L83.1 737.5L80.8 734.4L78.7 729.4L78.4 726.4L72.6 500.4L73.6 495.4L75.0 492.4L78.2 489.4L81.6 488.4Z" fill="currentColor" stroke-width="37" stroke-linejoin="round"/></svg></div>
+        <div>FORTH TRACE SHOT TIMER</div>
       </div>
       <div class="top-tools">
         <button class="tool-btn" id="helpBtn" aria-label="Hilfe" title="Hilfe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4"/><path d="M12 17.5h.01"/></svg></button>
@@ -476,39 +507,71 @@
 
         <div class="card-actions">
           <button class="ghost-btn" id="drillsBtn" type="button">Drills laden</button>
-          <button class="ghost-btn" id="simulateBtn" type="button">Treffer von Hand</button>
         </div>
       </section>
     </main>
 
     <section id="scoreView" class="view-panel" aria-labelledby="scoreTitle">
       <div class="panel-head">
-        <div>
-          <h1 id="scoreTitle">Hit Factor</h1>
-          <p>Zeit und Trefferzonen eintragen – die Wertung entsteht live.</p>
+        <div class="title-wrap">
+          <button class="score-back" id="scoreBack" type="button" aria-label="Zurück" hidden>‹</button>
+          <div class="title-text">
+            <h1 id="scoreTitle">Matches</h1>
+            <p id="scoreSub">Jedes Match enthält seine Stages und eine Gesamtwertung.</p>
+          </div>
         </div>
       </div>
-      <div class="stage-bar">
-        <input id="stageName" class="text-field" type="text" maxlength="40" placeholder="Stage 1" aria-label="Name der Stage">
-        <div class="shots-field">
-          <span>Schüsse</span>
-          <button class="step" id="shotsDown" type="button" aria-label="Weniger Schüsse">−</button>
-          <b class="shots-value" id="shotsValue">12</b>
-          <button class="step" id="shotsUp" type="button" aria-label="Mehr Schüsse">+</button>
-        </div>
-        <span class="max-points" id="maxPoints">max. 60 Punkte</span>
-      </div>
-      <div class="score-scroll">
-        <div id="entryList"></div>
-        <button class="ghost-btn wide" id="addEntry" type="button">+ Schütze hinzufügen</button>
-        <div class="result-block">
-          <div class="result-head"><h2>Wertung</h2><span class="muted-note" id="resultHint"></span></div>
-          <div id="resultList"></div>
+
+      <!-- Ebene 1: alle Matches -->
+      <div class="score-page" id="matchesPage">
+        <div class="score-scroll"><div id="matchList"></div></div>
+        <div class="score-footer">
+          <button class="sheet-action" id="newMatch" type="button">NEUES MATCH</button>
         </div>
       </div>
-      <div class="score-footer">
-        <button class="sheet-action" id="saveStage" type="button">STAGE SPEICHERN</button>
-        <button class="ghost-btn" id="newStage" type="button">Neue Stage</button>
+
+      <!-- Ebene 2: ein Match mit seinen Stages und der Gesamtwertung -->
+      <div class="score-page" id="matchPage" hidden>
+        <div class="stage-bar">
+          <input id="matchName" class="text-field" type="text" maxlength="40" placeholder="Name des Matches" aria-label="Name des Matches">
+        </div>
+        <div class="score-scroll">
+          <div id="stageList"></div>
+          <button class="ghost-btn wide" id="addStage" type="button">+ Neue Stage</button>
+          <div class="result-block">
+            <div class="result-head"><h2>Gesamtwertung</h2><span class="muted-note" id="matchHint"></span></div>
+            <div id="matchResult"></div>
+          </div>
+        </div>
+        <div class="score-footer">
+          <button class="ghost-btn" id="deleteMatch" type="button">Match löschen</button>
+        </div>
+      </div>
+
+      <!-- Ebene 3: eine Stage -->
+      <div class="score-page" id="stagePage" hidden>
+        <div class="stage-bar">
+          <input id="stageName" class="text-field" type="text" maxlength="40" placeholder="Stage 1" aria-label="Name der Stage">
+          <div class="shots-field">
+            <span>Schüsse</span>
+            <button class="step" id="shotsDown" type="button" aria-label="Weniger Schüsse">−</button>
+            <b class="shots-value" id="shotsValue">12</b>
+            <button class="step" id="shotsUp" type="button" aria-label="Mehr Schüsse">+</button>
+          </div>
+          <span class="max-points" id="maxPoints">max. 60 Punkte</span>
+        </div>
+        <div class="score-scroll">
+          <div id="entryList"></div>
+          <button class="ghost-btn wide" id="addEntry" type="button">+ Schütze hinzufügen</button>
+          <div class="result-block">
+            <div class="result-head"><h2>Wertung der Stage</h2><span class="muted-note" id="resultHint"></span></div>
+            <div id="resultList"></div>
+          </div>
+        </div>
+        <div class="score-footer">
+          <button class="sheet-action" id="stageDone" type="button">FERTIG</button>
+          <button class="ghost-btn" id="deleteStage" type="button">Stage löschen</button>
+        </div>
       </div>
     </section>
 
@@ -519,17 +582,11 @@
           <p>Auf diesem Gerät gespeichert – nichts verlässt das Telefon.</p>
         </div>
       </div>
-      <div class="segment" id="historySegment">
-        <button class="selected" data-seg="runs" type="button">Trainings</button>
-        <button data-seg="stages" type="button">Stages</button>
-      </div>
       <div class="view-scroll">
         <div id="historyList"></div>
-        <div id="stagesList" hidden></div>
       </div>
       <div class="view-footer">
         <button id="clearHistory" class="danger-link" type="button">Trainings löschen</button>
-        <button id="clearStages" class="danger-link" type="button" hidden>Alle Stages löschen</button>
       </div>
     </section>
 
@@ -625,38 +682,58 @@
   <div class="modal" id="moreModal" role="dialog" aria-modal="true" aria-labelledby="moreTitle">
     <div class="sheet">
       <div class="sheet-grab"></div>
-      <div class="sheet-head"><div><h2 id="moreTitle">Einstellungen</h2></div><button id="closeMore" aria-label="Schließen">×</button></div>
-      <div class="sheet-body">
-        <span class="field-label">Darstellung</span>
-        <div class="segment" id="themeSwitch">
-          <button data-theme-opt="auto" type="button">Automatisch</button>
-          <button data-theme-opt="light" type="button">Hell</button>
-          <button data-theme-opt="dark" class="selected" type="button">Dunkel</button>
+      <div class="sheet-head"><div class="title-wrap"><button class="sheet-back" id="moreBack" type="button" aria-label="Zurück" hidden>‹</button><h2 id="moreTitle">Einstellungen</h2></div><button id="closeMore" aria-label="Schließen">×</button></div>
+      <div class="sheet-body" id="moreBody">
+        <div class="set-page" data-page="root">
+          <div class="set-list">
+            <button class="set-row" type="button" data-go="look">
+              <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg></span>
+              <span class="set-txt"><b>Darstellung</b><small id="lookSummary">Dunkel</small></span><span class="set-chev" aria-hidden="true">›</span>
+            </button>
+            <button class="set-row" type="button" data-go="signals">
+              <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3l5 4V6L7 10H4Z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></span>
+              <span class="set-txt"><b>Signale</b><small id="signalsSummary">Make Ready aus · Normal · Vibration an</small></span><span class="set-chev" aria-hidden="true">›</span>
+            </button>
+            <button class="set-row" type="button" data-go="detect">
+              <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M18 11a6 6 0 0 1-12 0M12 17v4"/></svg></span>
+              <span class="set-txt"><b>Erkennung und Kalibrierung</b><small id="detectSummary">9 mm / Standard · 42 %</small></span><span class="set-chev" aria-hidden="true">›</span>
+            </button>
+          </div>
+          <div class="set-list">
+            <div class="set-row">
+              <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16M12 4c-2.5 2.5-2.5 13.5 0 16"/></svg></span>
+              <span class="set-txt"><b>Sprache</b><small>Deutsch · weitere Sprachen folgen</small></span>
+            </div>
+          </div>
         </div>
 
-        <span class="field-label">Signale</span>
-        <div class="settings-grid">
-          <div class="setting-tile"><div class="setting-tile-head"><div><b>Make Ready</b><small>Vorbereitungszeit</small></div><button class="toggle" id="makeReady" aria-label="Make Ready" aria-pressed="false"></button></div><div class="tile-control"><div class="seg-mini" id="readySeconds" role="radiogroup" aria-label="Vorbereitungszeit"><button type="button" data-v="10">10 s</button><button type="button" data-v="20">20 s</button><button type="button" data-v="30">30 s</button></div></div></div>
-          <div class="setting-tile"><div><b>Lautstärke</b><small>Start- und Par-Signal</small></div><div class="tile-control"><div class="seg-mini" id="volume" role="radiogroup" aria-label="Lautstärke"><button type="button" data-v="0.35">Leise</button><button type="button" data-v="0.65">Normal</button><button type="button" data-v="1">Laut</button></div></div></div>
-          <div class="setting-tile"><div class="setting-tile-head"><div><b>Vibration</b><small>Zusätzliches Startsignal</small></div><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div></div>
+        <div class="set-page" data-page="look" data-title="Darstellung" hidden>
+          <div class="segment" id="themeSwitch">
+            <button data-theme-opt="auto" type="button">Automatisch</button>
+            <button data-theme-opt="light" type="button">Hell</button>
+            <button data-theme-opt="dark" class="selected" type="button">Dunkel</button>
+          </div>
         </div>
 
-        <span class="field-label">Erkennung</span>
-        <div class="profile">
-          <div class="profile-icon" id="profileIcon">9</div>
-          <div><b id="profileName">9 mm / Standard</b><span id="profileDesc">Für die meisten Indoor-Stände</span></div>
+        <div class="set-page" data-page="signals" data-title="Signale" hidden>
+          <div class="set-list">
+            <div class="set-row col"><span class="set-txt"><b>Lautstärke</b><small>Start- und Par-Signal</small></span><div class="seg-mini" id="volume" role="radiogroup" aria-label="Lautstärke"><button type="button" data-v="0.35">Leise</button><button type="button" data-v="0.65">Normal</button><button type="button" data-v="1">Laut</button></div></div>
+            <div class="set-row"><span class="set-txt"><b>Vibration</b><small>Zusätzliches Startsignal</small></span><button class="toggle on" id="vibration" aria-label="Vibration" aria-pressed="true"></button></div>
+          </div>
         </div>
-        <div class="range-line">
-          <div class="range-head"><span>Empfindlichkeit</span><b id="sensitivityValue">42 %</b></div>
-          <input id="sensitivity" type="range" min="10" max="95" value="42" aria-label="Empfindlichkeit">
-          <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
-        </div>
-        <button class="ghost-btn wide" id="calibrateText" type="button" style="margin-top:12px">Jetzt kalibrieren</button>
-        <p class="tip"><span><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
 
-        <span class="field-label">Sprache</span>
-        <div class="settings-grid">
-          <div class="setting-tile wide"><div class="setting-tile-head"><div><b>Deutsch</b><small>Weitere Sprachen folgen</small></div></div></div>
+        <div class="set-page" data-page="detect" data-title="Erkennung und Kalibrierung" hidden>
+          <div class="profile">
+            <div class="profile-icon" id="profileIcon">9</div>
+            <div><b id="profileName">9 mm / Standard</b><span id="profileDesc">Für die meisten Indoor-Stände</span></div>
+          </div>
+          <div class="range-line">
+            <div class="range-head"><span>Empfindlichkeit</span><b id="sensitivityValue">42 %</b></div>
+            <input id="sensitivity" type="range" min="10" max="95" value="42" aria-label="Empfindlichkeit">
+            <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
+          </div>
+          <button class="ghost-btn wide" id="calibrateText" type="button" style="margin-top:12px">Jetzt kalibrieren</button>
+          <p class="tip"><span><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
         </div>
       </div>
     </div>
@@ -688,9 +765,8 @@
       <div class="sheet-body">
         <div class="help-block"><h3>Mikrofon</h3><p>Nach dem Startsignal hört die App mit und stoppt bei jedem Knall die Zeit. Daraus entstehen die Draw-Zeit und die Splits. Im Dry-Fire-Modus gilt dasselbe für den Trigger-Klick, nur empfindlicher eingestellt.</p></div>
         <div class="help-block"><h3>Kalibrieren</h3><p>Das Mikrofonsymbol neben START misst 1,5 Sekunden den Umgebungslärm und legt die Auslöseschwelle darüber. Einmal am Stand machen, solange es ruhig ist. Die Farbe des Symbols zeigt, ob das Mikrofon bereit ist.</p></div>
-        <div class="help-block"><h3>Treffer von Hand</h3><p>Trägt einen Treffer zum aktuellen Zeitpunkt ein – als Ersatz, wenn kein Mikrofon verfügbar ist, oder zum Ausprobieren ohne zu schießen.</p></div>
         <div class="help-block"><h3>Par Time und Durchgänge</h3><p>Par Time beendet den Durchgang nach der eingestellten Zeit mit einem zweiten Signal. Mehrere Durchgänge laufen automatisch hintereinander.</p></div>
-        <div class="help-block"><h3>Hit Factor</h3><p>Unter <b>Score</b> werden Zeit und Trefferzonen mehrerer Schützen eingetragen. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %.</p></div>
+        <div class="help-block"><h3>Hit Factor</h3><p>Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.</p></div>
         <div class="help-block"><h3>Sicherheit</h3><p>Regeln des Standes und Waffensicherheit liegen in deiner Verantwortung. Beim Dry Fire sicherstellen, dass die Waffe entladen ist und keine Munition in der Nähe liegt.</p></div>
       </div>
     </div>
@@ -757,6 +833,8 @@
       const PAR_MAX=20, PAR_STEP=.1, PAR_TAIL=2;
       // Startverzögerung: zufällig 2–4 s oder eine selbst gewählte feste Zeit.
       const DELAY_MAX=10;
+      // Länge der Standby-Ansage, falls die Datei noch keine Dauer liefert.
+      const STANDBY_FALLBACK_MS=1200;
 
       const OPTIONS={
         delay:[['random','Zufall 2–4 s'],['manual','Manuell']],
@@ -779,7 +857,7 @@
       let drillDraft=null;
       const DEFAULTS={
         mode:'live',delay:'random',delayManual:2,par:0,reps:1,
-        theme:'dark',volume:.65,vibration:true,makeReady:false,readySeconds:10,debug:false,drySeen:false,beep:'kurz',
+        theme:'dark',volume:.65,vibration:true,debug:false,drySeen:false,beep:'kurz',
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
       };
@@ -800,8 +878,6 @@
           theme:['auto','light','dark'].includes(stored.theme)?stored.theme:DEFAULTS.theme,
           volume:num(stored.volume,DEFAULTS.volume,0,1),
           vibration:typeof stored.vibration==='boolean'?stored.vibration:DEFAULTS.vibration,
-          makeReady:typeof stored.makeReady==='boolean'?stored.makeReady:DEFAULTS.makeReady,
-          readySeconds:Math.round(num(stored.readySeconds,DEFAULTS.readySeconds,5,120)),
           // Testtaste, Messwerte und Startton-Auswahl gibt es nicht mehr in den
           // Einstellungen. Alte gespeicherte Werte werden bewusst ignoriert.
           debug:DEFAULTS.debug,
@@ -868,10 +944,15 @@
       }
 
       /* ---------- Audio ---------- */
-      let beepBuffer=null,standbyBuffer=null,buffersLoaded=false;
-      async function loadBuffers(){
-        if(buffersLoaded||!rt.audio)return;
-        buffersLoaded=true;
+      let beepBuffer=null,standbyBuffer=null,buffersPromise=null;
+      // Einmal laden; jeder weitere Aufruf wartet auf denselben Ladevorgang,
+      // damit START nie mit halb geladener Standby-Ansage beginnt.
+      function loadBuffers(){
+        if(!rt.audio)return Promise.resolve();
+        if(!buffersPromise)buffersPromise=ladeBuffers();
+        return buffersPromise;
+      }
+      async function ladeBuffers(){
         const grab=async url=>{
           try{
             const res=await fetch(url);
@@ -923,11 +1004,17 @@
       // Audio-Elemente einmalig fuer die Wiedergabe freischalten.
       // iOS ignoriert das Setzen von .volume, beachtet aber .muted - mit
       // volume=0 liefen Ansage und Signal beim Start hoerbar an.
+      // Nur beim ersten START nötig. Das Anhalten kommt asynchron und darf
+      // eine inzwischen echt gestartete Ansage nicht abwürgen: playCue hebt
+      // muted vorher auf, dann bleibt die Wiedergabe stehen.
+      let cuesUnlocked=false;
       function unlockCues(){
+        if(cuesUnlocked)return;
+        cuesUnlocked=true;
         ['standbyAudio','signalAudio'].forEach(id=>{
           const a=$('#'+id);
           a.muted=true;
-          const stop=()=>{try{a.pause();a.currentTime=0}catch(e){}a.muted=false};
+          const stop=()=>{if(!a.muted)return;try{a.pause();a.currentTime=0}catch(e){}a.muted=false};
           try{
             const p=a.play();
             if(p?.then)p.then(stop).catch(stop); else stop();
@@ -995,7 +1082,7 @@
         // der Datei verschoben.
         const a=$(type==='standby'?'#standbyAudio':'#signalAudio');
         try{
-          a.pause();a.currentTime=0;a.volume=settings.volume;
+          a.muted=false;a.pause();a.currentTime=0;a.volume=settings.volume;
           const p=a.play();
           if(p?.catch)p.catch(()=>showToast('Audiosignal konnte nicht abgespielt werden'));
         }catch(e){}
@@ -1007,8 +1094,7 @@
       async function ensureMic(){
         if(rt.stream){await resumeAudio();return true}
         if(!navigator.mediaDevices?.getUserMedia){
-          setMicState('blocked','Kein Mikrofonzugriff – Treffer von Hand eintragen');
-          forceTestButton();
+          setMicState('blocked','Kein Mikrofonzugriff auf diesem Gerät');
           return false;
         }
         try{
@@ -1027,8 +1113,7 @@
           startMonitor();
           return true;
         }catch(e){
-          setMicState('blocked','Mikrofon nicht freigegeben – Treffer von Hand eintragen');
-          forceTestButton();
+          setMicState('blocked','Mikrofon nicht freigegeben – in den iPhone-Einstellungen erlauben');
           showToast('Mikrofon nicht freigegeben');
           return false;
         }
@@ -1038,11 +1123,6 @@
         rt.stream?.getTracks?.().forEach(t=>t.stop());
         rt.stream=null;rt.analyser=null;
         setMicState('off','');
-      }
-      // Ohne Mikrofon bleibt nur das Eintragen von Hand: dann erscheint die
-      // Testtaste neben START, nur für diese Sitzung.
-      function forceTestButton(){
-        $('#simulateBtn').hidden=false;
       }
 
       /* ---------- Pegel und Erkennung ---------- */
@@ -1129,23 +1209,22 @@
         unlockCues();
         await ensureMic();
         await resumeAudio();
+        await loadBuffers();
         reset(false,false);
         rt.running=true;rt.repNow=1;
         const runId=++rt.runId;
         $('#startBtn').textContent='STOP';
         $('#startBtn').classList.add('stop');
         requestWakeLock();
-        if(settings.makeReady){
-          $('#stateLabel').textContent='MAKE READY';
-          later(()=>{if(rt.running&&rt.runId===runId)queueRep(runId)},settings.readySeconds*1000);
-        }else queueRep(runId);
+        queueRep(runId);
       }
       function queueRep(runId){
         rt.counting=false;
         rt.threshold=currentThreshold();
         $('#stateLabel').textContent=settings.reps>1?'STANDBY '+rt.repNow+'/'+settings.reps:'STANDBY';
         renderTime(0);
-        playCue('standby');
+        // Die Verzögerung läuft erst, wenn „Standby“ ausgesprochen ist.
+        const ansageEnde=playCue('standby')+standbyMs();
         later(()=>{
           if(!rt.running||rt.runId!==runId)return;
           const t0=playCue('signal');
@@ -1172,7 +1251,12 @@
               },(settings.par+PAR_TAIL)*1000+(t0-performance.now()));
             }
           }
-        },getDelay()*1000);
+        },getDelay()*1000+Math.max(0,ansageEnde-performance.now()));
+      }
+      function standbyMs(){
+        if(standbyBuffer)return standbyBuffer.duration*1000;
+        const d=$('#standbyAudio').duration;
+        return Number.isFinite(d)&&d>0?d*1000:STANDBY_FALLBACK_MS;
       }
       function tick(now){
         if(!rt.counting)return;
@@ -1555,15 +1639,11 @@
         releaseModal();
       }
       function anyModalOpen(){return ALL_MODALS.some(id=>$('#'+id).classList.contains('show'))}
-      // Verlauf führt Trainings und Stages an einem Ort zusammen.
+      // Verlauf zeigt die Trainings; Stages stehen in den Matches.
       function setHistorySegment(seg){
         currentSegment=seg;
-        $$('#historySegment button').forEach(b=>b.classList.toggle('selected',b.dataset.seg===seg));
-        $('#historyList').hidden=seg!=='runs';
-        $('#stagesList').hidden=seg!=='stages';
-        $('#clearHistory').hidden=seg!=='runs';
-        $('#clearStages').hidden=seg!=='stages';
-        if(seg==='runs')renderHistory(); else renderStages();
+        // Stages leben jetzt in den Matches; der Verlauf zeigt die Trainings.
+        renderHistory();
       }
       function allDrills(){return [...BUILTIN_DRILLS,...customDrills]}
       // Beschreibung eines Drills aus seinen Werten, damit eigene Drills
@@ -1704,7 +1784,6 @@
       $('#resetBtn').onclick=()=>reset();
       $('#calibrateBtn').onclick=calibrate;
       $('#calibrateText').onclick=calibrate;
-      $('#simulateBtn').onclick=()=>rt.counting?recordShot():showToast('Timer zuerst starten');
       $$('[data-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.open));
       $('#applyOption').onclick=applySheet;
       holdStep($('#sheetUp'),1);
@@ -1712,11 +1791,29 @@
       $('#timerBtn').onclick=()=>{closeModals();showView('timer')};
       $('#drillsBtn').onclick=()=>openModalById('drillsModal');
       $('#historyBtn').onclick=()=>{closeModals();showView('history')};
-      $('#moreBtn').onclick=()=>openModalById('moreModal');
+      // Einstellungen: Übersicht mit Unterseiten im selben Sheet.
+      function settingsSummary(){
+        const themes={auto:'Automatisch',light:'Hell',dark:'Dunkel'};
+        const lautst={0.35:'Leise',0.65:'Normal',1:'Laut'};
+        $('#lookSummary').textContent=themes[settings.theme]||'';
+        $('#signalsSummary').textContent=
+          'Lautstärke '+(lautst[settings.volume]||'Normal')+' · Vibration '+(settings.vibration?'an':'aus');
+        $('#detectSummary').textContent=$('#profileName').textContent+' · '+$('#sensitivityValue').textContent;
+      }
+      function showSettingsPage(name){
+        $$('#moreBody .set-page').forEach(p=>p.hidden=p.dataset.page!==name);
+        const page=$('#moreBody .set-page[data-page="'+name+'"]');
+        $('#moreTitle').textContent=page.dataset.title||'Einstellungen';
+        $('#moreBack').hidden=name==='root';
+        $('#moreBody').scrollTop=0;
+        settingsSummary();
+      }
+      $$('#moreBody [data-go]').forEach(b=>b.onclick=()=>showSettingsPage(b.dataset.go));
+      $('#moreBack').onclick=()=>showSettingsPage('root');
+      $('#moreBtn').onclick=()=>{showSettingsPage('root');openModalById('moreModal')};
       $('#helpBtn').onclick=()=>openModalById('helpModal');
       $('#splitStrip').onclick=openRunSheet;
       $('#splitStrip').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openRunSheet()}};
-      $$('#historySegment button').forEach(b=>b.onclick=()=>setHistorySegment(b.dataset.seg));
       $('#historyList').addEventListener('click',ev=>{
         const karte=ev.target.closest('[data-run]');
         if(karte)openRunDetail(karte.dataset.run);
@@ -1729,7 +1826,6 @@
       ALL_MODALS.forEach(id=>$('#'+id).addEventListener('click',e=>{if(e.target.id===id)closeModals()}));
 
 
-      $('#makeReady').onclick=e=>{settings.makeReady=!settings.makeReady;setToggle(e.currentTarget,settings.makeReady);saveSettings()};
       // Kleine Segment-Auswahl statt nativer Dropdowns: alle Werte sind auf
       // einen Blick sichtbar, ein Tipp genügt.
       function bindSeg(id,key){
@@ -1747,7 +1843,6 @@
           b.setAttribute('role','radio');
         });
       }
-      bindSeg('readySeconds','readySeconds');
       bindSeg('volume','volume');
       $('#vibration').onclick=e=>{settings.vibration=!settings.vibration;setToggle(e.currentTarget,settings.vibration);saveSettings()};
       $('#clearHistory').onclick=()=>{
@@ -1778,7 +1873,6 @@
       const SHOOTERS_KEY='shot-timer-shooters-v1';
       const STAGES_KEY='shot-timer-stages-v1';
       const DRAFT_KEY='shot-timer-stage-draft-v1';
-      const STAGE_LIMIT=100;
       const ZONES=[
         {key:'a',label:'A'},{key:'c',label:'C'},{key:'d',label:'D'},
         {key:'m',label:'M',pen:true},{key:'ns',label:'NS',pen:true},{key:'pe',label:'PE',pen:true}
@@ -1787,7 +1881,10 @@
       const PENALTY=10;
       const MIN_SHOTS=1,MAX_SHOTS=64;
 
-      const stage={name:'',shots:12,entries:[]};
+      // Matches enthalten Stages; `stage` zeigt immer auf die offene Stage.
+      const MATCHES_KEY='shot-timer-matches-v1';
+      let matches=[],currentMatch=null,scorePage='matches';
+      let stage={id:'',name:'',shots:12,entries:[]};
       let shooters=[];
       let currentView='timer';
       let currentSegment='runs';
@@ -1802,33 +1899,68 @@
       function readJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch(e){return fallback}}
       function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast('Speichern fehlgeschlagen');return false}}
 
-      /* ---------- Laufende Stage sichern ----------
-         Die App kann am Stand jederzeit vom System beendet werden; ohne das
-         hier wären bereits eingetragene Zeiten und Treffer verloren.        */
-      function persistDraft(){
-        try{localStorage.setItem(DRAFT_KEY,JSON.stringify({name:stage.name,shots:stage.shots,entries:stage.entries}))}catch(e){}
-      }
-      function loadDraft(){
-        const d=readJson(DRAFT_KEY,null);
-        if(!d||!Array.isArray(d.entries))return;
-        stage.name=typeof d.name==='string'?d.name:'';
-        const shots=Math.round(Number(d.shots));
-        stage.shots=Number.isFinite(shots)?Math.min(MAX_SHOTS,Math.max(MIN_SHOTS,shots)):12;
-        stage.entries=d.entries.filter(e=>e&&e.id&&e.shooterId).map(e=>{
-          const time=Number(e.time);
-          const out={
-            id:String(e.id),shooterId:String(e.shooterId),
-            name:String(e.name||'Schütze'),pf:e.pf==='major'?'major':'minor',
-            time:Number.isFinite(time)&&time>0?time:0
-          };
-          ZONES.forEach(z=>{
-            const n=Math.round(Number(e[z.key]));
-            out[z.key]=Number.isFinite(n)&&n>0?Math.min(99,n):0;
-          });
-          return out;
+      /* ---------- Matches sichern ----------
+         Jede Eingabe wird sofort gespeichert. Die App kann am Stand jederzeit
+         vom System beendet werden; nichts darf dann verloren sein.          */
+      function persistDraft(){writeJson(MATCHES_KEY,matches)}
+      function cleanEntry(e){
+        const time=Number(e.time);
+        const out={
+          id:String(e.id||uid()),shooterId:String(e.shooterId),
+          name:String(e.name||'Schütze'),pf:e.pf==='major'?'major':'minor',
+          time:Number.isFinite(time)&&time>0?time:0
+        };
+        ZONES.forEach(z=>{
+          const n=Math.round(Number(e[z.key]));
+          out[z.key]=Number.isFinite(n)&&n>0?Math.min(99,n):0;
         });
-        $('#stageName').value=stage.name;
+        return out;
       }
+      function cleanStage(s){
+        const shots=Math.round(Number(s.shots));
+        return {
+          id:String(s.id||uid()),
+          name:typeof s.name==='string'?s.name:'',
+          shots:Number.isFinite(shots)?Math.min(MAX_SHOTS,Math.max(MIN_SHOTS,shots)):12,
+          entries:(Array.isArray(s.entries)?s.entries:[]).filter(e=>e&&e.shooterId).map(cleanEntry)
+        };
+      }
+      function loadMatches(){
+        const raw=readJson(MATCHES_KEY,null);
+        if(Array.isArray(raw)){
+          matches=raw.filter(m=>m&&m.id).map(m=>({
+            id:String(m.id),name:typeof m.name==='string'?m.name:'',
+            at:m.at||new Date().toISOString(),
+            stages:(Array.isArray(m.stages)?m.stages:[]).map(cleanStage)
+          }));
+          return;
+        }
+        matches=migrateOldStages();
+        persistDraft();
+      }
+      // Einmalig: gespeicherte Einzel-Stages und die offene Stage aus der
+      // Zeit vor den Matches übernehmen. Die alten Einträge bleiben liegen.
+      function migrateOldStages(){
+        const out=[];
+        const now=new Date().toISOString();
+        const draft=readJson(DRAFT_KEY,null);
+        if(draft&&Array.isArray(draft.entries)&&draft.entries.length){
+          out.push({id:uid(),name:'',at:now,stages:[cleanStage(draft)]});
+        }
+        const old=readJson(STAGES_KEY,[]);
+        if(Array.isArray(old)&&old.length){
+          out.push({
+            id:uid(),name:'Frühere Stages',at:old[old.length-1]?.at||now,
+            stages:[...old].reverse().map(s=>cleanStage({
+              id:s.id,name:s.name,shots:s.shots,
+              entries:(Array.isArray(s.results)?s.results:[]).map(r=>({...r,id:uid()}))
+            }))
+          });
+        }
+        return out;
+      }
+      const matchTitle=m=>m.name.trim()||'Match vom '+dateShort(m.at);
+      const stageTitle=(m,s)=>s.name.trim()||'Stage '+(m.stages.indexOf(s)+1);
       // Nach jeder Eingabe: sichern, Karte auffrischen, Rangliste neu rechnen.
       function updated(entry){
         persistDraft();
@@ -1844,9 +1976,9 @@
         const points=Math.max(0,hits-penalties);
         return {hits,penalties,points,hf:e.time>0?points/e.time:0};
       }
-      function maxStagePoints(){return stage.shots*5}
-      function ranked(){
-        return stage.entries
+      function maxStagePoints(st=stage){return st.shots*5}
+      function ranked(st=stage){
+        return st.entries
           .filter(e=>e.time>0)
           .map(e=>({entry:e,...scoreEntry(e)}))
           .sort((x,y)=>y.hf-x.hf);
@@ -2017,88 +2149,176 @@
         updated(entry);
       }
 
-      /* ---------- Speichern und Verlauf ---------- */
-      function defaultStageName(){return 'Stage '+(readJson(STAGES_KEY,[]).length+1)}
-      function saveStage(){
-        const rows=ranked();
-        if(!rows.length){showToast('Noch keine Zeit eingetragen');return}
-        const best=rows[0].hf, max=maxStagePoints();
-        const stages=readJson(STAGES_KEY,[]);
-        stages.unshift({
-          id:uid(),
-          at:new Date().toISOString(),
-          name:stage.name.trim()||defaultStageName(),
-          shots:stage.shots,
-          maxPoints:max,
-          results:rows.map((r,i)=>{
-            const pct=best>0?r.hf/best*100:0;
-            return {
-              rank:i+1,shooterId:r.entry.shooterId,name:r.entry.name,pf:r.entry.pf,
-              time:Number(r.entry.time.toFixed(2)),points:r.points,
-              hf:Number(r.hf.toFixed(4)),pct:Number(pct.toFixed(2)),
-              stagePoints:Number((max*pct/100).toFixed(2)),
-              a:r.entry.a,c:r.entry.c,d:r.entry.d,m:r.entry.m,ns:r.entry.ns,pe:r.entry.pe
-            };
-          })
-        });
-        if(!writeJson(STAGES_KEY,stages.slice(0,STAGE_LIMIT)))return;
-        renderStages();
-        showToast('Stage gespeichert');
-      }
-      function newStage(){
-        stage.entries.forEach(e=>{e.time=0;ZONES.forEach(z=>{e[z.key]=0})});
-        stage.name='';
-        $('#stageName').value='';
-        $('#stageName').placeholder=defaultStageName();
-        persistDraft();renderEntries();renderResult();
-        showToast('Neue Stage – Schützen bleiben geladen');
-      }
+      /* ---------- Matches und Stages ---------- */
       function rankRow(o){
         const tag=o.tag||'div';
         return '<'+tag+' class="rank-row'+(o.lead?' lead':'')+'"'+(o.attrs||'')+'>'+
           '<span class="pos">'+o.rank+'</span>'+
           '<span class="who"><b>'+esc(o.title)+'</b><span>'+o.sub+'</span></span>'+
-          '<span class="hf">'+nf(o.hf,4)+'</span>'+
+          '<span class="hf">'+(o.main??nf(o.hf,4))+'</span>'+
           '<span class="pct"><b>'+nf(o.pct,1)+' %</b><span>'+o.aside+'</span></span>'+
         '</'+tag+'>';
       }
-      function renderStages(){
-        const stages=readJson(STAGES_KEY,[]);
-        const el=$('#stagesList');
-        if(!stages.length){el.innerHTML='<div class="empty">Noch keine Stage gespeichert.</div>';return}
-        el.innerHTML=stages.map(s=>{
-          const rows=Array.isArray(s.results)?s.results:[];
-          const top=rows[0];
-          return '<details class="stage-card">'+
-            '<summary><div><b>'+esc(s.name)+'</b>'+
-              '<span>'+dateText(s.at)+' · '+rows.length+(rows.length===1?' Schütze':' Schützen')+' · max. '+s.maxPoints+' Pkt</span></div>'+
-              '<em>'+(top?nf(top.hf,4):'—')+'</em>'+
-              '<button class="stage-del" type="button" data-del-stage="'+s.id+'" aria-label="Stage '+esc(s.name)+' löschen">×</button>'+
-            '</summary>'+
-            '<div class="stage-detail">'+rows.map(r=>rankRow({
-              rank:r.rank,title:r.name,hf:r.hf,pct:r.pct,lead:r.rank===1,
-              sub:r.points+' Pkt · '+nf(r.time,2)+' s',
-              aside:nf(r.stagePoints,1)+' Stage-Pkt'
-            })).join('')+'</div>'+
-          '</details>';
+      // Gesamtwertung wie im IPSC: Stage-Punkte (bester HF = volle Punktzahl
+      // der Stage) über alle Stages addiert, der Beste ist 100 %.
+      function matchStandings(m){
+        const sum=new Map();
+        m.stages.forEach(st=>{
+          const rows=ranked(st);
+          if(!rows.length)return;
+          const best=rows[0].hf, max=maxStagePoints(st);
+          rows.forEach(r=>{
+            const t=sum.get(r.entry.shooterId)||{shooterId:r.entry.shooterId,name:r.entry.name,points:0,stages:0};
+            t.points+=best>0?max*r.hf/best:0;
+            t.stages++;
+            t.name=r.entry.name;
+            sum.set(r.entry.shooterId,t);
+          });
+        });
+        const list=[...sum.values()].sort((a,b)=>b.points-a.points);
+        const top=list[0]?.points||0;
+        return list.map((t,i)=>({...t,rank:i+1,pct:top>0?t.points/top*100:0}));
+      }
+      function matchShooterCount(m){
+        return new Set(m.stages.flatMap(s=>s.entries.map(e=>e.shooterId))).size;
+      }
+      function showScorePage(p){
+        scorePage=p;
+        $('#matchesPage').hidden=p!=='matches';
+        $('#matchPage').hidden=p!=='match';
+        $('#stagePage').hidden=p!=='stage';
+        $('#scoreBack').hidden=p==='matches';
+        if(p==='matches'){
+          $('#scoreTitle').textContent='Matches';
+          $('#scoreSub').textContent='Jedes Match enthält seine Stages und eine Gesamtwertung.';
+          renderMatchList();
+        }else if(p==='match'){
+          $('#scoreTitle').textContent=matchTitle(currentMatch);
+          const n=currentMatch.stages.length, s=matchShooterCount(currentMatch);
+          $('#scoreSub').textContent=n+(n===1?' Stage':' Stages')+' · '+s+(s===1?' Schütze':' Schützen');
+          $('#matchName').value=currentMatch.name;
+          $('#matchName').placeholder='Match vom '+dateShort(currentMatch.at);
+          renderMatchPage();
+        }else{
+          $('#scoreTitle').textContent=stageTitle(currentMatch,stage);
+          $('#scoreSub').textContent=matchTitle(currentMatch);
+          $('#stageName').value=stage.name;
+          $('#stageName').placeholder='Stage '+(currentMatch.stages.indexOf(stage)+1);
+          renderEntries();
+          renderScore();
+        }
+        resetDeleteButtons();
+      }
+      function renderMatchList(){
+        const el=$('#matchList');
+        if(!matches.length){
+          el.innerHTML='<div class="empty">Noch kein Match angelegt. Ein Match sammelt mehrere Stages und rechnet die Gesamtwertung.</div>';
+          return;
+        }
+        el.innerHTML=matches.map(m=>{
+          const top=matchStandings(m)[0];
+          const n=m.stages.length, s=matchShooterCount(m);
+          return '<button class="history-card" type="button" data-match="'+m.id+'"><div>'+
+            '<b>'+esc(matchTitle(m))+'</b>'+
+            '<span>'+dateShort(m.at)+' · '+n+(n===1?' Stage':' Stages')+' · '+s+(s===1?' Schütze':' Schützen')+'</span>'+
+            (top?'<span>Führt: '+esc(top.name)+'</span>':'')+
+          '</div><strong><span class="chev">›</span></strong></button>';
         }).join('');
       }
-      function deleteStage(id){
-        const stages=readJson(STAGES_KEY,[]).filter(s=>s.id!==id);
-        writeJson(STAGES_KEY,stages);
-        renderStages();
+      function renderMatchPage(){
+        const m=currentMatch;
+        $('#stageList').innerHTML=m.stages.length?m.stages.map(st=>{
+          const rows=ranked(st);
+          const n=st.entries.length;
+          return '<button class="history-card" type="button" data-stage="'+st.id+'"><div>'+
+            '<b>'+esc(stageTitle(m,st))+'</b>'+
+            '<span>'+n+(n===1?' Schütze':' Schützen')+' · '+st.shots+' Schüsse'+
+              (rows.length?' · bester HF '+nf(rows[0].hf,4):'')+'</span>'+
+          '</div><strong><span class="chev">›</span></strong></button>';
+        }).join(''):'<div class="empty">Noch keine Stage in diesem Match.</div>';
+        const rows=matchStandings(m);
+        $('#matchHint').textContent=rows.length?rows.length+(rows.length===1?' Schütze':' Schützen'):'';
+        $('#matchResult').innerHTML=rows.length?rows.map(r=>rankRow({
+          tag:'button',attrs:' type="button" data-shooter="'+r.shooterId+'"',lead:r.rank===1,
+          rank:r.rank,title:r.name,pct:r.pct,main:nf(r.points,1),
+          sub:r.stages+(r.stages===1?' Stage':' Stages')+' gewertet',
+          aside:'Match-Pkt'
+        })).join(''):'<div class="empty">Sobald auf einer Stage Zeiten stehen, erscheint hier die Gesamtwertung.</div>';
+      }
+      function openMatch(id){
+        currentMatch=matches.find(m=>m.id===id)||null;
+        if(currentMatch)showScorePage('match');
+      }
+      function openStage(id){
+        const st=currentMatch?.stages.find(s=>s.id===id);
+        if(!st)return;
+        stage=st;
+        showScorePage('stage');
+      }
+      function newMatch(){
+        const m={id:uid(),name:'',at:new Date().toISOString(),stages:[]};
+        matches.unshift(m);
+        currentMatch=m;
+        m.stages.push(cleanStage({}));
+        persistDraft();
+        showScorePage('match');
+        $('#matchName').focus();
+      }
+      // Neue Stage übernimmt die Schützen der letzten Stage, ohne Zeiten und Treffer.
+      function addStage(){
+        const last=currentMatch.stages[currentMatch.stages.length-1];
+        const st=cleanStage({shots:last?.shots||12,entries:(last?.entries||[]).map(e=>({
+          shooterId:e.shooterId,name:e.name,pf:e.pf
+        }))});
+        currentMatch.stages.push(st);
+        persistDraft();
+        openStage(st.id);
+      }
+      // Löschen braucht einen zweiten Tipp innerhalb von drei Sekunden.
+      function armDelete(btn,label,action){
+        if(btn.dataset.armed){action();return}
+        btn.dataset.armed='1';
+        btn.textContent='Wirklich löschen?';
+        btn.classList.add('danger');
+        clearTimeout(btn._reset);
+        btn._reset=setTimeout(()=>resetDeleteButtons(),3000);
+      }
+      function resetDeleteButtons(){
+        [['#deleteMatch','Match löschen'],['#deleteStage','Stage löschen']].forEach(([sel,label])=>{
+          const b=$(sel);delete b.dataset.armed;b.textContent=label;b.classList.remove('danger');
+        });
+      }
+      function deleteCurrentMatch(){
+        matches=matches.filter(m=>m!==currentMatch);
+        currentMatch=null;
+        persistDraft();
+        showScorePage('matches');
+        showToast('Match gelöscht');
+      }
+      function deleteCurrentStage(){
+        currentMatch.stages=currentMatch.stages.filter(s=>s!==stage);
+        persistDraft();
+        showScorePage('match');
         showToast('Stage gelöscht');
       }
 
       /* ---------- Fortschritt ---------- */
       function shooterHistory(id){
         const out=[];
-        for(const s of readJson(STAGES_KEY,[])){
-          if(!Array.isArray(s.results))continue;
-          const r=s.results.find(x=>x.shooterId===id);
-          if(r)out.push({at:s.at,stage:s.name,name:r.name,hf:r.hf,pct:r.pct,rank:r.rank,of:s.results.length,points:r.points,time:r.time});
+        for(const m of matches){
+          // Innerhalb eines Matches die letzte Stage zuerst, wie die Match-Liste.
+          for(const st of [...m.stages].reverse()){
+            const rows=ranked(st);
+            const i=rows.findIndex(r=>r.entry.shooterId===id);
+            if(i<0)continue;
+            const r=rows[i], best=rows[0].hf;
+            out.push({
+              at:m.at,stage:matchTitle(m)+' · '+stageTitle(m,st),name:r.entry.name,
+              hf:r.hf,pct:best>0?r.hf/best*100:0,rank:i+1,of:rows.length,points:r.points,time:r.entry.time
+            });
+          }
         }
-        return out; // neueste zuerst, wie die Stage-Liste
+        return out; // neueste zuerst
       }
       function sparkline(values){
         const w=300,h=52,pad=5;
@@ -2120,7 +2340,7 @@
         const body=$('#progressBody');
         if(!rows.length){
           $('#progressSub').textContent='Noch nichts gespeichert';
-          body.innerHTML='<div class="empty">Sobald eine Stage mit '+esc(name)+' gespeichert ist, entsteht hier der Verlauf.</div>';
+          body.innerHTML='<div class="empty">Sobald '+esc(name)+' auf einer Stage eine Zeit hat, entsteht hier der Verlauf.</div>';
         }else{
           const hfs=rows.map(r=>r.hf);
           const avg=hfs.reduce((a,b)=>a+b,0)/hfs.length;
@@ -2203,12 +2423,29 @@
         const row=ev.target.closest('.rank-row[data-shooter]');
         if(row)openProgress(row.dataset.shooter);
       });
-      $('#stagesList').addEventListener('click',ev=>{
-        const del=ev.target.closest('[data-del-stage]');
-        if(!del)return;
-        ev.preventDefault(); // sonst klappt das <details> zusätzlich auf
-        deleteStage(del.dataset.delStage);
+      $('#matchList').addEventListener('click',ev=>{
+        const card=ev.target.closest('[data-match]');
+        if(card)openMatch(card.dataset.match);
       });
+      $('#stageList').addEventListener('click',ev=>{
+        const card=ev.target.closest('[data-stage]');
+        if(card)openStage(card.dataset.stage);
+      });
+      $('#matchResult').addEventListener('click',ev=>{
+        const row=ev.target.closest('.rank-row[data-shooter]');
+        if(row)openProgress(row.dataset.shooter);
+      });
+      $('#scoreBack').onclick=()=>showScorePage(scorePage==='stage'?'match':'matches');
+      $('#stageDone').onclick=()=>showScorePage('match');
+      $('#newMatch').onclick=newMatch;
+      $('#addStage').onclick=addStage;
+      $('#matchName').oninput=ev=>{
+        currentMatch.name=ev.target.value;
+        $('#scoreTitle').textContent=matchTitle(currentMatch);
+        persistDraft();
+      };
+      $('#deleteMatch').onclick=ev=>armDelete(ev.currentTarget,'Match löschen',deleteCurrentMatch);
+      $('#deleteStage').onclick=ev=>armDelete(ev.currentTarget,'Stage löschen',deleteCurrentStage);
       $('#shooterPicker').addEventListener('click',ev=>{
         const del=ev.target.closest('[data-del]');
         if(ev.target.closest('[data-cancel-del]')){pendingDelete=null;renderShooterPicker();return}
@@ -2224,26 +2461,21 @@
       $('#newShooterName').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();createShooter()}});
       $('#createShooter').onclick=createShooter;
       $('#addEntry').onclick=openShooterSheet;
-      $('#stageName').oninput=ev=>{stage.name=ev.target.value;persistDraft()};
+      $('#stageName').oninput=ev=>{
+        stage.name=ev.target.value;
+        $('#scoreTitle').textContent=stageTitle(currentMatch,stage);
+        persistDraft();
+      };
       $('#shotsUp').onclick=()=>{stage.shots=Math.min(MAX_SHOTS,stage.shots+1);persistDraft();renderScore()};
       $('#shotsDown').onclick=()=>{stage.shots=Math.max(MIN_SHOTS,stage.shots-1);persistDraft();renderScore()};
-      $('#saveStage').onclick=saveStage;
-      $('#newStage').onclick=newStage;
-      $('#clearStages').onclick=()=>{
-        localStorage.removeItem(STAGES_KEY);
-        renderStages();
-        showToast('Alle Stages gelöscht');
-      };
       $('#scoreBtn').onclick=()=>{closeModals();showView('score')};
 
       function initScore(){
         shooters=readJson(SHOOTERS_KEY,[]).filter(s=>s&&s.id&&s.name).map(s=>({
           id:String(s.id),name:String(s.name),pf:s.pf==='major'?'major':'minor'
         }));
-        loadDraft();
-        $('#stageName').placeholder=defaultStageName();
-        renderEntries();
-        renderScore();
+        loadMatches();
+        showScorePage('matches');
       }
 
       /* ---------- Start ---------- */
@@ -2258,11 +2490,8 @@
         renderQuickSettings();
         renderSeg('volume',settings.volume);
         aktualisiereSperrzeit();
-        renderSeg('readySeconds',settings.readySeconds);
-        setToggle($('#makeReady'),settings.makeReady);
         setToggle($('#vibration'),settings.vibration);
         $('#debugBox').hidden=!settings.debug;
-        $('#simulateBtn').hidden=true;
         renderShots();
         renderHistory();
         initScore();
