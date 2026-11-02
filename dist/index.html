@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <meta name="description" content="FORTH TRACE Shot Timer für Live Fire und Dry Fire.">
   <title>FORTH TRACE Shot Timer</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1010'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23ff3131' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%23ff3131' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231c1f1d'/%3E%3Ccircle cx='32' cy='35' r='17' fill='none' stroke='%23ffffff' stroke-width='6'/%3E%3Cpath d='M32 18v-7M24 10h16M32 35l8-7' fill='none' stroke='%2318e5ff' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
   <style>
     /* Lokal gebuendelt, damit die App ohne Netz laeuft. SIL OFL 1.1,
        Lizenztext in assets/fonts/OFL.txt. Holen: node tools/fetch-fonts.mjs */
@@ -30,12 +30,12 @@
       --font-display:'Montserrat',ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
       --font-text:'Montserrat',ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
       --sage:#a3a398;
-      --accent:#ff3131;
-      --accent-fill:#ff3131;
-      --accent-dark:#c2201f;
-      --accent-ink:#ffffff;
-      --accent-soft:rgba(255,49,49,.14);
-      --accent-line:rgba(255,49,49,.34);
+      --accent:#18e5ff;
+      --accent-fill:#18e5ff;
+      --accent-dark:#0aa9c2;
+      --accent-ink:#06171a;
+      --accent-soft:rgba(24,229,255,.13);
+      --accent-line:rgba(24,229,255,.34);
       --danger:#de6c51;
       --danger-soft:rgba(180,74,50,.42);
       --warm:#de6c51;
@@ -58,12 +58,12 @@
     }
     :root[data-theme="light"]{
       color-scheme:light;
-      --accent:#d61f1f;
-      --accent-fill:#ff3131;
-      --accent-dark:#a81818;
-      --accent-ink:#ffffff;
-      --accent-soft:rgba(214,31,31,.1);
-      --accent-line:rgba(214,31,31,.36);
+      --accent:#0089a1;
+      --accent-fill:#18e5ff;
+      --accent-dark:#0aa9c2;
+      --accent-ink:#06171a;
+      --accent-soft:rgba(0,137,161,.1);
+      --accent-line:rgba(0,137,161,.36);
       --danger:#b44a32;
       --danger-soft:rgba(180,74,50,.4);
       --warm:#b44a32;
@@ -163,7 +163,7 @@
     /* Das Mikrofonsymbol ist zugleich die Statusanzeige. */
     .icon-btn.mic.ready{color:var(--accent);border-color:var(--accent-line)}
     .icon-btn.mic.blocked{color:var(--warm);border-color:var(--warm)}
-    .start-btn{font-family:var(--font-display);border:0;border-radius:17px;background:var(--accent-fill);color:var(--accent-ink);height:56px;font-weight:950;font-size:1.05rem;letter-spacing:.11em;cursor:pointer;box-shadow:0 8px 26px #ff313126;transition:transform .12s ease,background .2s ease}
+    .start-btn{font-family:var(--font-display);border:0;border-radius:17px;background:var(--accent-fill);color:var(--accent-ink);height:56px;font-weight:950;font-size:1.05rem;letter-spacing:.11em;cursor:pointer;box-shadow:0 8px 26px #18e5ff2e;transition:transform .12s ease,background .2s ease}
     .start-btn:active{transform:scale(.985)}
     .start-btn.stop{background:var(--text);color:var(--bg);box-shadow:none}
 
