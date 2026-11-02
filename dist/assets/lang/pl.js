@@ -1,5 +1,7 @@
 // Polski – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).pl={
+  "Delay": "Opóźnienie",
+  "Instant": "Natychmiast",
   "WEITER": "DALEJ",
   "Sprache wählen": "Wybierz język",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibracja</b> przez 1,5 sekundy mierzy hałas otoczenia i ustawia próg wyzwalania tuż nad nim. Dotknij raz na strzelnicy, gdy jest cicho – potem wentylacja i sąsiednie stanowiska nie będą już przypadkowo wyzwalać pomiaru.",

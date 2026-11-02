@@ -216,6 +216,13 @@
     .stepper-sheet{display:flex;align-items:center;justify-content:center;gap:18px;padding:6px 0 14px}
     .stepper-sheet[hidden],.quick-row[hidden],.option-grid[hidden]{display:none}
     #optionGrid:not([hidden])+.stepper-sheet{padding-top:18px}
+    /* Auswahl-Sheet (Verzögerung, Par Time, Durchgänge): mehr Luft. */
+    #settingsModal .sheet-head{margin-bottom:18px}
+    #settingsModal .option{padding:14px 10px;font-size:.88rem}
+    #settingsModal .sheet-body{padding-bottom:6px}
+    #settingsModal .sheet-action{margin-top:18px}
+    /* Beim Öffnen springt der Fokus auf ×; der Rahmen soll nur bei Tastatur erscheinen. */
+    .sheet-head button:focus:not(:focus-visible){outline:none}
     .step.big{width:56px;height:56px;border-radius:17px;font-size:1.5rem}
     .stepper-value{font-size:2rem;font-weight:850;font-variant-numeric:tabular-nums;min-width:4.5ch;text-align:center}
     .quick-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
@@ -893,13 +900,13 @@
       // nach dem bei mehreren Durchgaengen der naechste startet - die Par-Zeit
       // selbst beendet die Messung nicht.
       const PAR_MAX=20, PAR_STEP=.1, PAR_TAIL=2;
-      // Startverzögerung: zufällig 2–4 s oder eine selbst gewählte feste Zeit.
-      const DELAY_MAX=10;
+      // Startverzögerung: Instant (Signal direkt nach Standby) oder eine feste Zeit.
+      const DELAY_MIN=.5, DELAY_MAX=10;
       // Länge der Standby-Ansage, falls die Datei noch keine Dauer liefert.
       const STANDBY_FALLBACK_MS=1200;
 
       const OPTIONS={
-        delay:[['random',t('Zufall 2–4 s')],['manual',t('Manuell')]],
+        delay:[['instant',t('Instant')],['manual',t('Delay')]],
         par:[['0','Aus'],['1.5','1,50 s'],['2','2,00 s']],
         reps:[['1','1 Durchgang'],['5','5 Durchgänge'],['10','10 Durchgänge']]
       };
@@ -908,7 +915,7 @@
         dry:{icon:'DF',name:t('Dry Fire / Striker'),desc:t('Hohe Empfindlichkeit für Trigger-Klicks'),sensitivity:78}
       };
       const DEFAULTS={
-        mode:'live',delay:'random',delayManual:2,par:0,reps:1,
+        mode:'live',delay:'2',delayManual:2,par:0,reps:1,
         lang:'',theme:'dark',volume:.65,vibration:true,debug:false,drySeen:false,beep:'kurz',
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
@@ -921,10 +928,14 @@
         const num=(v,fallback,min,max)=>{const n=Number(v);return Number.isFinite(n)&&n>=min&&n<=max?n:fallback};
         return {
           mode:stored.mode==='dry'?'dry':'live',
-          // 'random' oder eine feste Zeit in Sekunden als Zeichenkette.
-          delay:typeof stored.delay==='string'&&stored.delay.trim()!==''&&Number.isFinite(Number(stored.delay))
-            ?String(num(stored.delay,DEFAULTS.delayManual,0,DELAY_MAX)):DEFAULTS.delay,
-          delayManual:num(stored.delayManual??stored.delay,DEFAULTS.delayManual,0,DELAY_MAX),
+          // 'instant' oder eine feste Zeit in Sekunden als Zeichenkette. Die frühere
+          // Zufallsverzögerung ('random') wird zur gemerkten festen Zeit.
+          // Eine feste Zeit von 0 ist dasselbe wie Instant.
+          delay:stored.delay==='instant'||Number(stored.delay)===0&&stored.delay!==''&&stored.delay!=null?'instant'
+            :typeof stored.delay==='string'&&stored.delay.trim()!==''&&Number.isFinite(Number(stored.delay))
+            ?String(num(stored.delay,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX))
+            :String(num(stored.delayManual,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX)),
+          delayManual:num(stored.delayManual,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX),
           par:num(stored.par,DEFAULTS.par,0,20),
           reps:Math.round(num(stored.reps,DEFAULTS.reps,1,99)),
           lang:LANG,
@@ -1253,7 +1264,7 @@
       }
 
       /* ---------- Ablauf ---------- */
-      function getDelay(){return settings.delay==='random'?2+Math.random()*2:Number(settings.delay)}
+      function getDelay(){return settings.delay==='instant'?0:Number(settings.delay)}
       async function start(){
         if(rt.running){stop();return}
         unlockCues();
@@ -1417,7 +1428,7 @@
         $('#sensitivityValue').textContent=value+' %';
       }
       function renderQuickSettings(){
-        $('#delayValue').textContent=settings.delay==='random'?t('Zufall 2–4 s'):de(Number(settings.delay))+' s';
+        $('#delayValue').textContent=settings.delay==='instant'?t('Instant'):de(Number(settings.delay))+' s';
         $('#parValue').textContent=settings.par?de(settings.par)+' s':t('Aus');
         $('#repsValue').textContent=settings.reps===1?t('1 Durchgang'):t('{0} Durchgänge',settings.reps);
       }
@@ -1522,7 +1533,7 @@
           [t('Treffer'),String(lauf.count)],
           [t('Bester Split'),typeof lauf.best==='number'?lauf.best.toFixed(2)+' s':'–'],
           [t('Par Time'),lauf.par?de(lauf.par)+' s':t('Aus')],
-          [t('Verzögerung'),lauf.delay==='random'?t('Zufall 2–4 s'):de(Number(lauf.delay))+' s']
+          [t('Verzögerung'),lauf.delay==='random'?t('Zufall 2–4 s'):lauf.delay==='instant'?t('Instant'):de(Number(lauf.delay))+' s']
         ];
         $('#runDetailBody').innerHTML=
           '<div class="stat-grid">'+fakten.map(([k,v])=>statTile(k,v)).join('')+'</div>'+
@@ -1549,7 +1560,7 @@
       /* ---------- Sheets ---------- */
       const FOCUSABLE='button:not([disabled]),select:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
       const ALL_MODALS=['settingsModal','runModal','runDetailModal','dryInfoModal','moreModal','helpModal','shooterModal','progressModal'];
-      let activeModal=null,lastFocus=null,pendingKey='delay',pendingValue='random';
+      let activeModal=null,lastFocus=null,pendingKey='delay',pendingValue='instant';
 
       function focusModal(id){
         const el=$('#'+id);
@@ -1572,12 +1583,12 @@
         else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
       }
       // Par und Durchgänge sind frei einstellbar, die Verzögerung bleibt
-      // eine Auswahl – zufällig und fest sind keine Punkte einer Skala.
+      // eine Auswahl – Instant und Delay sind keine Punkte einer Skala.
       const STEPPER={
         par:{min:0,max:PAR_MAX,step:PAR_STEP,einheit:' s',aus:t('Aus'),schnell:[]},
         reps:{min:1,max:99,step:1,einheit:'',schnell:[]},
-        // Verzögerung: erst die Wahl Zufall/Manuell, nur bei Manuell der Regler.
-        delay:{min:0,max:DELAY_MAX,step:.1,einheit:' s',schnell:[],wahl:true}
+        // Verzögerung: erst die Wahl Instant/Delay, nur bei Delay der Regler.
+        delay:{min:DELAY_MIN,max:DELAY_MAX,step:.1,einheit:' s',schnell:[],wahl:true}
       };
       function stepperText(key,wert){
         const s=STEPPER[key];
@@ -1602,8 +1613,8 @@
         $('#optionGrid').style.gridTemplateColumns='';
         if(s&&s.wahl){
           const waehle=wert=>{
-            pendingValue=wert==='random'?'random':String(settings.delayManual);
-            const manuell=pendingValue!=='random';
+            pendingValue=wert==='instant'?'instant':String(settings.delayManual);
+            const manuell=pendingValue!=='instant';
             $$('#optionGrid .option').forEach(b=>b.classList.toggle('selected',(b.dataset.value==='manual')===manuell));
             $('#stepperBox').hidden=!manuell;
             if(manuell)renderStepper();
@@ -1613,8 +1624,8 @@
             '<button class="option" type="button" data-value="'+o[0]+'">'+o[1]+'</button>').join('');
           $$('#optionGrid .option').forEach(b=>b.onclick=()=>waehle(b.dataset.value));
           // Beim Öffnen die gespeicherte feste Zeit zeigen, nicht den Merkwert.
-          const fest=settings.delay!=='random';
-          waehle(fest?'manual':'random');
+          const fest=settings.delay!=='instant';
+          waehle(fest?'manual':'instant');
           if(fest){pendingValue=settings.delay;renderStepper()}
         }else if(s){
           $('#quickRow').innerHTML=s.schnell.map(w=>
@@ -1635,7 +1646,7 @@
       }
       function stepSheet(richtung){
         const s=STEPPER[pendingKey];
-        if(!s||pendingValue==='random')return;
+        if(!s||pendingValue==='instant')return;
         const roh=Math.round((Number(pendingValue)+richtung*s.step)/s.step)*s.step;
         const wert=Math.min(s.max,Math.max(s.min,roh));
         pendingValue=String(Number(wert.toFixed(2)));
@@ -1665,7 +1676,7 @@
       function applySheet(){
         if(pendingKey==='delay'){
           settings.delay=pendingValue;
-          if(pendingValue!=='random')settings.delayManual=Number(pendingValue);
+          if(pendingValue!=='instant')settings.delayManual=Number(pendingValue);
         }else settings[pendingKey]=Number(pendingValue);
         saveSettings();
         renderQuickSettings();

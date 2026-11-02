@@ -1,5 +1,7 @@
 // Español – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).es={
+  "Delay": "Retardo",
+  "Instant": "Instantáneo",
   "WEITER": "CONTINUAR",
   "Sprache wählen": "Elige tu idioma",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Calibrar</b> mide el ruido ambiente durante 1,5 segundos y fija el umbral de disparo justo por encima. Tócalo una vez en la galería mientras haya silencio – después, la ventilación y los puestos vecinos ya no lo activarán por error.",

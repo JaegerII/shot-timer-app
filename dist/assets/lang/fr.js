@@ -1,5 +1,7 @@
 // Français – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).fr={
+  "Delay": "Délai",
+  "Instant": "Instantané",
   "WEITER": "CONTINUER",
   "Sprache wählen": "Choisissez votre langue",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Calibrer</b> mesure le bruit ambiant pendant 1,5 seconde et place le seuil de déclenchement juste au-dessus. Touchez-le une fois au stand quand c'est calme – ensuite, la ventilation et les postes voisins ne déclencheront plus le timer par erreur.",

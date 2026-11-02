@@ -1,5 +1,7 @@
 // English – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).en={
+  "Delay": "Delay",
+  "Instant": "Instant",
   "WEITER": "CONTINUE",
   "Sprache wählen": "Choose your language",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Calibrate</b> measures the ambient noise for 1.5 seconds and sets the trigger threshold just above it. Tap it once at the range while it is quiet – after that, ventilation and neighboring bays will no longer set it off by accident.",

@@ -1,5 +1,7 @@
 // Svenska – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).sv={
+  "Delay": "Fördröjning",
+  "Instant": "Direkt",
   "WEITER": "FORTSÄTT",
   "Sprache wählen": "Välj språk",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibrera</b> mäter bakgrundsljudet i 1,5 sekunder och lägger utlösningströskeln strax över. Tryck en gång på banan medan det är tyst – sedan löser varken ventilation eller grannbanor ut av misstag.",

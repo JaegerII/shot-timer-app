@@ -1,5 +1,7 @@
 // Italiano – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).it={
+  "Delay": "Ritardo",
+  "Instant": "Istantaneo",
   "WEITER": "CONTINUA",
   "Sprache wählen": "Scegli la lingua",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Calibra</b> misura per 1,5 secondi il rumore ambientale e imposta la soglia di attivazione appena sopra. Toccalo una volta al poligono quando c'è silenzio – così ventilazione e linee vicine non attivano più il timer per errore.",

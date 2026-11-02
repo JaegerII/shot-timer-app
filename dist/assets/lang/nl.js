@@ -1,5 +1,7 @@
 // Nederlands – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).nl={
+  "Delay": "Vertraging",
+  "Instant": "Direct",
   "WEITER": "VERDER",
   "Sprache wählen": "Kies je taal",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibreren</b> meet 1,5 seconde het omgevingsgeluid en legt de triggerdrempel net daarboven. Tik er op de baan één keer op terwijl het stil is – daarna zorgen ventilatie en naastgelegen banen niet meer per ongeluk voor een trigger.",

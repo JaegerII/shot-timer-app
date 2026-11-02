@@ -1,5 +1,7 @@
 // Čeština – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).cs={
+  "Delay": "Zpoždění",
+  "Instant": "Okamžitě",
   "WEITER": "POKRAČOVAT",
   "Sprache wählen": "Vyber jazyk",
   "<b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.": "<b>Kalibrace</b> po dobu 1,5 sekundy měří okolní hluk a nastaví práh spouštění těsně nad něj. Jednou ťukni na střelnici, dokud je ticho – pak už ventilace ani sousední stanoviště nebudou omylem spouštět měření.",
