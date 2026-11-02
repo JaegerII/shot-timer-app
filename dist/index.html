@@ -139,9 +139,6 @@
     .time .hundredths{color:var(--muted);font-size:.54em;letter-spacing:-.03em}
     .last-split{color:var(--muted);font-size:.85rem;min-height:1.3em}
     .last-split strong{color:var(--text);font-size:1.02rem;margin-left:6px;font-variant-numeric:tabular-nums}
-    .sound-meter{width:min(100%,300px);height:5px;background:var(--surface-3);border-radius:999px;overflow:hidden}
-    .sound-meter i{display:block;height:100%;width:3%;background:linear-gradient(90deg,var(--accent-dark,var(--accent)),var(--accent-fill));border-radius:inherit;transition:width .06s linear}
-    .meter-caption{display:flex;justify-content:space-between;width:min(100%,300px);color:var(--faint);font-size:.68rem}
     .debug{display:grid;grid-template-columns:repeat(2,auto);gap:2px 16px;margin:0;font-family:var(--font-display);font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums;border:1px dashed var(--line);border-radius:10px;padding:7px 11px}
     .debug[hidden]{display:none}
     .debug b{color:var(--text);font-weight:700}
@@ -174,7 +171,10 @@
     .quick{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:13px;padding:9px 8px;text-align:left;cursor:pointer}
     .quick:hover{border-color:var(--line-strong)}
     .quick label{display:block;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;pointer-events:none}
-    .quick b{font-size:.73rem;pointer-events:none}
+    .quick{min-width:0}
+    .quick b{display:block;font-size:.73rem;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    /* Längere Sprachen: Werte in den drei Kacheln etwas kleiner statt umbrechen. */
+    :root:not([lang="de"]) .quick b{font-size:.68rem;letter-spacing:-.01em}
 
     /* ============ Tableiste ============ */
     /* Die Leiste reicht bis zur Bildschirmkante; nur ihr Inhalt wird um die
@@ -252,6 +252,7 @@
     button.set-row:active,a.set-row:active{background:var(--surface-3)}
     a.set-row{text-decoration:none}
     .set-head{margin:18px 2px 8px}
+    .set-chev.lang-on{color:var(--accent);font-size:1rem;font-weight:900}
     .set-row.col{flex-direction:column;align-items:stretch;gap:9px}
     .set-ico{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--surface-3);display:grid;place-items:center;color:var(--accent)}
     .set-txt{flex:1;min-width:0}
@@ -468,9 +469,7 @@
         <div class="timer-stage">
           <div class="state-label" id="stateLabel">BEREIT</div>
           <div class="time"><span id="seconds">0</span><span class="hundredths" id="hundredths">.00</span></div>
-          <div class="last-split" id="lastSplit">Noch keine Aufnahme</div>
-          <div class="sound-meter"><i id="soundLevel"></i></div>
-          <div class="meter-caption"><span>Umgebung</span><span id="thresholdLabel">Schwelle 36 %</span></div>
+          <div class="last-split" id="lastSplit"></div>
           <p class="debug" id="debugBox" hidden>
             <span>Peak <b id="dbgPeak">0 %</b></span>
             <span>Schwelle <b id="dbgThr">0 %</b></span>
@@ -635,10 +634,10 @@
             </button>
           </div>
           <div class="set-list">
-            <div class="set-row">
+            <button class="set-row" type="button" data-go="lang">
               <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16M12 4c-2.5 2.5-2.5 13.5 0 16"/></svg></span>
-              <span class="set-txt"><b>Sprache</b><small>Deutsch · weitere Sprachen folgen</small></span>
-            </div>
+              <span class="set-txt"><b>Sprache</b><small id="langSummary">Deutsch</small></span><span class="set-chev" aria-hidden="true">›</span>
+            </button>
           </div>
           <span class="field-label set-head">Mehr Training und Tipps</span>
           <div class="set-list">
@@ -651,6 +650,10 @@
               <span class="set-txt"><b>Instagram</b><small>@wax_meils · Reels und Updates</small></span><span class="set-chev" aria-hidden="true">↗</span>
             </a>
           </div>
+        </div>
+
+        <div class="set-page" data-page="lang" data-title="Sprache" hidden>
+          <div class="set-list" id="langList"></div>
         </div>
 
         <div class="set-page" data-page="look" data-title="Darstellung" hidden>
@@ -679,7 +682,7 @@
             <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
           </div>
           <button class="ghost-btn wide" id="calibrateText" type="button" style="margin-top:12px">Jetzt kalibrieren</button>
-          <p class="tip"><span><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
+          <p class="tip"><span data-i18n-html><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
         </div>
       </div>
     </div>
@@ -700,6 +703,7 @@
       <div class="sheet-body">
         <p class="help-text">Die Schusserkennung läuft über das Mikrofon deines Geräts. Umgebungsgeräusche, Holsterbewegungen, Manipulationen an der Waffe oder andere Geräusche können ebenfalls als Treffer gewertet werden. Die gemessenen Zeiten können daher je nach Gerät und Umgebung abweichen.</p>
         <p class="help-text">Kalibriere einmal, solange es ruhig ist, und prüfe die Zeiten gegen eine Referenz, bevor du dich auf sie verlässt. Ein eigenständiger Shot Timer arbeitet unter allen Bedingungen genauer.</p>
+        <button class="ghost-btn wide" id="dryInfoCalibrate" type="button">Erkennung einstellen und kalibrieren</button>
       </div>
       <button class="sheet-action" id="dryInfoOk" type="button">VERSTANDEN</button>
     </div>
@@ -712,7 +716,7 @@
         <div class="help-block"><h3>Mikrofon</h3><p>Nach dem Startsignal hört die App mit und stoppt bei jedem Knall die Zeit. Daraus entstehen die Draw-Zeit und die Splits. Im Dry-Fire-Modus gilt dasselbe für den Trigger-Klick, nur empfindlicher eingestellt.</p></div>
         <div class="help-block"><h3>Kalibrieren</h3><p>Das Mikrofonsymbol neben START misst 1,5 Sekunden den Umgebungslärm und legt die Auslöseschwelle darüber. Einmal am Stand machen, solange es ruhig ist. Die Farbe des Symbols zeigt, ob das Mikrofon bereit ist.</p></div>
         <div class="help-block"><h3>Par Time und Durchgänge</h3><p>Par Time beendet den Durchgang nach der eingestellten Zeit mit einem zweiten Signal. Mehrere Durchgänge laufen automatisch hintereinander.</p></div>
-        <div class="help-block"><h3>Hit Factor</h3><p>Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.</p></div>
+        <div class="help-block"><h3>Hit Factor</h3><p data-i18n-html>Unter <b>Score</b> legst du ein Match an und darin beliebig viele Stages. Je Stage werden Zeit und Trefferzonen mehrerer Schützen eingetragen, alles wird sofort gespeichert. Punkte je Power Factor, minus 10 je Miss, No-Shoot und Prozedurfehler. Hit Factor = Punkte geteilt durch Zeit; der beste der Stage ist 100 %. Die Gesamtwertung addiert die Stage-Punkte aller Stages.</p></div>
         <div class="help-block"><h3>Sicherheit</h3><p>Regeln des Standes und Waffensicherheit liegen in deiner Verantwortung. Beim Dry Fire sicherstellen, dass die Waffe entladen ist und keine Munition in der Nähe liegt.</p></div>
       </div>
     </div>
@@ -749,10 +753,63 @@
   <audio id="standbyAudio" src="assets/standby.mp3" preload="auto"></audio>
   <audio id="signalAudio" src="assets/pact-beep.mp3" preload="auto"></audio>
 
+  <!-- Übersetzungen; Deutsch ist die Quellsprache im HTML selbst. -->
+  <script src="assets/lang/en.js"></script>
+  <script src="assets/lang/fr.js"></script>
+  <script src="assets/lang/es.js"></script>
+  <script src="assets/lang/it.js"></script>
+  <script src="assets/lang/nl.js"></script>
+  <script src="assets/lang/pl.js"></script>
+  <script src="assets/lang/cs.js"></script>
+  <script src="assets/lang/pt.js"></script>
+  <script src="assets/lang/sv.js"></script>
+
   <script>
     (()=>{
       'use strict';
       const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+      /* ---------- Sprachen ----------
+         Deutsch ist die Quellsprache. t() schlägt den deutschen Text im
+         Wörterbuch der gewählten Sprache nach (assets/lang/*.js) und fällt
+         sonst auf ihn zurück. {0}, {1} … sind Platzhalter.               */
+      const LANGS=[['de','Deutsch'],['en','English'],['fr','Français'],['es','Español'],['it','Italiano'],
+        ['nl','Nederlands'],['pl','Polski'],['cs','Čeština'],['pt','Português'],['sv','Svenska']];
+      const LANG=(()=>{
+        try{
+          const l=JSON.parse(localStorage.getItem('shot-timer-settings-v1')||'{}').lang;
+          if(LANGS.some(x=>x[0]===l))return l;
+        }catch(e){}
+        const n=(navigator.language||'en').slice(0,2).toLowerCase();
+        return LANGS.some(x=>x[0]===n)?n:'en';
+      })();
+      const DICT=(window.I18N||{})[LANG]||{};
+      function t(text,...args){
+        let r=DICT[text]??text;
+        args.forEach((v,i)=>{r=r.split('{'+i+'}').join(v)});
+        return r;
+      }
+      const LOCALE={de:'de-DE',en:'en-GB',fr:'fr-FR',es:'es-ES',it:'it-IT',nl:'nl-NL',pl:'pl-PL',cs:'cs-CZ',pt:'pt-PT',sv:'sv-SE'}[LANG];
+      const DEC=LANG==='en'?'.':',';
+      // Feste Texte im HTML: Textknoten und Attribute über das Wörterbuch.
+      // Absätze mit Auszeichnung (data-i18n-html) werden als Ganzes übersetzt.
+      function translateDom(){
+        document.documentElement.lang=LANG;
+        if(LANG==='de')return;
+        $$('[data-i18n-html]').forEach(el=>{const k=el.innerHTML.trim();if(DICT[k])el.innerHTML=DICT[k]});
+        const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+        for(let n=w.nextNode();n;n=w.nextNode()){
+          const p=n.parentElement;
+          if(!p||p.closest('script,style,[data-i18n-html]'))continue;
+          const k=n.nodeValue.trim();
+          if(k&&DICT[k])n.nodeValue=n.nodeValue.replace(k,DICT[k]);
+        }
+        $$('[placeholder],[aria-label],[title],[data-title]').forEach(el=>
+          ['placeholder','aria-label','title','data-title'].forEach(a=>{
+            const v=el.getAttribute(a);
+            if(v&&DICT[v.trim()])el.setAttribute(a,DICT[v.trim()]);
+          }));
+      }
 
       const SETTINGS_KEY='shot-timer-settings-v1';
       const HISTORY_KEY='shot-timer-history-v2';
@@ -785,17 +842,17 @@
       const STANDBY_FALLBACK_MS=1200;
 
       const OPTIONS={
-        delay:[['random','Zufall 2–4 s'],['manual','Manuell']],
+        delay:[['random',t('Zufall 2–4 s')],['manual',t('Manuell')]],
         par:[['0','Aus'],['1.5','1,50 s'],['2','2,00 s']],
         reps:[['1','1 Durchgang'],['5','5 Durchgänge'],['10','10 Durchgänge']]
       };
       const PROFILES={
-        live:{icon:'9',name:'9 mm / Standard',desc:'Für die meisten Indoor-Stände',sensitivity:42},
-        dry:{icon:'DF',name:'Dry Fire / Striker',desc:'Hohe Empfindlichkeit für Trigger-Klicks',sensitivity:78}
+        live:{icon:'9',name:t('9 mm / Standard'),desc:t('Für die meisten Indoor-Stände'),sensitivity:42},
+        dry:{icon:'DF',name:t('Dry Fire / Striker'),desc:t('Hohe Empfindlichkeit für Trigger-Klicks'),sensitivity:78}
       };
       const DEFAULTS={
         mode:'live',delay:'random',delayManual:2,par:0,reps:1,
-        theme:'dark',volume:.65,vibration:true,debug:false,drySeen:false,beep:'kurz',
+        lang:'',theme:'dark',volume:.65,vibration:true,debug:false,drySeen:false,beep:'kurz',
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
       };
@@ -813,6 +870,7 @@
           delayManual:num(stored.delayManual??stored.delay,DEFAULTS.delayManual,0,DELAY_MAX),
           par:num(stored.par,DEFAULTS.par,0,20),
           reps:Math.round(num(stored.reps,DEFAULTS.reps,1,99)),
+          lang:LANG,
           theme:['auto','light','dark'].includes(stored.theme)?stored.theme:DEFAULTS.theme,
           volume:num(stored.volume,DEFAULTS.volume,0,1),
           vibration:typeof stored.vibration==='boolean'?stored.vibration:DEFAULTS.vibration,
@@ -852,7 +910,7 @@
       function showToast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(el.t);el.t=setTimeout(()=>el.classList.remove('show'),2200)}
       function format(t){const s=Math.max(0,t);return {whole:Math.floor(s),dec:'.'+Math.floor((s%1)*100).toString().padStart(2,'0'),full:s.toFixed(2)}}
       function renderTime(t){const f=format(t);$('#seconds').textContent=f.whole;$('#hundredths').textContent=f.dec}
-      function de(n){return n.toFixed(2).replace('.',',')}
+      function de(n){return n.toFixed(2).replace('.',DEC)}
       function setToggle(el,on){el.classList.toggle('on',on);el.setAttribute('aria-pressed',String(on))}
 
       /* ---------- Darstellung ----------
@@ -874,9 +932,9 @@
         btn.classList.toggle('ready',state==='ready');
         btn.classList.toggle('blocked',state==='blocked');
         btn.setAttribute('aria-label',
-          state==='ready'?'Mikrofon bereit – jetzt kalibrieren'
-          :state==='blocked'?'Mikrofon nicht verfügbar'
-          :'Mikrofon kalibrieren');
+          state==='ready'?t('Mikrofon bereit – jetzt kalibrieren')
+          :state==='blocked'?t('Mikrofon nicht verfügbar')
+          :t('Mikrofon kalibrieren'));
         $('#micWarn').classList.toggle('show',!!message);
         if(message)$('#micWarnText').textContent=message;
       }
@@ -1022,7 +1080,7 @@
         try{
           a.muted=false;a.pause();a.currentTime=0;a.volume=settings.volume;
           const p=a.play();
-          if(p?.catch)p.catch(()=>showToast('Audiosignal konnte nicht abgespielt werden'));
+          if(p?.catch)p.catch(()=>showToast(t('Audiosignal konnte nicht abgespielt werden')));
         }catch(e){}
         rt.audioT0=null;
         return performance.now()+(type==='signal'?FALLBACK_LEAD_MS:0);
@@ -1032,7 +1090,7 @@
       async function ensureMic(){
         if(rt.stream){await resumeAudio();return true}
         if(!navigator.mediaDevices?.getUserMedia){
-          setMicState('blocked','Kein Mikrofonzugriff auf diesem Gerät');
+          setMicState('blocked',t('Kein Mikrofonzugriff auf diesem Gerät'));
           return false;
         }
         try{
@@ -1051,8 +1109,8 @@
           startMonitor();
           return true;
         }catch(e){
-          setMicState('blocked','Mikrofon nicht freigegeben – in den iPhone-Einstellungen erlauben');
-          showToast('Mikrofon nicht freigegeben');
+          setMicState('blocked',t('Mikrofon nicht freigegeben – in den iPhone-Einstellungen erlauben'));
+          showToast(t('Mikrofon nicht freigegeben'));
           return false;
         }
       }
@@ -1086,16 +1144,13 @@
         rt.monitoring=false;
         if(rt.raf)cancelAnimationFrame(rt.raf);
         rt.raf=null;
-        $('#soundLevel').style.width='3%';
       }
       function monitor(){
         if(!rt.monitoring||!rt.analyser){rt.monitoring=false;return}
         const data=new Uint8Array(rt.analyser.fftSize);
         rt.analyser.getByteTimeDomainData(data);
-        let sum=0,peak=0;
-        for(const v of data){const n=Math.abs((v-128)/128);sum+=n*n;if(n>peak)peak=n}
-        const rms=Math.sqrt(sum/data.length);
-        $('#soundLevel').style.width=Math.min(100,Math.max(2,rms*420))+'%';
+        let peak=0;
+        for(const v of data){const n=Math.abs((v-128)/128);if(n>peak)peak=n}
         if(settings.debug){
           if(peak>rt.peakMax)rt.peakMax=peak;
           const jetzt=performance.now();
@@ -1117,10 +1172,10 @@
         rt.raf=requestAnimationFrame(monitor);
       }
       async function calibrate(){
-        if(rt.running){showToast('Erst den Durchgang beenden');return}
+        if(rt.running){showToast(t('Erst den Durchgang beenden'));return}
         if(!await ensureMic())return;
-        $('#stateLabel').textContent='RUHE BITTE';
-        showToast('Jetzt 1,5 s ruhig sein');
+        $('#stateLabel').textContent=t('RUHE BITTE');
+        showToast(t('Jetzt 1,5 s ruhig sein'));
         const samples=[];
         const take=()=>{
           if(!rt.analyser)return;
@@ -1134,9 +1189,8 @@
           clearInterval(id);
           settings.noiseFloor[settings.mode]=Math.max(.006,samples.reduce((a,b)=>a+b,0)/(samples.length||1));
           saveSettings();
-          renderThreshold();
-          $('#stateLabel').textContent='BEREIT';
-          showToast('Kalibriert – Schwelle '+Math.round(currentThreshold()*100)+' %');
+          $('#stateLabel').textContent=t('BEREIT');
+          showToast(t('Kalibriert'));
         },1500);
       }
 
@@ -1151,7 +1205,7 @@
         reset(false,false);
         rt.running=true;rt.repNow=1;
         const runId=++rt.runId;
-        $('#startBtn').textContent='STOP';
+        $('#startBtn').textContent=t('STOP');
         $('#startBtn').classList.add('stop');
         requestWakeLock();
         queueRep(runId);
@@ -1159,7 +1213,7 @@
       function queueRep(runId){
         rt.counting=false;
         rt.threshold=currentThreshold();
-        $('#stateLabel').textContent=settings.reps>1?'STANDBY '+rt.repNow+'/'+settings.reps:'STANDBY';
+        $('#stateLabel').textContent=settings.reps>1?t('STANDBY')+' '+rt.repNow+'/'+settings.reps:t('STANDBY');
         renderTime(0);
         // Die Verzögerung läuft erst, wenn „Standby“ ausgesprochen ist.
         const ansageEnde=playCue('standby')+standbyMs();
@@ -1170,7 +1224,7 @@
           rt.lastDetected=t0;
           rt.ignoreUntil=t0+(rt.blankMs||BLANK_MS);
           rt.counting=true;
-          $('#stateLabel').textContent='GO';
+          $('#stateLabel').textContent=t('GO');
           rt.clock=requestAnimationFrame(tick);
           if(settings.par>0){
             // Par ist nur ein Signal: die Messung läuft weiter, ein Treffer
@@ -1178,7 +1232,7 @@
             later(()=>{
               if(rt.running&&rt.counting&&rt.runId===runId){
                 playCue('signal');
-                $('#stateLabel').textContent='NACH PAR';
+                $('#stateLabel').textContent=t('NACH PAR');
               }
             },settings.par*1000+(t0-performance.now()));
             // Bei mehreren Durchgängen muss der Lauf trotzdem enden, sonst
@@ -1206,7 +1260,7 @@
         const t=(now-rt.startAt)/1000;
         if(t<.05)return;
         if(settings.debug){
-          $('#dbgHit').textContent=peak===null?'manuell':Math.round(peak*100)+' %';
+          $('#dbgHit').textContent=peak===null?t('manuell'):Math.round(peak*100)+' %';
           $('#dbgTime').textContent=t.toFixed(3)+' s';
         }
         const prev=rt.shots.length?rt.shots[rt.shots.length-1].time:0;
@@ -1215,15 +1269,15 @@
         renderTime(t);
         renderShots();
         $('#lastSplit').innerHTML=rt.shots.length===1
-          ?'Erster Schuss <strong>'+format(t).full+' s</strong>'
-          :'Split <strong>'+format(split).full+' s</strong>';
+          ?t('Erster Schuss')+' <strong>'+format(t).full+' s</strong>'
+          :t('Split')+' <strong>'+format(split).full+' s</strong>';
         if(rt.drillStop&&rt.shots.length>=rt.drillStop)finishRep(rt.runId);
       }
       function finishRep(runId,byPar=false){
         if(!rt.counting||rt.runId!==runId)return;
         rt.counting=false;
         cancelAnimationFrame(rt.clock);
-        $('#stateLabel').textContent=byPar?'PAR':'ENDE';
+        $('#stateLabel').textContent=byPar?t('PAR'):t('ENDE');
         if(rt.repNow<settings.reps){
           rt.repNow++;
           later(()=>{if(rt.running&&rt.runId===runId)queueRep(runId)},1200);
@@ -1236,11 +1290,11 @@
         clearTimers();
         cancelAnimationFrame(rt.clock);
         $('#standbyAudio').pause();$('#signalAudio').pause();
-        $('#startBtn').textContent='START';
+        $('#startBtn').textContent=t('START');
         $('#startBtn').classList.remove('stop');
         releaseWakeLock();
         if(lief&&rt.shots.length&&!rt.saved){rt.saved=true;saveRun()}
-        if(update)$('#stateLabel').textContent=rt.shots.length?'ENDE':'BEREIT';
+        if(update)$('#stateLabel').textContent=rt.shots.length?t('ENDE'):t('BEREIT');
       }
       function reset(label=true,clearDrill=true){
         stop(false);
@@ -1249,8 +1303,8 @@
         if(clearDrill){rt.drillStop=0;rt.drillLabel=null}
         renderTime(0);
         renderShots();
-        $('#lastSplit').textContent='Noch keine Aufnahme';
-        if(label)$('#stateLabel').textContent='BEREIT';
+        $('#lastSplit').textContent='';
+        if(label)$('#stateLabel').textContent=t('BEREIT');
       }
 
       /* ---------- Wake Lock ---------- */
@@ -1273,16 +1327,16 @@
           ? rt.shots.map((s,i)=>
               '<div class="shot-row"><span class="n">#'+String(i+1).padStart(2,'0')+'</span>'+
               '<b>'+s.time.toFixed(2)+' s</b>'+
-              '<span class="split">'+(i===0?'Draw':'+'+s.split.toFixed(2))+'</span></div>'
+              '<span class="split">'+(i===0?t('Draw'):'+'+s.split.toFixed(2))+'</span></div>'
             ).reverse().join('')
-          : '<div class="empty">Noch keine Treffer aufgezeichnet.</div>';
+          : '<div class="empty">'+t('Noch keine Treffer aufgezeichnet.')+'</div>';
         renderSplitStrip();
       }
       // Die letzten vier Treffer bleiben auf der Karte sichtbar, ohne zu scrollen.
       function renderSplitStrip(){
         const strip=$('#splitStrip');
         if(!rt.shots.length){
-          strip.innerHTML='<span class="splits-empty">Splits erscheinen hier – antippen für alle</span>';
+          strip.innerHTML='<span class="splits-empty">'+t('Splits erscheinen hier – antippen für alle')+'</span>';
           return;
         }
         const shown=rt.shots.map((s,i)=>({s,n:i+1})).slice(-4).reverse();
@@ -1295,23 +1349,19 @@
       function openRunSheet(){
         renderShots();
         $('#runSub').textContent=rt.shots.length
-          ? rt.shots.length+' Treffer · '+rt.shots[rt.shots.length-1].time.toFixed(2)+' s gesamt · liegt im Verlauf'
-          : 'Noch keine Aufnahme';
+          ? t('{0} Treffer · {1} s gesamt · liegt im Verlauf',rt.shots.length,rt.shots[rt.shots.length-1].time.toFixed(2))
+          : t('Noch keine Aufnahme');
         openModalById('runModal');
-      }
-      function renderThreshold(){
-        $('#thresholdLabel').textContent='Schwelle '+Math.round(currentThreshold()*100)+' %';
       }
       function renderSensitivity(){
         const value=settings.sensitivity[settings.mode];
         $('#sensitivity').value=value;
         $('#sensitivityValue').textContent=value+' %';
-        renderThreshold();
       }
       function renderQuickSettings(){
-        $('#delayValue').textContent=settings.delay==='random'?'Zufall 2–4 s':de(Number(settings.delay))+' s';
-        $('#parValue').textContent=settings.par?de(settings.par)+' s':'Aus';
-        $('#repsValue').textContent=settings.reps===1?'1 Durchgang':settings.reps+' Durchgänge';
+        $('#delayValue').textContent=settings.delay==='random'?t('Zufall 2–4 s'):de(Number(settings.delay))+' s';
+        $('#parValue').textContent=settings.par?de(settings.par)+' s':t('Aus');
+        $('#repsValue').textContent=settings.reps===1?t('1 Durchgang'):t('{0} Durchgänge',settings.reps);
       }
       function renderProfile(){
         const p=PROFILES[settings.mode];
@@ -1379,7 +1429,7 @@
         const history=readHistory();
         history.unshift(eintrag);
         try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(0,HISTORY_LIMIT)))}
-        catch(e){showToast('Speichern fehlgeschlagen');return null}
+        catch(e){showToast(t('Speichern fehlgeschlagen'));return null}
         LEGACY_HISTORY_KEYS.forEach(k=>localStorage.removeItem(k));
         renderHistory();
         return eintrag;
@@ -1388,18 +1438,18 @@
         const history=readHistory().filter(x=>x.id!==id);
         writeJson(HISTORY_KEY,history);
         renderHistory();
-        showToast('Durchgang gelöscht');
+        showToast(t('Durchgang gelöscht'));
       }
       // Zeiten eines Laufs als Tabelle, für die Detailansicht und das
       // Sheet zum laufenden Durchgang.
       function shotTable(shots){
-        if(!shots||!shots.length)return '<div class="empty">Keine Treffer aufgezeichnet.</div>';
+        if(!shots||!shots.length)return '<div class="empty">'+t('Keine Treffer aufgezeichnet.')+'</div>';
         return '<div class="shot-list">'+
-          '<div class="shot-row head"><span class="n">#</span><b>Zeit</b><span class="split">Split</span></div>'+
+          '<div class="shot-row head"><span class="n">#</span><b>'+t('Zeit')+'</b><span class="split">'+t('Split')+'</span></div>'+
           shots.map((s,i)=>
             '<div class="shot-row"><span class="n">'+String(i+1).padStart(2,'0')+'</span>'+
             '<b>'+s.t.toFixed(2)+' s</b>'+
-            '<span class="split">'+(i===0?'Draw':'+'+s.s.toFixed(2))+'</span></div>'
+            '<span class="split">'+(i===0?t('Draw'):'+'+s.s.toFixed(2))+'</span></div>'
           ).join('')+'</div>';
       }
       function openRunDetail(id){
@@ -1409,12 +1459,12 @@
         $('#runDetailTitle').textContent=titel;
         $('#runDetailSub').textContent=dateText(lauf.at);
         const fakten=[
-          ['Erster Treffer',lauf.first.toFixed(2)+' s'],
-          ['Gesamtzeit',lauf.total.toFixed(2)+' s'],
-          ['Treffer',String(lauf.count)],
-          ['Bester Split',typeof lauf.best==='number'?lauf.best.toFixed(2)+' s':'–'],
-          ['Par Time',lauf.par?de(lauf.par)+' s':'Aus'],
-          ['Verzögerung',lauf.delay==='random'?'Zufall 2–4 s':de(Number(lauf.delay))+' s']
+          [t('Erster Treffer'),lauf.first.toFixed(2)+' s'],
+          [t('Gesamtzeit'),lauf.total.toFixed(2)+' s'],
+          [t('Treffer'),String(lauf.count)],
+          [t('Bester Split'),typeof lauf.best==='number'?lauf.best.toFixed(2)+' s':'–'],
+          [t('Par Time'),lauf.par?de(lauf.par)+' s':t('Aus')],
+          [t('Verzögerung'),lauf.delay==='random'?t('Zufall 2–4 s'):de(Number(lauf.delay))+' s']
         ];
         $('#runDetailBody').innerHTML=
           '<div class="stat-grid">'+fakten.map(([k,v])=>statTile(k,v)).join('')+'</div>'+
@@ -1424,15 +1474,15 @@
       }
       function renderHistory(){
         const h=readHistory(),el=$('#historyList');
-        if(!h.length){el.innerHTML='<div class="empty">Noch keine Trainings gespeichert.</div>';return}
+        if(!h.length){el.innerHTML='<div class="empty">'+t('Noch keine Trainings gespeichert.')+'</div>';return}
         el.innerHTML=h.map((x,i)=>{
           const title=x.drill||(x.mode==='live'?'Live Fire':'Dry Fire');
-          const when=new Date(x.at).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-          const draw=typeof x.first==='number'?' · Draw '+x.first.toFixed(2)+' s':'';
-          const best=typeof x.best==='number'?' · Bester Split '+x.best.toFixed(2)+' s':'';
+          const when=new Date(x.at).toLocaleString(LOCALE,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+          const draw=typeof x.first==='number'?' · '+t('Draw')+' '+x.first.toFixed(2)+' s':'';
+          const best=typeof x.best==='number'?' · '+t('Bester Split')+' '+x.best.toFixed(2)+' s':'';
           const nr=h.length-i;
           return '<button class="history-card" type="button"'+(x.id?' data-run="'+x.id+'"':'')+'>'+
-                 '<div><b>Lauf '+nr+' · '+esc(title)+' · '+x.count+' Treffer</b>'+
+                 '<div><b>'+t('Lauf {0}',nr)+' · '+esc(title)+' · '+t('{0} Treffer',x.count)+'</b>'+
                  '<span>'+when+draw+best+'</span></div>'+
                  '<strong>'+x.total.toFixed(2)+' s</strong></button>';
         }).join('');
@@ -1466,7 +1516,7 @@
       // Par und Durchgänge sind frei einstellbar, die Verzögerung bleibt
       // eine Auswahl – zufällig und fest sind keine Punkte einer Skala.
       const STEPPER={
-        par:{min:0,max:PAR_MAX,step:PAR_STEP,einheit:' s',aus:'Aus',schnell:[]},
+        par:{min:0,max:PAR_MAX,step:PAR_STEP,einheit:' s',aus:t('Aus'),schnell:[]},
         reps:{min:1,max:99,step:1,einheit:'',schnell:[]},
         // Verzögerung: erst die Wahl Zufall/Manuell, nur bei Manuell der Regler.
         delay:{min:0,max:DELAY_MAX,step:.1,einheit:' s',schnell:[],wahl:true}
@@ -1485,7 +1535,7 @@
       }
       function openSheet(key){
         pendingKey=key;pendingValue=String(settings[key]);
-        const titles={delay:'Startverzögerung',par:'Par Time',reps:'Durchgänge'};
+        const titles={delay:t('Startverzögerung'),par:t('Par Time'),reps:t('Durchgänge')};
         $('#sheetTitle').textContent=titles[key];
         const s=STEPPER[key];
         $('#stepperBox').hidden=!s;
@@ -1602,23 +1652,38 @@
       $('#historyBtn').onclick=()=>{closeModals();showView('history')};
       // Einstellungen: Übersicht mit Unterseiten im selben Sheet.
       function settingsSummary(){
-        const themes={auto:'Automatisch',light:'Hell',dark:'Dunkel'};
-        const lautst={0.35:'Leise',0.65:'Normal',1:'Laut'};
+        const themes={auto:t('Automatisch'),light:t('Hell'),dark:t('Dunkel')};
+        const lautst={0.35:t('Leise'),0.65:t('Normal'),1:t('Laut')};
         $('#lookSummary').textContent=themes[settings.theme]||'';
         $('#signalsSummary').textContent=
-          'Lautstärke '+(lautst[settings.volume]||'Normal')+' · Vibration '+(settings.vibration?'an':'aus');
+          t('Lautstärke')+' '+(lautst[settings.volume]||t('Normal'))+' · '+t('Vibration')+' '+(settings.vibration?t('an'):t('aus'));
         $('#detectSummary').textContent=$('#profileName').textContent+' · '+$('#sensitivityValue').textContent;
+        $('#langSummary').textContent=LANGS.find(l=>l[0]===LANG)[1];
       }
+      // Sprachliste: die Namen stehen immer in der eigenen Sprache.
+      // Ein Wechsel lädt die App neu, damit jeder Text sicher mitwechselt.
+      $('#langList').innerHTML=LANGS.map(([code,name])=>
+        '<button class="set-row" type="button" data-lang="'+code+'"><span class="set-txt"><b>'+name+'</b></span>'+
+        (code===LANG?'<span class="set-chev lang-on" aria-hidden="true">✓</span>':'')+'</button>').join('');
+      $('#langList').addEventListener('click',ev=>{
+        const b=ev.target.closest('[data-lang]');
+        if(!b||b.dataset.lang===LANG)return;
+        settings.lang=b.dataset.lang;
+        saveSettings();
+        location.reload();
+      });
       function showSettingsPage(name){
         $$('#moreBody .set-page').forEach(p=>p.hidden=p.dataset.page!==name);
         const page=$('#moreBody .set-page[data-page="'+name+'"]');
-        $('#moreTitle').textContent=page.dataset.title||'Einstellungen';
+        $('#moreTitle').textContent=page.dataset.title||t('Einstellungen');
         $('#moreBack').hidden=name==='root';
         $('#moreBody').scrollTop=0;
         settingsSummary();
       }
       $$('#moreBody [data-go]').forEach(b=>b.onclick=()=>showSettingsPage(b.dataset.go));
       $('#moreBack').onclick=()=>showSettingsPage('root');
+      // Aus dem Dry-Fire-Hinweis direkt zur Erkennung in den Einstellungen.
+      $('#dryInfoCalibrate').onclick=()=>{showSettingsPage('detect');openModalById('moreModal')};
       $('#moreBtn').onclick=()=>{showSettingsPage('root');openModalById('moreModal')};
       $('#helpBtn').onclick=()=>openModalById('helpModal');
       $('#splitStrip').onclick=openRunSheet;
@@ -1657,7 +1722,7 @@
       $('#clearHistory').onclick=()=>{
         [HISTORY_KEY,...LEGACY_HISTORY_KEYS].forEach(k=>localStorage.removeItem(k));
         renderHistory();
-        showToast('Verlauf gelöscht');
+        showToast(t('Verlauf gelöscht'));
       };
 
       document.addEventListener('keydown',e=>{
@@ -1700,13 +1765,15 @@
       let pendingPf='minor';
       let pendingDelete=null;
 
+      // Zahl mit passender Einzahl oder Mehrzahl, beides über das Wörterbuch.
+      const countText=(n,one,many)=>n+' '+t(n===1?one:many);
       const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-      const nf=(v,d)=>Number(v).toFixed(d).replace('.',',');
+      const nf=(v,d)=>Number(v).toFixed(d).replace('.',DEC);
       const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      const dateText=iso=>new Date(iso).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
-      const dateShort=iso=>new Date(iso).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'});
+      const dateText=iso=>new Date(iso).toLocaleString(LOCALE,{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const dateShort=iso=>new Date(iso).toLocaleDateString(LOCALE,{day:'2-digit',month:'2-digit',year:'2-digit'});
       function readJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch(e){return fallback}}
-      function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast('Speichern fehlgeschlagen');return false}}
+      function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast(t('Speichern fehlgeschlagen'));return false}}
 
       /* ---------- Matches sichern ----------
          Jede Eingabe wird sofort gespeichert. Die App kann am Stand jederzeit
@@ -1716,7 +1783,7 @@
         const time=Number(e.time);
         const out={
           id:String(e.id||uid()),shooterId:String(e.shooterId),
-          name:String(e.name||'Schütze'),pf:e.pf==='major'?'major':'minor',
+          name:String(e.name||t('Schütze')),pf:e.pf==='major'?'major':'minor',
           time:Number.isFinite(time)&&time>0?time:0
         };
         ZONES.forEach(z=>{
@@ -1768,8 +1835,8 @@
         }
         return out;
       }
-      const matchTitle=m=>m.name.trim()||'Match vom '+dateShort(m.at);
-      const stageTitle=(m,s)=>s.name.trim()||'Stage '+(m.stages.indexOf(s)+1);
+      const matchTitle=m=>m.name.trim()||t('Match vom {0}',dateShort(m.at));
+      const stageTitle=(m,s)=>s.name.trim()||t('Stage {0}',m.stages.indexOf(s)+1);
       // Nach jeder Eingabe: sichern, Karte auffrischen, Rangliste neu rechnen.
       function updated(entry){
         persistDraft();
@@ -1803,24 +1870,24 @@
         return '<article class="entry" data-entry="'+e.id+'">'+
           '<div class="entry-head">'+
             '<b>'+name+'</b>'+
-            '<button class="pf-badge '+e.pf+'" type="button" title="Power Factor umschalten" aria-label="Power Factor von '+name+' umschalten, aktuell '+(e.pf==='major'?'Major':'Minor')+'">'+(e.pf==='major'?'Major':'Minor')+'</button>'+
-            '<button class="entry-tool progress" type="button" aria-label="Fortschritt von '+name+'">'+ICON_CHART+'</button>'+
-            '<button class="entry-tool remove" type="button" aria-label="'+name+' von der Stage nehmen">'+ICON_CLOSE+'</button>'+
+            '<button class="pf-badge '+e.pf+'" type="button" title="'+t('Power Factor umschalten')+'" aria-label="'+t('Power Factor von {0} umschalten, aktuell {1}',name,e.pf==='major'?'Major':'Minor')+'">'+(e.pf==='major'?'Major':'Minor')+'</button>'+
+            '<button class="entry-tool progress" type="button" aria-label="'+t('Fortschritt von {0}',name)+'">'+ICON_CHART+'</button>'+
+            '<button class="entry-tool remove" type="button" aria-label="'+t('{0} von der Stage nehmen',name)+'">'+ICON_CLOSE+'</button>'+
           '</div>'+
           '<div class="entry-metrics">'+
             '<div class="time-field">'+
-              '<input class="time-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" value="'+(e.time>0?nf(e.time,2):'')+'" aria-label="Zeit von '+name+' in Sekunden">'+
+              '<input class="time-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" value="'+(e.time>0?nf(e.time,2):'')+'" aria-label="'+t('Zeit von {0} in Sekunden',name)+'">'+
               '<span>s</span>'+
-              '<button class="take-time" type="button">Aus Timer</button>'+
+              '<button class="take-time" type="button">'+t('Aus Timer')+'</button>'+
             '</div>'+
-            '<div class="metric points"><span>Punkte</span><b>'+s.points+'</b></div>'+
+            '<div class="metric points"><span>'+t('Punkte')+'</span><b>'+s.points+'</b></div>'+
             '<div class="metric hf"><span>Hit Factor</span><b>'+(e.time>0?nf(s.hf,4):'—')+'</b></div>'+
           '</div>'+
           '<div class="counters">'+ZONES.map(z=>
             '<div class="counter'+(z.pen?' pen':'')+'" data-zone="'+z.key+'">'+
-              '<button class="counter-main" type="button" aria-label="'+z.label+' erhöhen"><small>'+z.label+'</small>'+
+              '<button class="counter-main" type="button" aria-label="'+t('{0} erhöhen',z.label)+'"><small>'+z.label+'</small>'+
                 '<b'+(z.pen&&e[z.key]>0?' class="hot"':'')+'>'+e[z.key]+'</b></button>'+
-              '<button class="counter-minus'+(e[z.key]>0?' show':'')+'" type="button" aria-label="'+z.label+' verringern">−</button>'+
+              '<button class="counter-minus'+(e[z.key]>0?' show':'')+'" type="button" aria-label="'+t('{0} verringern',z.label)+'">−</button>'+
             '</div>').join('')+
           '</div>'+
         '</article>';
@@ -1829,7 +1896,7 @@
         const list=$('#entryList');
         list.innerHTML=stage.entries.length
           ? stage.entries.map(entryHtml).join('')
-          : '<div class="empty">Noch kein Schütze auf dieser Stage.</div>';
+          : '<div class="empty">'+t('Noch kein Schütze auf dieser Stage.')+'</div>';
       }
       // Aktualisiert nur die Zahlen, damit ein laufendes Tippen im Zeitfeld erhalten bleibt.
       function refreshEntry(e){
@@ -1853,10 +1920,10 @@
         const rows=ranked();
         const el=$('#resultList');
         $('#resultHint').textContent=stage.entries.length
-          ? rows.length+' von '+stage.entries.length+' gewertet'
+          ? t('{0} von {1} gewertet',rows.length,stage.entries.length)
           : '';
         if(!rows.length){
-          el.innerHTML='<div class="empty">Sobald eine Zeit eingetragen ist, erscheint hier die Rangliste.</div>';
+          el.innerHTML='<div class="empty">'+t('Sobald eine Zeit eingetragen ist, erscheint hier die Rangliste.')+'</div>';
           return;
         }
         const best=rows[0].hf, max=maxStagePoints();
@@ -1865,20 +1932,20 @@
           return rankRow({
             tag:'button',attrs:' type="button" data-shooter="'+r.entry.shooterId+'"',lead:i===0,
             rank:i+1,title:r.entry.name,hf:r.hf,pct,
-            sub:r.points+' Pkt · '+nf(r.entry.time,2)+' s',
-            aside:nf(max*pct/100,1)+' Stage-Pkt'
+            sub:t('{0} Pkt',r.points)+' · '+nf(r.entry.time,2)+' s',
+            aside:t('{0} Stage-Pkt',nf(max*pct/100,1))
           });
         }).join('');
       }
       function renderStageBar(){
         $('#shotsValue').textContent=stage.shots;
-        $('#maxPoints').textContent='max. '+maxStagePoints()+' Punkte';
+        $('#maxPoints').textContent=t('max. {0} Punkte',maxStagePoints());
       }
       function renderScore(){renderStageBar();renderResult()}
 
       /* ---------- Schützen ---------- */
       function addEntry(shooter){
-        if(stage.entries.some(e=>e.shooterId===shooter.id)){showToast('Steht bereits auf der Stage');return}
+        if(stage.entries.some(e=>e.shooterId===shooter.id)){showToast(t('Steht bereits auf der Stage'));return}
         stage.entries.push({id:uid(),shooterId:shooter.id,name:shooter.name,pf:shooter.pf,time:0,a:0,c:0,d:0,m:0,ns:0,pe:0});
         persistDraft();renderEntries();renderResult();
       }
@@ -1890,22 +1957,22 @@
         const el=$('#shooterPicker');
         const used=new Set(stage.entries.map(e=>e.shooterId));
         const free=shooters.filter(s=>!used.has(s.id));
-        if(!shooters.length){el.innerHTML='<div class="empty">Noch keine Schützen gespeichert.</div>';return}
-        if(!free.length){el.innerHTML='<div class="empty">Alle gespeicherten Schützen stehen schon auf der Stage.</div>';return}
+        if(!shooters.length){el.innerHTML='<div class="empty">'+t('Noch keine Schützen gespeichert.')+'</div>';return}
+        if(!free.length){el.innerHTML='<div class="empty">'+t('Alle gespeicherten Schützen stehen schon auf der Stage.')+'</div>';return}
         el.innerHTML=free.map(s=>{
           const name=esc(s.name);
           // Rueckfrage in der Zeile statt eines zweiten Dialogs ueber dem offenen.
           if(s.id===pendingDelete){
             return '<div class="pick-row confirm">'+
-              '<span class="confirm-text">'+name+' löschen?</span>'+
-              '<button class="ghost-btn" type="button" data-cancel-del="1">Abbrechen</button>'+
-              '<button class="ghost-btn danger" type="button" data-confirm-del="'+s.id+'">Löschen</button>'+
+              '<span class="confirm-text">'+t('{0} löschen?',name)+'</span>'+
+              '<button class="ghost-btn" type="button" data-cancel-del="1">'+t('Abbrechen')+'</button>'+
+              '<button class="ghost-btn danger" type="button" data-confirm-del="'+s.id+'">'+t('Löschen')+'</button>'+
             '</div>';
           }
           return '<div class="pick-row">'+
             '<button class="pick" type="button" data-pick="'+s.id+'"><b>'+name+'</b>'+
               '<span class="pf-badge '+s.pf+'">'+(s.pf==='major'?'Major':'Minor')+'</span></button>'+
-            '<button class="pick-del" type="button" data-del="'+s.id+'" aria-label="'+name+' aus der Liste löschen">×</button>'+
+            '<button class="pick-del" type="button" data-del="'+s.id+'" aria-label="'+t('{0} aus der Liste löschen',name)+'">×</button>'+
           '</div>';
         }).join('');
       }
@@ -1922,7 +1989,7 @@
       }
       function createShooter(){
         const name=$('#newShooterName').value.trim();
-        if(!name){showToast('Name fehlt');$('#newShooterName').focus();return}
+        if(!name){showToast(t('Name fehlt'));$('#newShooterName').focus();return}
         let shooter=shooters.find(s=>s.name.toLowerCase()===name.toLowerCase());
         if(shooter)shooter.pf=pendingPf;
         else{shooter={id:uid(),name,pf:pendingPf};shooters.push(shooter)}
@@ -1940,12 +2007,12 @@
         writeJson(SHOOTERS_KEY,shooters);
         pendingDelete=null;
         renderShooterPicker();
-        showToast('Schütze gelöscht');
+        showToast(t('Schütze gelöscht'));
       }
 
       /* ---------- Zeit aus dem Timer ---------- */
       function takeTimerTime(entry){
-        if(!rt.shots.length){showToast('Im Timer liegt noch keine Zeit');return}
+        if(!rt.shots.length){showToast(t('Im Timer liegt noch keine Zeit'));return}
         const shots=rt.shots.length;
         entry.time=Number(rt.shots[shots-1].time.toFixed(2));
         const input=$('.entry[data-entry="'+entry.id+'"] .time-input');
@@ -1953,8 +2020,8 @@
         const empty=ZONES.every(z=>entry[z.key]===0);
         if(empty){
           entry.a=shots; // Vorbelegung: alles A, danach nur noch herunterstufen
-          showToast('Zeit und '+shots+(shots===1?' Treffer':' Treffer')+' als A übernommen');
-        }else showToast('Zeit übernommen');
+          showToast(t('Zeit und {0} Treffer als A übernommen',shots));
+        }else showToast(t('Zeit übernommen'));
         updated(entry);
       }
 
@@ -1998,21 +2065,21 @@
         $('#stagePage').hidden=p!=='stage';
         $('#scoreBack').hidden=p==='matches';
         if(p==='matches'){
-          $('#scoreTitle').textContent='Matches';
+          $('#scoreTitle').textContent=t('Matches');
           $('#scoreSub').textContent='';
           renderMatchList();
         }else if(p==='match'){
           $('#scoreTitle').textContent=matchTitle(currentMatch);
           const n=currentMatch.stages.length, s=matchShooterCount(currentMatch);
-          $('#scoreSub').textContent=n+(n===1?' Stage':' Stages')+' · '+s+(s===1?' Schütze':' Schützen');
+          $('#scoreSub').textContent=countText(n,'Stage','Stages')+' · '+countText(s,'Schütze','Schützen');
           $('#matchName').value=currentMatch.name;
-          $('#matchName').placeholder='Match vom '+dateShort(currentMatch.at);
+          $('#matchName').placeholder=t('Match vom {0}',dateShort(currentMatch.at));
           renderMatchPage();
         }else{
           $('#scoreTitle').textContent=stageTitle(currentMatch,stage);
           $('#scoreSub').textContent=matchTitle(currentMatch);
           $('#stageName').value=stage.name;
-          $('#stageName').placeholder='Stage '+(currentMatch.stages.indexOf(stage)+1);
+          $('#stageName').placeholder=t('Stage {0}',currentMatch.stages.indexOf(stage)+1);
           renderEntries();
           renderScore();
         }
@@ -2021,7 +2088,7 @@
       function renderMatchList(){
         const el=$('#matchList');
         if(!matches.length){
-          el.innerHTML='<div class="empty">Noch kein Match angelegt. Ein Match sammelt mehrere Stages und rechnet die Gesamtwertung.</div>';
+          el.innerHTML='<div class="empty">'+t('Noch kein Match angelegt. Ein Match sammelt mehrere Stages und rechnet die Gesamtwertung.')+'</div>';
           return;
         }
         el.innerHTML=matches.map(m=>{
@@ -2029,8 +2096,8 @@
           const n=m.stages.length, s=matchShooterCount(m);
           return '<button class="match-card" type="button" data-match="'+m.id+'"><div>'+
             '<b>'+esc(matchTitle(m))+'</b>'+
-            '<div class="meta"><span>'+dateShort(m.at)+'</span><span>'+n+(n===1?' Stage':' Stages')+'</span><span>'+s+(s===1?' Schütze':' Schützen')+'</span></div>'+
-            (top?'<span class="lead-line">Führt: <strong>'+esc(top.name)+'</strong></span>':'')+
+            '<div class="meta"><span>'+dateShort(m.at)+'</span><span>'+countText(n,'Stage','Stages')+'</span><span>'+countText(s,'Schütze','Schützen')+'</span></div>'+
+            (top?'<span class="lead-line">'+t('Führt:')+' <strong>'+esc(top.name)+'</strong></span>':'')+
           '</div><span class="chev" aria-hidden="true">›</span></button>';
         }).join('');
       }
@@ -2041,18 +2108,18 @@
           const n=st.entries.length;
           return '<button class="match-card" type="button" data-stage="'+st.id+'"><div>'+
             '<b>'+esc(stageTitle(m,st))+'</b>'+
-            '<div class="meta"><span>'+n+(n===1?' Schütze':' Schützen')+'</span><span>'+st.shots+' Schüsse</span></div>'+
-            (rows.length?'<span class="lead-line">Bester HF: <strong>'+nf(rows[0].hf,4)+'</strong> · '+esc(rows[0].entry.name)+'</span>':'')+
+            '<div class="meta"><span>'+countText(n,'Schütze','Schützen')+'</span><span>'+t('{0} Schüsse',st.shots)+'</span></div>'+
+            (rows.length?'<span class="lead-line">'+t('Bester HF:')+' <strong>'+nf(rows[0].hf,4)+'</strong> · '+esc(rows[0].entry.name)+'</span>':'')+
           '</div><span class="chev" aria-hidden="true">›</span></button>';
-        }).join(''):'<div class="empty">Noch keine Stage in diesem Match.</div>';
+        }).join(''):'<div class="empty">'+t('Noch keine Stage in diesem Match.')+'</div>';
         const rows=matchStandings(m);
-        $('#matchHint').textContent=rows.length?rows.length+(rows.length===1?' Schütze':' Schützen'):'';
+        $('#matchHint').textContent=rows.length?countText(rows.length,'Schütze','Schützen'):'';
         $('#matchResult').innerHTML=rows.length?rows.map(r=>rankRow({
           tag:'button',attrs:' type="button" data-shooter="'+r.shooterId+'"',lead:r.rank===1,
           rank:r.rank,title:r.name,pct:r.pct,main:nf(r.points,1),
-          sub:r.stages+(r.stages===1?' Stage':' Stages')+' gewertet',
-          aside:'Match-Pkt'
-        })).join(''):'<div class="empty">Sobald auf einer Stage Zeiten stehen, erscheint hier die Gesamtwertung.</div>';
+          sub:t('{0} gewertet',countText(r.stages,'Stage','Stages')),
+          aside:t('Match-Pkt')
+        })).join(''):'<div class="empty">'+t('Sobald auf einer Stage Zeiten stehen, erscheint hier die Gesamtwertung.')+'</div>';
       }
       function openMatch(id){
         currentMatch=matches.find(m=>m.id===id)||null;
@@ -2087,13 +2154,13 @@
       function armDelete(btn,label,action){
         if(btn.dataset.armed){action();return}
         btn.dataset.armed='1';
-        btn.textContent='Wirklich löschen?';
+        btn.textContent=t('Wirklich löschen?');
         btn.classList.add('danger');
         clearTimeout(btn._reset);
         btn._reset=setTimeout(()=>resetDeleteButtons(),3000);
       }
       function resetDeleteButtons(){
-        [['#deleteMatch','Match löschen'],['#deleteStage','Stage löschen']].forEach(([sel,label])=>{
+        [['#deleteMatch',t('Match löschen')],['#deleteStage',t('Stage löschen')]].forEach(([sel,label])=>{
           const b=$(sel);delete b.dataset.armed;b.textContent=label;b.classList.remove('danger');
         });
       }
@@ -2102,13 +2169,13 @@
         currentMatch=null;
         persistDraft();
         showScorePage('matches');
-        showToast('Match gelöscht');
+        showToast(t('Match gelöscht'));
       }
       function deleteCurrentStage(){
         currentMatch.stages=currentMatch.stages.filter(s=>s!==stage);
         persistDraft();
         showScorePage('match');
-        showToast('Stage gelöscht');
+        showToast(t('Stage gelöscht'));
       }
 
       /* ---------- Fortschritt ---------- */
@@ -2138,35 +2205,35 @@
           const y=h-pad-((v-min)/span)*(h-2*pad);
           return x.toFixed(1)+','+y.toFixed(1);
         }).join(' ');
-        return '<svg class="spark" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Hit Factor von '+nf(min,4)+' bis '+nf(max,4)+'">'+
+        return '<svg class="spark" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="'+t('Hit Factor von {0} bis {1}',nf(min,4),nf(max,4))+'">'+
           '<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
       }
       function statTile(label,value){return '<div class="stat"><span>'+label+'</span><b>'+value+'</b></div>'}
       function openProgress(shooterId,fallbackName){
         const rows=shooterHistory(shooterId);
-        const name=shooters.find(s=>s.id===shooterId)?.name||rows[0]?.name||fallbackName||'Schütze';
+        const name=shooters.find(s=>s.id===shooterId)?.name||rows[0]?.name||fallbackName||t('Schütze');
         $('#progressName').textContent=name;
         const body=$('#progressBody');
         if(!rows.length){
-          $('#progressSub').textContent='Noch nichts gespeichert';
-          body.innerHTML='<div class="empty">Sobald '+esc(name)+' auf einer Stage eine Zeit hat, entsteht hier der Verlauf.</div>';
+          $('#progressSub').textContent=t('Noch nichts gespeichert');
+          body.innerHTML='<div class="empty">'+t('Sobald {0} auf einer Stage eine Zeit hat, entsteht hier der Verlauf.',esc(name))+'</div>';
         }else{
           const hfs=rows.map(r=>r.hf);
           const avg=hfs.reduce((a,b)=>a+b,0)/hfs.length;
           const avgPct=rows.reduce((a,r)=>a+r.pct,0)/rows.length;
-          $('#progressSub').textContent=rows.length+(rows.length===1?' Stage':' Stages');
+          $('#progressSub').textContent=countText(rows.length,'Stage','Stages');
           body.innerHTML=
             '<div class="stat-grid">'+
-              statTile('Bester HF',nf(Math.max(...hfs),4))+
-              statTile('Ø HF',nf(avg,4))+
-              statTile('Ø Prozent',nf(avgPct,1)+' %')+
-              statTile('Stage-Siege',String(rows.filter(r=>r.rank===1).length))+
+              statTile(t('Bester HF'),nf(Math.max(...hfs),4))+
+              statTile(t('Ø HF'),nf(avg,4))+
+              statTile(t('Ø Prozent'),nf(avgPct,1)+' %')+
+              statTile(t('Stage-Siege'),String(rows.filter(r=>r.rank===1).length))+
             '</div>'+
-            (rows.length>1?'<div class="spark-wrap"><span>Hit Factor über die Zeit</span>'+sparkline([...hfs].reverse())+'</div>':'')+
+            (rows.length>1?'<div class="spark-wrap"><span>'+t('Hit Factor über die Zeit')+'</span>'+sparkline([...hfs].reverse())+'</div>':'')+
             '<div class="rank-list">'+rows.map(r=>rankRow({
               rank:r.rank,title:r.stage,hf:r.hf,pct:r.pct,lead:r.rank===1,
-              sub:dateShort(r.at)+' · '+r.points+' Pkt · '+nf(r.time,2)+' s',
-              aside:'Platz '+r.rank+'/'+r.of
+              sub:dateShort(r.at)+' · '+t('{0} Pkt',r.points)+' · '+nf(r.time,2)+' s',
+              aside:t('Platz {0}',r.rank+'/'+r.of)
             })).join('')+'</div>';
         }
         openModalById('progressModal');
@@ -2289,6 +2356,7 @@
 
       /* ---------- Start ---------- */
       function init(){
+        translateDom();
         applyTheme();
         setMicState('off','');
         $$('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===settings.mode));
