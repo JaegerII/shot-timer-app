@@ -78,7 +78,7 @@
   }];
   const runs = [[0, 3, 'live', 2.31, 6, 1.08, .19], [0, 5, 'dry', 1.62, 4, .94, .21], [1, 2, 'live', 3.05, 8, 1.21, .18], [2, 4, 'live', 2.47, 6, 1.15, .2], [3, 1, 'dry', 1.88, 5, .99, .22], [5, 3, 'live', 2.74, 6, 1.19, .23]]
     .map(([d, h, mode, total, count, first, best], i) => ({ id: 'r' + i, at: day(d, h), mode, par: 0, delay: 'random', total, count, first, best, shots: [] }));
-  localStorage.setItem('shot-timer-settings-v1', JSON.stringify({ lang: LANG, langChosen: true, theme: 'dark', mode: KEY === 'dry' ? 'dry' : 'live', delay: 'random', delayRandom: true, par: KEY === 'par' ? 3 : 0, reps: 1, volume: .65, vibration: true, drySeen: true }));
+  localStorage.setItem('shot-timer-settings-v1', JSON.stringify({ lang: LANG, langChosen: true, theme: 'dark', mode: q.get('mode') || (KEY === 'dry' ? 'dry' : 'live'), delay: 'random', delayRandom: true, par: q.has('par') ? Number(q.get('par')) : KEY === 'par' ? 3 : 0, reps: 1, volume: .65, vibration: true, drySeen: true }));
   localStorage.setItem('shot-timer-matches-v1', JSON.stringify(matches));
   localStorage.setItem('shot-timer-history-v2', JSON.stringify(runs));
   localStorage.setItem('shot-timer-shooters-v1', JSON.stringify(NAMES.map(n => ({ id: 's-' + n, name: n, pf: n === 'Jonas' ? 'major' : 'minor' }))));
@@ -108,6 +108,28 @@
       const shown = splits.map((s, i) => ({ s, n: i + 1 })).slice(-4).reverse();
       $('#splitStrip').innerHTML = shown.map(x => '<span class="chip' + (x.n === 1 ? ' first' : '') + '"><small>#' + String(x.n).padStart(2, '0') + '</small><b>' + (x.n === 1 ? x.s.toFixed(2) : '+' + x.s.toFixed(2)) + '</b></span>').join('');
       $('#lastSplit').innerHTML = tr('Split') + ' <strong>' + num(splits[splits.length - 1]) + ' s</strong>';
+    };
+    // Für Videos (?anim=1): CSS-Animationen aus, der Rahmen wird Bild für Bild gesteuert.
+    if (q.get('anim')) {
+      const s2 = d.createElement('style');
+      s2.textContent = '*,*::before,*::after{animation:none!important;transition:none!important}';
+      d.head.appendChild(s2);
+    }
+    // Zustand von außen setzen: run '' | standby | go | par | end, Zeit und bisherige Schüsse.
+    window.SET = ({ run, time, shots, glow }) => {
+      const splits = shots.map((s, i) => i ? s - shots[i - 1] : s);
+      const ende = run === 'end';
+      d.documentElement.dataset.run = ende ? '' : run;
+      const glowEl = d.querySelector('.edge-glow');
+      if (glowEl) glowEl.style.opacity = ende || !run ? 0 : glow;
+      $('#stateLabel').textContent = tr({ standby: 'STANDBY', go: 'GO', par: 'NACH PAR', end: 'ENDE' }[run] || 'BEREIT');
+      $('#seconds').textContent = Math.floor(time);
+      $('#hundredths').textContent = '.' + String(Math.floor((time % 1) * 100 + 1e-6)).padStart(2, '0');
+      $('#startBtn').textContent = ende ? tr('START') : tr('STOP');
+      $('#startBtn').classList.toggle('stop', !ende);
+      const shown = splits.map((s, i) => ({ s, n: i + 1 })).slice(-4).reverse();
+      $('#splitStrip').innerHTML = shown.length ? shown.map(x => '<span class="chip' + (x.n === 1 ? ' first' : '') + '"><small>#' + String(x.n).padStart(2, '0') + '</small><b>' + (x.n === 1 ? x.s.toFixed(2) : '+' + x.s.toFixed(2)) + '</b></span>').join('') : '<span class="splits-empty">' + tr('Splits erscheinen hier – antippen für alle') + '</span>';
+      $('#lastSplit').innerHTML = splits.length ? (splits.length === 1 ? tr('Erster Schuss') : tr('Split')) + ' <strong>' + num(splits[splits.length - 1]) + ' s</strong>' : '';
     };
     await wait(400);
     if (KEY === 'go') timer(1.84, 'go', tr('GO'), [1.12, .24, .22, .26]);

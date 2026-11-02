@@ -47,8 +47,32 @@
     if (m) document.getElementById('icon').innerHTML = m[1].replace('width="24" height="24"', 'width="70%" height="70%"');
   });
 
+  // Video (?anim=1): alle drei laufen denselben Ablauf, zeitversetzt (off in Sekunden).
+  const ANIM = new URLSearchParams(location.search).get('anim') === '1';
   // Reihenfolge links → rechts: Standby, läuft, Par. Die mittlere liegt vorn.
-  const SHOTS = [{ shot: 2, x: 0, z: 1 }, { shot: 1, x: 1, z: 3 }, { shot: 3, x: 2, z: 2 }];
+  const SHOTS = [{ shot: 2, x: 0, z: 1, off: 0, extra: '&mode=dry' }, { shot: 1, x: 1, z: 3, off: 2.2 }, { shot: 3, x: 2, z: 2, off: 4.9 }];
+
+  /* Ablauf eines Durchgangs, Schleife von LOOP Sekunden:
+     Standby (gelb) → Signal → Zeit läuft (grün) → Par 3,00 s (rot) → Ende. */
+  const LOOP = 8, STANDBY = 1.5, PAR = 3, STOP_AT = 4.6;
+  const HITS = [1.12, 1.36, 1.58, 1.84, 2.21, 2.47, 2.78, 3.27, 3.52, 3.94, 4.31];
+  const pulse = (u, period) => 1 - .28 * (.5 - .5 * Math.cos(2 * Math.PI * u / period));
+  function stateAt(t) {
+    const u = ((t % LOOP) + LOOP) % LOOP;
+    if (u < STANDBY) return { run: 'standby', time: 0, shots: [], glow: pulse(u, 1.2) };
+    const el = u - STANDBY;
+    if (el < STOP_AT) {
+      const run = el < PAR ? 'go' : 'par';
+      return { run, time: el, shots: HITS.filter(h => h <= el), glow: pulse(el, run === 'go' ? 1.6 : .8) };
+    }
+    return { run: 'end', time: HITS[HITS.length - 1], shots: HITS, glow: 0 };
+  }
+  window.renderAt = (t) => {
+    document.querySelectorAll('#phones iframe').forEach((f, i) => {
+      const app = f.contentWindow;
+      if (app && app.SET) app.SET(stateAt(t + SHOTS[i].off));
+    });
+  };
   const step = (440 - 90) * F.s;
   (async () => {
     for (const p of SHOTS) {
@@ -56,11 +80,12 @@
       f.style.left = (p.x * step) + 'px';
       f.style.zIndex = p.z;
       f.style.transform = 'scale(' + F.s + ')' + (p.x === 1 ? '' : ' translateY(' + 30 + 'px)');
-      f.src = 'shots.html?bare=1&lang=en&shot=' + p.shot;
+      f.src = 'shots.html?bare=1&lang=en&shot=' + p.shot + (ANIM ? '&anim=1&par=3' + (p.extra || '') : '');
       document.getElementById('phones').appendChild(f);
       await new Promise(res => { const t = setInterval(() => { if (f.contentWindow && f.contentWindow.READY) { clearInterval(t); res(); } }, 100); });
     }
     await document.fonts.ready;
+    if (ANIM) window.renderAt(0);
     window.READY = true;
   })();
 </script>
