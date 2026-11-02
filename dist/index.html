@@ -248,8 +248,10 @@
     .set-list+.set-list{margin-top:10px}
     .set-row{width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;font:inherit;text-align:left}
     .set-row:last-child{border-bottom:0}
-    button.set-row{cursor:pointer}
-    button.set-row:active{background:var(--surface-3)}
+    button.set-row,a.set-row{cursor:pointer}
+    button.set-row:active,a.set-row:active{background:var(--surface-3)}
+    a.set-row{text-decoration:none}
+    .set-head{margin:18px 2px 8px}
     .set-row.col{flex-direction:column;align-items:stretch;gap:9px}
     .set-ico{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--surface-3);display:grid;place-items:center;color:var(--accent)}
     .set-txt{flex:1;min-width:0}
@@ -637,6 +639,17 @@
               <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16M12 4c-2.5 2.5-2.5 13.5 0 16"/></svg></span>
               <span class="set-txt"><b>Sprache</b><small>Deutsch · weitere Sprachen folgen</small></span>
             </div>
+          </div>
+          <span class="field-label set-head">Mehr Training und Tipps</span>
+          <div class="set-list">
+            <a class="set-row" href="https://www.youtube.com/@wax_meils" target="_blank" rel="noopener">
+              <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="4"/><path d="m10.5 9.5 4 2.5-4 2.5Z" fill="currentColor"/></svg></span>
+              <span class="set-txt"><b>YouTube</b><small>@wax_meils · Videos und Drills</small></span><span class="set-chev" aria-hidden="true">↗</span>
+            </a>
+            <a class="set-row" href="https://www.instagram.com/wax_meils/" target="_blank" rel="noopener">
+              <span class="set-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.8" cy="7.2" r=".6" fill="currentColor"/></svg></span>
+              <span class="set-txt"><b>Instagram</b><small>@wax_meils · Reels und Updates</small></span><span class="set-chev" aria-hidden="true">↗</span>
+            </a>
           </div>
         </div>
 

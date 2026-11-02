@@ -1,5 +1,5 @@
 /* Erzeugt von tools/make-sw.mjs – nicht von Hand ändern. */
-const VERSION = 'shot-timer-cc52d37f64';
+const VERSION = 'shot-timer-c63c5e2778';
 const ASSETS = [
   "./",
   "assets/apple-touch-icon.png",
