@@ -42,6 +42,10 @@
 
 <script>
   const q = new URLSearchParams(location.search);
+  // ?bare=1: nur das iPhone auf transparentem Grund, für die Kopfzeile (store/header.html).
+  if (q.get('bare')) {
+    document.head.insertAdjacentHTML('beforeend', '<style>body{background:transparent!important}.head{display:none}.phone{top:20px!important}</style>');
+  }
   const SHOT = Number(q.get('shot') || 1);
   const LANG = q.get('lang') || 'de';
 

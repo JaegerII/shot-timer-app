@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Store-Kopfzeile</title>
+<!--
+  Kopfzeile für die App-Store-Produktseite. tools/store-header.mjs fotografiert
+  sie in 3840 x 1646 (?format=wide) und 5244 x 2950 (?format=tall).
+  Die drei iPhones sind store/shots.html im Modus bare=1, nacheinander geladen,
+  weil sie sich den Speicher der App teilen.
+-->
+<style>
+  @font-face{font-family:Montserrat;src:url(../dist/assets/fonts/montserrat-latin.woff2) format('woff2');font-weight:100 900}
+  html,body{margin:0;overflow:hidden}
+  body{width:var(--w);height:var(--h);position:relative;background:url(../dist/assets/topo.svg) 0 0/620px 620px repeat,radial-gradient(circle at 72% 50%,#1b201e 0,#0b0c0c 70%);color:#edede6;font-family:Montserrat,system-ui,sans-serif}
+  .text{position:absolute;left:var(--pad);top:50%;transform:translateY(-50%);width:var(--textw)}
+  .icon{width:calc(var(--u)*13);height:calc(var(--u)*13);border-radius:calc(var(--u)*3);background:#1c1f1d;border:1px solid #ffffff14;display:grid;place-items:center;color:#fff;margin-bottom:calc(var(--u)*5)}
+  .kicker{font-size:calc(var(--u)*2.1);font-weight:800;letter-spacing:.3em;color:#18e5ff;margin-bottom:calc(var(--u)*2.4)}
+  h1{margin:0;font-size:calc(var(--u)*7.6);line-height:1.05;font-weight:900;letter-spacing:-.015em}
+  h1 em{font-style:normal;color:#18e5ff}
+  p{margin:calc(var(--u)*3) 0 0;font-size:calc(var(--u)*2.5);line-height:1.45;color:#a7ab9e;font-weight:600;max-width:calc(var(--u)*62)}
+  .phones{position:absolute;right:var(--pad);top:50%;width:calc(440px * 3 * var(--s) - 90px * var(--s) * 2);height:calc(780px * var(--s));transform:translateY(-50%)}
+  .phones iframe{position:absolute;top:0;border:0;width:440px;height:780px;transform-origin:0 0;background:transparent}
+</style>
+</head>
+<body>
+  <div class="text">
+    <div class="icon" id="icon"></div>
+    <div class="kicker">SHOT TIMER · LIVE FIRE · DRY FIRE</div>
+    <h1>FORTH TRACE<br><em>Shot Timer</em></h1>
+    <p>Every shot, every split – timed with your iPhone's microphone. Par time, Hit Factor and full match results.</p>
+  </div>
+  <div class="phones" id="phones"></div>
+<script>
+  const FORMAT = new URLSearchParams(location.search).get('format') || 'wide';
+  // CSS-Pixel; der Generator fotografiert mit Faktor 2.
+  // u = Grundeinheit für Schrift und Abstände; im hohen Format kleiner, damit Text und iPhones nebeneinander passen.
+  const F = FORMAT === 'tall' ? { w: 2622, h: 1475, s: 1.25, pad: 150, textw: 860, u: 11 } : { w: 1920, h: 823, s: .98, pad: 110, textw: 760, u: 8.23 };
+  const root = document.documentElement.style;
+  root.setProperty('--w', F.w + 'px'); root.setProperty('--h', F.h + 'px');
+  root.setProperty('--s', F.s); root.setProperty('--pad', F.pad + 'px'); root.setProperty('--textw', F.textw + 'px');
+  root.setProperty('--u', F.u + 'px');
+
+  // App-Icon aus der Kopfzeile der App übernehmen (gleiches SVG).
+  fetch('../dist/index.html').then(r => r.text()).then(html => {
+    const m = html.match(/<div class="brand-mark" aria-hidden="true">(<svg[\s\S]*?<\/svg>)<\/div>/);
+    if (m) document.getElementById('icon').innerHTML = m[1].replace('width="24" height="24"', 'width="70%" height="70%"');
+  });
+
+  // Reihenfolge links → rechts: Standby, läuft, Par. Die mittlere liegt vorn.
+  const SHOTS = [{ shot: 2, x: 0, z: 1 }, { shot: 1, x: 1, z: 3 }, { shot: 3, x: 2, z: 2 }];
+  const step = (440 - 90) * F.s;
+  (async () => {
+    for (const p of SHOTS) {
+      const f = document.createElement('iframe');
+      f.style.left = (p.x * step) + 'px';
+      f.style.zIndex = p.z;
+      f.style.transform = 'scale(' + F.s + ')' + (p.x === 1 ? '' : ' translateY(' + 30 + 'px)');
+      f.src = 'shots.html?bare=1&lang=en&shot=' + p.shot;
+      document.getElementById('phones').appendChild(f);
+      await new Promise(res => { const t = setInterval(() => { if (f.contentWindow && f.contentWindow.READY) { clearInterval(t); res(); } }, 100); });
+    }
+    await document.fonts.ready;
+    window.READY = true;
+  })();
+</script>
+</body>
+</html>
