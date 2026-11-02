@@ -360,6 +360,12 @@
     #matchName{flex:1 1 auto}
     /* Score: Matches -> Match -> Stage, jede Ebene füllt die Ansicht. */
     /* Score liegt auf ruhiger Fläche statt direkt auf den Höhenlinien – besser lesbar. */
+    /* Verlauf: ähnlich, aber durchscheinender – die Höhenlinien bleiben zu ahnen. */
+    #historyView{background:rgba(23,26,24,.8);border:1px solid var(--line);border-radius:24px;padding:14px 14px 10px}
+    :root[data-theme="light"] #historyView{background:rgba(255,255,255,.82)}
+    #historyView .view-footer{justify-content:center}
+    .clear-btn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 16px;font:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:color .15s,border-color .15s}
+    .clear-btn.danger{color:var(--danger);border-color:var(--danger)}
     #scoreView{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:14px 14px 12px}
     .score-page{flex:1;min-height:0;display:flex;flex-direction:column}
     .match-card{position:relative;width:100%;text-align:left;display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:15px 14px 15px 18px;margin-bottom:9px;color:inherit;font:inherit;cursor:pointer;overflow:hidden}
@@ -651,7 +657,7 @@
         <div id="historyList"></div>
       </div>
       <div class="view-footer">
-        <button id="clearHistory" class="danger-link" type="button">Trainings löschen</button>
+        <button id="clearHistory" class="clear-btn" type="button">Trainings löschen</button>
       </div>
     </section>
 
@@ -1583,6 +1589,8 @@
       }
       function renderHistory(){
         const h=readHistory(),el=$('#historyList');
+        // Ohne Trainings gibt es nichts zu löschen.
+        $('#clearHistory').hidden=!h.length;
         if(!h.length){el.innerHTML='<div class="empty">'+t('Noch keine Trainings gespeichert.')+'</div>';return}
         el.innerHTML=h.map((x,i)=>{
           const title=x.drill||(x.mode==='live'?'Live Fire':'Dry Fire');
@@ -1891,7 +1899,21 @@
       }
       bindSeg('volume','volume');
       $('#vibration').onclick=e=>{settings.vibration=!settings.vibration;setToggle(e.currentTarget,settings.vibration);saveSettings()};
-      $('#clearHistory').onclick=()=>{
+      // Löschen aller Trainings braucht einen zweiten Tipp innerhalb von drei Sekunden.
+      $('#clearHistory').onclick=e=>{
+        const b=e.currentTarget;
+        if(!b.dataset.armed){
+          b.dataset.armed='1';
+          b.textContent=t('Wirklich löschen?');
+          b.classList.add('danger');
+          clearTimeout(b._reset);
+          b._reset=setTimeout(()=>{delete b.dataset.armed;b.textContent=t('Trainings löschen');b.classList.remove('danger')},3000);
+          return;
+        }
+        clearTimeout(b._reset);
+        delete b.dataset.armed;
+        b.textContent=t('Trainings löschen');
+        b.classList.remove('danger');
         [HISTORY_KEY,...LEGACY_HISTORY_KEYS].forEach(k=>localStorage.removeItem(k));
         renderHistory();
         showToast(t('Verlauf gelöscht'));
