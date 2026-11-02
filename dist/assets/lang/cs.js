@@ -1,6 +1,6 @@
 // Čeština – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).cs={
-  "Zufällig 2–4 s": "Náhodně 2–4 s",
+  "Zufällig 1–4 s": "Náhodně 1–4 s",
   "Delay": "Zpoždění",
   "Instant": "Okamžitě",
   "WEITER": "POKRAČOVAT",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Tady se objeví splity – ťukni pro všechny",
   "START": "START",
   "Verzögerung": "Zpoždění",
-  "Zufall 2–4 s": "Náhodně 2–4 s",
+  "Zufall 1–4 s": "Náhodně 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Vyp.",
   "Durchgänge": "Pokusy",

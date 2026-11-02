@@ -1,6 +1,6 @@
 // Français – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).fr={
-  "Zufällig 2–4 s": "Aléatoire 2–4 s",
+  "Zufällig 1–4 s": "Aléatoire 1–4 s",
   "Delay": "Délai",
   "Instant": "Instantané",
   "WEITER": "CONTINUER",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Les splits s'affichent ici – touchez pour tout voir",
   "START": "START",
   "Verzögerung": "Délai",
-  "Zufall 2–4 s": "Aléatoire 2–4 s",
+  "Zufall 1–4 s": "Aléatoire 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Désactivé",
   "Durchgänge": "Séries",

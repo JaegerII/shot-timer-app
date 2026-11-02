@@ -569,7 +569,7 @@
         </div>
 
         <div class="quick-settings">
-          <button class="quick" data-open="delay"><label>Verzögerung</label><b id="delayValue">Zufall 2–4 s</b></button>
+          <button class="quick" data-open="delay"><label>Verzögerung</label><b id="delayValue">Zufall 1–4 s</b></button>
           <button class="quick" data-open="par"><label>Par Time</label><b id="parValue">Aus</b></button>
           <button class="quick" data-open="reps"><label>Durchgänge</label><b id="repsValue">1 Durchgang</b></button>
         </div>
@@ -668,7 +668,7 @@
       <div class="sheet-head"><div><h2 id="sheetTitle">Verzögerung</h2></div><button id="closeModal" aria-label="Schließen">×</button></div>
       <div class="sheet-body">
         <div class="option-grid" id="optionGrid"></div>
-        <div class="rand-row" id="randRow" hidden><span>Zufällig 2–4 s</span><button class="toggle on" id="randToggle" type="button" aria-label="Zufällig 2–4 s" aria-pressed="true"></button></div>
+        <div class="rand-row" id="randRow" hidden><span>Zufällig 1–4 s</span><button class="toggle on" id="randToggle" type="button" aria-label="Zufällig 1–4 s" aria-pressed="true"></button></div>
         <div class="stepper-sheet" id="stepperBox" hidden>
           <button class="step big" id="sheetDown" type="button" aria-label="Weniger">−</button>
           <b class="stepper-value" id="sheetValue">0</b>
@@ -917,7 +917,7 @@
       // nach dem bei mehreren Durchgaengen der naechste startet - die Par-Zeit
       // selbst beendet die Messung nicht.
       const PAR_MAX=20, PAR_STEP=.1, PAR_TAIL=2;
-      // Startverzögerung: Instant (Signal direkt nach Standby), zufällig 2–4 s
+      // Startverzögerung: Instant (Signal direkt nach Standby), zufällig 1–4 s
       // (Standard) oder eine feste Zeit ab 1 s.
       const DELAY_MIN=1, DELAY_MAX=99;
       // Länge der Standby-Ansage, falls die Datei noch keine Dauer liefert.
@@ -1300,7 +1300,7 @@
       // Leuchtrand: 'standby' gelb bis zum Signal, 'go' grün während die Zeit läuft,
       // 'par' rot nach der Par Time, sonst aus.
       function glow(state){document.documentElement.dataset.run=state||''}
-      function getDelay(){return settings.delay==='instant'?0:settings.delay==='random'?2+Math.random()*2:Number(settings.delay)}
+      function getDelay(){return settings.delay==='instant'?0:settings.delay==='random'?1+Math.random()*3:Number(settings.delay)}
       async function start(){
         if(rt.running){stop();return}
         unlockCues();
@@ -1469,7 +1469,7 @@
         $('#sensitivityValue').textContent=value+' %';
       }
       function renderQuickSettings(){
-        $('#delayValue').textContent=settings.delay==='instant'?t('Instant'):settings.delay==='random'?t('Zufall 2–4 s'):de(Number(settings.delay))+' s';
+        $('#delayValue').textContent=settings.delay==='instant'?t('Instant'):settings.delay==='random'?t('Zufall 1–4 s'):de(Number(settings.delay))+' s';
         $('#parValue').textContent=settings.par?de(settings.par)+' s':t('Aus');
         $('#repsValue').textContent=settings.reps===1?t('1 Durchgang'):t('{0} Durchgänge',settings.reps);
       }
@@ -1574,7 +1574,7 @@
           [t('Treffer'),String(lauf.count)],
           [t('Bester Split'),typeof lauf.best==='number'?lauf.best.toFixed(2)+' s':'–'],
           [t('Par Time'),lauf.par?de(lauf.par)+' s':t('Aus')],
-          [t('Verzögerung'),lauf.delay==='random'?t('Zufall 2–4 s'):lauf.delay==='instant'?t('Instant'):de(Number(lauf.delay))+' s']
+          [t('Verzögerung'),lauf.delay==='random'?t('Zufall 1–4 s'):lauf.delay==='instant'?t('Instant'):de(Number(lauf.delay))+' s']
         ];
         $('#runDetailBody').innerHTML=
           '<div class="stat-grid">'+fakten.map(([k,v])=>statTile(k,v)).join('')+'</div>'+
@@ -1654,7 +1654,7 @@
         $('#optionGrid').hidden=!!s&&!s.wahl;
         $('#optionGrid').style.gridTemplateColumns='';
         if(s&&s.wahl){
-          // Instant oder Delay; bei Delay entweder zufällig 2–4 s (Standard)
+          // Instant oder Delay; bei Delay entweder zufällig 1–4 s (Standard)
           // oder eine feste Zeit über den Regler.
           let modus=settings.delay==='instant'?'instant':'manual';
           let zufall=settings.delay==='instant'?settings.delayRandom:settings.delay==='random';

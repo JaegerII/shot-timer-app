@@ -1,6 +1,6 @@
 // Svenska – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).sv={
-  "Zufällig 2–4 s": "Slumpvis 2–4 s",
+  "Zufällig 1–4 s": "Slumpvis 1–4 s",
   "Delay": "Fördröjning",
   "Instant": "Direkt",
   "WEITER": "FORTSÄTT",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Splits visas här – tryck för att se alla",
   "START": "START",
   "Verzögerung": "Fördröjning",
-  "Zufall 2–4 s": "Slump 2–4 s",
+  "Zufall 1–4 s": "Slump 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Av",
   "Durchgänge": "Omgångar",

@@ -1,6 +1,6 @@
 // Nederlands – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).nl={
-  "Zufällig 2–4 s": "Willekeurig 2–4 s",
+  "Zufällig 1–4 s": "Willekeurig 1–4 s",
   "Delay": "Vertraging",
   "Instant": "Direct",
   "WEITER": "VERDER",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Splits verschijnen hier – tik voor alle",
   "START": "START",
   "Verzögerung": "Vertraging",
-  "Zufall 2–4 s": "Random 2–4 s",
+  "Zufall 1–4 s": "Random 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Uit",
   "Durchgänge": "Herhalingen",

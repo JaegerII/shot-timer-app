@@ -1,6 +1,6 @@
 // Italiano – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).it={
-  "Zufällig 2–4 s": "Casuale 2–4 s",
+  "Zufällig 1–4 s": "Casuale 1–4 s",
   "Delay": "Ritardo",
   "Instant": "Istantaneo",
   "WEITER": "CONTINUA",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Gli split appaiono qui – tocca per vederli tutti",
   "START": "START",
   "Verzögerung": "Ritardo",
-  "Zufall 2–4 s": "Casuale 2–4 s",
+  "Zufall 1–4 s": "Casuale 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Off",
   "Durchgänge": "Ripetizioni",

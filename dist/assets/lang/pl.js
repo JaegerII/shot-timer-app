@@ -1,6 +1,6 @@
 // Polski – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).pl={
-  "Zufällig 2–4 s": "Losowo 2–4 s",
+  "Zufällig 1–4 s": "Losowo 1–4 s",
   "Delay": "Opóźnienie",
   "Instant": "Natychmiast",
   "WEITER": "DALEJ",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Tu pojawią się splity – dotknij, by zobaczyć wszystkie",
   "START": "START",
   "Verzögerung": "Opóźnienie",
-  "Zufall 2–4 s": "Losowo 2–4 s",
+  "Zufall 1–4 s": "Losowo 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Wył.",
   "Durchgänge": "Serie",

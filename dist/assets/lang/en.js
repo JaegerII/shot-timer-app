@@ -1,6 +1,6 @@
 // English – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).en={
-  "Zufällig 2–4 s": "Random 2–4 s",
+  "Zufällig 1–4 s": "Random 1–4 s",
   "Delay": "Delay",
   "Instant": "Instant",
   "WEITER": "CONTINUE",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Splits appear here – tap to see all",
   "START": "START",
   "Verzögerung": "Delay",
-  "Zufall 2–4 s": "Random 2–4 s",
+  "Zufall 1–4 s": "Random 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Off",
   "Durchgänge": "Runs",

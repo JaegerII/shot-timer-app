@@ -1,6 +1,6 @@
 // Português – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).pt={
-  "Zufällig 2–4 s": "Aleatório 2–4 s",
+  "Zufällig 1–4 s": "Aleatório 1–4 s",
   "Delay": "Atraso",
   "Instant": "Instantâneo",
   "WEITER": "CONTINUAR",
@@ -16,7 +16,7 @@
   "Splits erscheinen hier – antippen für alle": "Os splits aparecem aqui – toca para ver todos",
   "START": "START",
   "Verzögerung": "Atraso",
-  "Zufall 2–4 s": "Aleatório 2–4 s",
+  "Zufall 1–4 s": "Aleatório 1–4 s",
   "Par Time": "Par Time",
   "Aus": "Off",
   "Durchgänge": "Repetições",
