@@ -17,7 +17,7 @@ Grenzen von Apple in Klammern; alle Texte unten halten sie ein.
 | Support-URL | https://jaegerii.github.io/shot-timer-app/support.html |
 | Marketing-URL | https://www.instagram.com/wax_meils/ *(optional)* |
 | Copyright | © 2026 Maximilian Weil |
-| Screenshots | `store/screenshots/en/1–6.png` (1320 × 2868) in der Hauptsprache hochladen; Apple verwendet sie für alle Sprachen |
+| Screenshots | In der Hauptsprache hochladen, Apple verwendet sie für alle Sprachen. Großes Display (6,9"): `store/screenshots/en-6.9/1–6.png` (1320 × 2868). Mittleres Display (6,1"/6,3"): `store/screenshots/en-6.3/1–6.png` (1206 × 2622) |
 | App-Datenschutz | Keine Daten erfasst („Data Not Collected“) |
 
 ---
