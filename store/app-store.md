@@ -3,6 +3,10 @@
 Zum Einfügen in App Store Connect → App → iOS-App 1.0 bzw. App-Informationen.
 Grenzen von Apple in Klammern; alle Texte unten halten sie ein.
 
+Suchbegriffe: Apple durchsucht Name, Untertitel und Schlüsselwörter gemeinsam.
+Wörter, die schon im Namen stehen („Shot“, „Timer“), werden deshalb nicht
+wiederholt; der Platz geht an weitere Suchbegriffe.
+
 ---
 
 ## Allgemein (für beide Sprachen gleich)
@@ -15,7 +19,7 @@ Grenzen von Apple in Klammern; alle Texte unten halten sie ein.
 | Preis | Kostenlos |
 | Datenschutz-URL | https://jaegerii.github.io/shot-timer-app/privacy.html |
 | Support-URL | https://jaegerii.github.io/shot-timer-app/support.html |
-| Kopfzeile (optional) | `store/header/header-3840x1646.png` oder `store/header/header-5244x2950.png` |
+| Kopfzeile (optional) | `store/header/header-3840x1646.mp4` (Animation) oder `.png` |
 | Marketing-URL | https://www.instagram.com/wax_meils/ *(optional)* |
 | Copyright | © 2026 Maximilian Weil |
 | Screenshots | In der Hauptsprache hochladen, Apple verwendet sie für alle Sprachen. Großes Display (6,9"): `store/screenshots/en-6.9/1–6.png` (1320 × 2868). Mittleres Display (6,1"/6,3"): `store/screenshots/en-6.3/1–6.png` (1206 × 2622) |
@@ -23,108 +27,106 @@ Grenzen von Apple in Klammern; alle Texte unten halten sie ein.
 
 ---
 
-## Deutsch
-
-**Untertitel (30)**
-```
-Live- & Dry-Fire Shot Timer
-```
-
-**Werbetext (170)**
-```
-Schusszeiten per Mikrofon messen – Live und Dry Fire, Par Time, Splits und Hit-Factor-Wertung für ganze Matches. Ohne Konto, ohne Werbung, alles bleibt auf dem iPhone.
-```
-
-**Schlüsselwörter (100, durch Kommas getrennt, ohne Leerzeichen)**
-```
-shot timer,schießen,ipsc,uspsa,dry fire,par time,split,draw,hit factor,pistole,sportschießen,stand
-```
-
-**Beschreibung (4000)**
-```
-FORTH TRACE Shot Timer macht dein iPhone zum Shot Timer für Live Fire und Dry Fire. Die App hört nach dem Startsignal mit, erkennt jeden Schuss oder Trigger-Klick und misst Draw-Zeit und Splits – direkt am Stand oder beim Trockentraining zu Hause.
-
-TIMER
-• Startsignal nach „Standby“ – sofort, zufällig 1–4 s oder mit fester Verzögerung
-• Par Time in Zehntelsekunden, mit Doppelpiep beim Erreichen
-• Mehrere Durchgänge automatisch hintereinander
-• Live Fire für Schüsse, Dry Fire für leise Trigger-Klicks – mit getrennter Empfindlichkeit und Kalibrierung
-• Leuchtrand: gelb bei Standby, grün während der Messung, rot nach der Par Time
-• Draw-Zeit, Splits und Gesamtzeit auf einen Blick
-
-HIT FACTOR UND MATCHES
-• Matches mit beliebig vielen Stages anlegen
-• Zeit und Trefferzonen (A, C, D, Miss, No-Shoot, Prozedurfehler) je Schütze eintragen – Major und Minor
-• Hit Factor und Stage-Wertung live, Gesamtwertung über alle Stages
-• Zeit mit einem Tipp aus dem Timer übernehmen
-• Fortschritt jedes Schützen über alle Matches
-
-VERLAUF
-• Jedes Training wird automatisch gespeichert – mit allen Zeiten und Splits
-
-DATENSCHUTZ
-• Kein Konto, keine Werbung, kein Tracking
-• Das Mikrofon wird nur live ausgewertet, es wird nichts aufgenommen
-• Alle Daten bleiben auf deinem Gerät
-
-In zehn Sprachen: Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch, Polnisch, Tschechisch, Portugiesisch und Schwedisch.
-
-Hinweis: Die Erkennung über das Telefonmikrofon kann je nach Gerät und Umgebung abweichen. Prüfe die Zeiten vor wichtigen Einsätzen gegen eine Referenz. Regeln des Standes und Waffensicherheit liegen in deiner Verantwortung – beim Dry Fire immer mit entladener Waffe und ohne Munition in der Nähe trainieren.
-
-Mehr Training und Tipps: Instagram und YouTube @wax_meils
-```
-
----
-
-## English (U.K. / U.S.)
+## English (U.S. / U.K.)
 
 **Subtitle (30)**
 ```
-Live & Dry Fire Shot Timer
+Dry Fire, Par Time, Hit Factor
 ```
 
 **Promotional text (170)**
 ```
-Time your shots with the microphone – live and dry fire, par time, splits and Hit Factor scoring for full matches. No account, no ads, everything stays on your iPhone.
+Your phone is the shot timer. Hear the beep, run your draw and see every split – live fire or dry fire. Par time, Hit Factor and full match results. Free, no account.
 ```
 
 **Keywords (100)**
 ```
-shot timer,shooting,ipsc,uspsa,dry fire,par time,split,draw,hit factor,training,pistol,range
+ipsc,uspsa,idpa,splits,draw,pistol,practical,shooting,range,practice,stopwatch,match,competition
 ```
 
 **Description (4000)**
 ```
-FORTH TRACE Shot Timer turns your iPhone into a shot timer for live fire and dry fire. After the start signal the app listens, detects every shot or trigger click and measures your draw and splits – at the range or during dry practice at home.
+Turn your iPhone into a shot timer. FORTH TRACE Shot Timer listens for the beep-to-shot moment, catches every shot or trigger click and shows your draw and splits instantly – at the range or in dry practice at home. No extra hardware, no account, no ads.
 
 TIMER
-• Start signal after "Standby" – instant, random 1–4 s or a fixed delay
-• Par time in tenths of a second, with a double beep when reached
+• Standby, then the start beep – instant, random 1–4 s or your own fixed delay
+• Par time in tenths of a second with a double beep when you're over
 • Multiple runs back to back
-• Live Fire for shots, Dry Fire for quiet trigger clicks – with separate sensitivity and calibration
-• Glowing edge: yellow on standby, green while timing, red after par time
-• Draw, splits and total time at a glance
+• Live Fire for loud shots, Dry Fire for quiet trigger clicks – each with its own sensitivity and calibration
+• Glowing screen edge you can see from the corner of your eye: yellow on standby, green while timing, red after par
+• Draw, splits and total time at a glance, with vibration on the start signal
 
-HIT FACTOR AND MATCHES
-• Create matches with as many stages as you like
-• Enter time and hit zones (A, C, D, Miss, No-Shoot, procedurals) per shooter – Major and Minor
-• Live Hit Factor and stage results, overall match standings
-• Take the time straight from the timer with one tap
-• Progress of every shooter across all matches
+MATCHES & HIT FACTOR
+• Create matches with as many stages as you need
+• Score every shooter: time and hit zones (A, C, D, Miss, No-Shoot, Procedural), Major or Minor
+• Live Hit Factor, stage percentages and overall match points
+• Pull the time straight from the timer with one tap
+• Track each shooter's progress across all matches
 
 HISTORY
 • Every run is saved automatically with all times and splits
 
-PRIVACY
-• No account, no ads, no tracking
-• The microphone is analysed live only – nothing is recorded
-• All data stays on your device
+PRIVATE BY DESIGN
+• The microphone is analysed live and never recorded
+• No account, no tracking, no ads – your data stays on your iPhone
 
-Available in ten languages: English, German, French, Spanish, Italian, Dutch, Polish, Czech, Portuguese and Swedish.
+10 languages: English, German, French, Spanish, Italian, Dutch, Polish, Czech, Portuguese and Swedish.
 
-Note: Detection via a phone microphone can vary by device and environment. Check the times against a reference before relying on them. Range rules and firearm safety are your responsibility – always dry fire with an unloaded firearm and no ammunition nearby.
+Good to know: phone-microphone detection varies with device and environment – check your times against a reference before relying on them. Range rules and firearm safety are your responsibility; always dry fire with an unloaded firearm and no ammunition nearby.
 
-More training and tips: Instagram and YouTube @wax_meils
+More training and tips: @wax_meils on Instagram and YouTube.
+```
+
+---
+
+## Deutsch
+
+**Untertitel (30)**
+```
+Dry Fire, Par Time, Hit Factor
+```
+
+**Werbetext (170)**
+```
+Dein iPhone ist der Shot Timer: Piep, Draw, jeder Split – Live und Dry Fire. Dazu Par Time, Hit Factor und komplette Match-Wertung. Kostenlos, ohne Konto.
+```
+
+**Schlüsselwörter (100, durch Kommas getrennt, ohne Leerzeichen)**
+```
+schießen,ipsc,uspsa,splits,draw,pistole,sportschießen,trockentraining,stand,stoppuhr,wettkampf
+```
+
+**Beschreibung (4000)**
+```
+Mach dein iPhone zum Shot Timer. FORTH TRACE Shot Timer hört nach dem Startsignal mit, erkennt jeden Schuss oder Trigger-Klick und zeigt Draw-Zeit und Splits sofort an – direkt am Stand oder beim Trockentraining zu Hause. Ohne Zusatzgerät, ohne Konto, ohne Werbung.
+
+TIMER
+• Standby, dann der Startpiep – sofort, zufällig 1–4 s oder mit eigener fester Verzögerung
+• Par Time in Zehntelsekunden, mit Doppelpiep, sobald du drüber bist
+• Mehrere Durchgänge automatisch hintereinander
+• Live Fire für laute Schüsse, Dry Fire für leise Trigger-Klicks – jeweils mit eigener Empfindlichkeit und Kalibrierung
+• Leuchtender Bildschirmrand, den du aus dem Augenwinkel siehst: gelb bei Standby, grün während der Messung, rot nach der Par Time
+• Draw, Splits und Gesamtzeit auf einen Blick, mit Vibration beim Startsignal
+
+MATCHES & HIT FACTOR
+• Matches mit beliebig vielen Stages anlegen
+• Jeden Schützen werten: Zeit und Trefferzonen (A, C, D, Miss, No-Shoot, Prozedurfehler), Major oder Minor
+• Hit Factor, Stage-Prozente und Gesamtwertung live
+• Zeit mit einem Tipp aus dem Timer übernehmen
+• Fortschritt jedes Schützen über alle Matches
+
+VERLAUF
+• Jeder Durchgang wird automatisch gespeichert – mit allen Zeiten und Splits
+
+DATENSCHUTZ
+• Das Mikrofon wird nur live ausgewertet, nie aufgenommen
+• Kein Konto, kein Tracking, keine Werbung – deine Daten bleiben auf deinem iPhone
+
+10 Sprachen: Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch, Polnisch, Tschechisch, Portugiesisch und Schwedisch.
+
+Gut zu wissen: Die Erkennung über das Telefonmikrofon hängt von Gerät und Umgebung ab – prüfe die Zeiten vor wichtigen Einsätzen gegen eine Referenz. Regeln des Standes und Waffensicherheit liegen in deiner Verantwortung; beim Dry Fire immer mit entladener Waffe und ohne Munition in der Nähe trainieren.
+
+Mehr Training und Tipps: @wax_meils auf Instagram und YouTube.
 ```
 
 ---
@@ -132,7 +134,7 @@ More training and tips: Instagram and YouTube @wax_meils
 ## Hinweise für die Prüfung (App Review → Notizen)
 
 ```
-The app is a shot timer for practical shooting training. It uses the microphone only to detect the loudness of shots or trigger clicks in real time; nothing is recorded or transmitted. No login is required. To test without firearms: allow microphone access, tap START, wait for the beep and clap loudly – each clap is recorded as a shot. Dry Fire mode reacts to quieter clicks (e.g. tapping the table).
+The app is a shot timer for practical shooting training. It uses the microphone only to detect the loudness of shots or trigger clicks in real time; nothing is recorded or transmitted. No login is required. To test without firearms: allow microphone access, tap START, wait for the beep and clap loudly – each clap is recorded as a shot. Dry Fire mode reacts to quieter clicks (e.g. tapping the table). Matches and Hit Factor scoring are under "Score".
 ```
 
 ## Altersfreigabe – Hinweis
