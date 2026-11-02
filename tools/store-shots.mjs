@@ -1,4 +1,4 @@
-// Erzeugt die App-Store-Screenshots aus store/shots.html: fünf Motive je Sprache,
+// Erzeugt die App-Store-Screenshots aus store/shots.html: sechs Motive je Sprache,
 // 1320 x 2868 px (iPhone 6,9"). Start: node tools/store-shots.mjs [en]
 // Standard ist ein englischer Satz; Apple nutzt ihn für alle Store-Sprachen.
 // Ausgabe: store/screenshots/<sprache>/<nr>.png
@@ -27,7 +27,7 @@ try {
   for (const lang of LANGS) {
     const out = fileURLToPath(new URL(`../store/screenshots/${lang}/`, import.meta.url));
     mkdirSync(out, { recursive: true });
-    for (let shot = 1; shot <= 5; shot++) {
+    for (let shot = 1; shot <= 6; shot++) {
       const page = await browser.newPage();
       await page.setViewport({ width: 440, height: 956, deviceScaleFactor: 3 });
       await page.goto(`http://localhost:${PORT}/store/shots.html?shot=${shot}&lang=${lang}`, { waitUntil: 'networkidle0' });

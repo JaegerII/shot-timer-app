@@ -45,25 +45,18 @@
   const SHOT = Number(q.get('shot') || 1);
   const LANG = q.get('lang') || 'de';
 
-  const TEXT = {
-    de: [
-      ['Jeder Schuss.<br><em>Jeder Split.</em>', 'Draw, Splits und Gesamtzeit per Mikrofon – Live Fire und Dry Fire.'],
-      ['Par Time,<br>die du <em>siehst</em>', 'Doppelpiep und roter Rand, sobald du über der Zeit bist.'],
-      ['Matches mit<br><em>Gesamtwertung</em>', 'Beliebig viele Stages, Hit Factor und Match-Punkte für alle Schützen.'],
-      ['Hit Factor<br><em>live</em> am Stand', 'Zeit und Trefferzonen eintragen – die Wertung rechnet sofort mit.'],
-      ['Dein Training<br><em>im Verlauf</em>', 'Jeder Durchgang wird gespeichert. Ohne Konto, alles bleibt auf dem iPhone.']
-    ],
-    en: [
-      ['Every shot.<br><em>Every split.</em>', 'Draw, splits and total time via the microphone – live fire and dry fire.'],
-      ['Par time<br>you can <em>see</em>', 'Double beep and a red edge as soon as you are over time.'],
-      ['Matches with<br><em>overall results</em>', 'As many stages as you like, Hit Factor and match points for every shooter.'],
-      ['Hit Factor<br><em>live</em> at the range', 'Enter time and hit zones – the results update instantly.'],
-      ['Your training<br><em>history</em>', 'Every run is saved. No account, everything stays on your iPhone.']
-    ]
-  }.en; // Überschriften immer auf Englisch; die App im Rahmen zeigt die jeweilige Sprache.
-  document.getElementById('title').innerHTML = TEXT[SHOT - 1][0];
-  document.getElementById('sub').textContent = TEXT[SHOT - 1][1];
-
+  // Reihenfolge der Motive im Store. Überschriften immer auf Englisch.
+  const MOTIFS = [
+    ['go', 'Every shot.<br><em>Every split.</em>', 'Draw, splits and total time via the microphone – at the range or at home.'],
+    ['dry', 'Live fire <em>&amp;</em><br><em>dry fire</em>', 'Separate detection for loud shots and quiet trigger clicks. Standby, then the beep.'],
+    ['par', 'Par time<br>you can <em>see</em>', 'Double beep and a red edge as soon as you are over time.'],
+    ['match', 'Matches with<br><em>overall results</em>', 'As many stages as you like, Hit Factor and match points for every shooter.'],
+    ['stage', 'Hit Factor<br><em>live</em> at the range', 'Enter time and hit zones – the results update instantly.'],
+    ['history', 'Your training<br><em>history</em>', 'Every run is saved. No account, everything stays on your iPhone.']
+  ];
+  const [KEY, TITLE, SUB] = MOTIFS[SHOT - 1];
+  document.getElementById('title').innerHTML = TITLE;
+  document.getElementById('sub').textContent = SUB;
   /* ---------- Beispieldaten im Speicher der App ---------- */
   const day = (d, h) => new Date(Date.now() - d * 864e5 - h * 36e5).toISOString();
   const entry = (n, pf, time, a, c, d, m) => ({ id: n + Math.random().toString(36).slice(2, 6), shooterId: 's-' + n, name: n, pf, time, a, c, d, m, ns: 0, pe: 0 });
@@ -81,7 +74,7 @@
   }];
   const runs = [[0, 3, 'live', 2.31, 6, 1.08, .19], [0, 5, 'dry', 1.62, 4, .94, .21], [1, 2, 'live', 3.05, 8, 1.21, .18], [2, 4, 'live', 2.47, 6, 1.15, .2], [3, 1, 'dry', 1.88, 5, .99, .22], [5, 3, 'live', 2.74, 6, 1.19, .23]]
     .map(([d, h, mode, total, count, first, best], i) => ({ id: 'r' + i, at: day(d, h), mode, par: 0, delay: 'random', total, count, first, best, shots: [] }));
-  localStorage.setItem('shot-timer-settings-v1', JSON.stringify({ lang: LANG, langChosen: true, theme: 'dark', mode: 'live', delay: 'random', delayRandom: true, par: SHOT === 2 ? 3 : 0, reps: 1, volume: .65, vibration: true, drySeen: true }));
+  localStorage.setItem('shot-timer-settings-v1', JSON.stringify({ lang: LANG, langChosen: true, theme: 'dark', mode: KEY === 'dry' ? 'dry' : 'live', delay: 'random', delayRandom: true, par: KEY === 'par' ? 3 : 0, reps: 1, volume: .65, vibration: true, drySeen: true }));
   localStorage.setItem('shot-timer-matches-v1', JSON.stringify(matches));
   localStorage.setItem('shot-timer-history-v2', JSON.stringify(runs));
   localStorage.setItem('shot-timer-shooters-v1', JSON.stringify(NAMES.map(n => ({ id: 's-' + n, name: n, pf: n === 'Jonas' ? 'major' : 'minor' }))));
@@ -113,15 +106,22 @@
       $('#lastSplit').innerHTML = tr('Split') + ' <strong>' + num(splits[splits.length - 1]) + ' s</strong>';
     };
     await wait(400);
-    if (SHOT === 1) timer(1.84, 'go', tr('GO'), [1.12, .24, .22, .26]);
-    if (SHOT === 2) timer(3.27, 'par', tr('NACH PAR'), [1.18, .27, .31, .29, .41, .35, .46]);
-    if (SHOT === 3) {
+    if (KEY === 'go') timer(1.84, 'go', tr('GO'), [1.12, .24, .22, .26]);
+    if (KEY === 'dry') {
+      // Standby im Dry-Fire-Modus: gelber Rand, Zeit steht noch auf null.
+      d.documentElement.dataset.run = 'standby';
+      $('#stateLabel').textContent = tr('STANDBY');
+      $('#startBtn').textContent = tr('STOP');
+      $('#startBtn').classList.add('stop');
+    }
+    if (KEY === 'par') timer(3.27, 'par', tr('NACH PAR'), [1.18, .27, .31, .29, .41, .35, .46]);
+    if (KEY === 'match') {
       $('#scoreBtn').click(); await wait(150); $('[data-match="m1"]').click(); await wait(150);
       // Die Gesamtwertung ist das Motiv: ganz nach unten scrollen.
       const sc = $('#matchPage .score-scroll'); sc.scrollTop = sc.scrollHeight;
     }
-    if (SHOT === 4) { $('#scoreBtn').click(); await wait(150); $('[data-match="m1"]').click(); await wait(150); $('[data-stage="st2"]').click(); }
-    if (SHOT === 5) $('#historyBtn').click();
+    if (KEY === 'stage') { $('#scoreBtn').click(); await wait(150); $('[data-match="m1"]').click(); await wait(150); $('[data-stage="st2"]').click(); }
+    if (KEY === 'history') $('#historyBtn').click();
     await wait(500);
     await d.fonts.ready;
     window.READY = true;
