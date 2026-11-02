@@ -7,12 +7,33 @@
   "scripts": {
     "dev": "node tools/dev-server.mjs 8080",
     "icons": "node tools/make-icons.mjs",
-    "assets": "capacitor-assets generate --ios --android --iconBackgroundColor \"#0f1010\" --iconBackgroundColorDark \"#0f1010\" --splashBackgroundColor \"#0f1010\" --splashBackgroundColorDark \"#0f1010\"",
+    "assets": "capacitor-assets generate --ios --android --iconBackgroundColor \"#1c1f1d\" --iconBackgroundColorDark \"#1c1f1d\" --splashBackgroundColor \"#0f1010\" --splashBackgroundColorDark \"#0f1010\"",
     "sync": "cap sync",
     "android": "cap sync android && cap open android",
     "ios": "cap sync ios && cap open ios",
     "build": "node tools/make-icons.mjs && node tools/make-topo.mjs && npm run assets && node tools/make-sw.mjs && cap sync",
-    "sw": "node tools/make-sw.mjs"
+    "sw": "node tools/make-sw.mjs",
+    "reel": "node tools/dev-server.mjs 8090 reel",
+    "reel:export": "node tools/export-reel.mjs",
+    "erklaer": "node tools/dev-server.mjs 8091 erklaer",
+    "erklaer:export": "node tools/export-reel.mjs --dir erklaer",
+    "occluded": "node tools/dev-server.mjs 8092 occluded",
+    "occluded:export": "node tools/export-reel.mjs --dir occluded --clips && node tools/add-sfx.mjs --dir occluded",
+    "sportschuetze": "node tools/dev-server.mjs 8093 sportschuetze",
+    "sportschuetze:export": "node tools/export-reel.mjs --dir sportschuetze --clips",
+    "jaeger": "node tools/dev-server.mjs 8094 jaeger",
+    "jaeger:export": "node tools/export-reel.mjs --dir jaeger --clips && node tools/add-sfx.mjs --dir jaeger",
+    "sammler": "node tools/dev-server.mjs 8095 sammler",
+    "sammler:export": "node tools/export-reel.mjs --dir sammler --clips && node tools/add-sfx.mjs --dir sammler",
+    "rotpunkt": "node tools/dev-server.mjs 8096 rotpunkt",
+    "rotpunkt:export": "node tools/export-reel.mjs --dir rotpunkt --clips && node tools/add-sfx.mjs --dir rotpunkt",
+    "griff": "node tools/dev-server.mjs 8097 griff",
+    "griff:export": "node tools/export-reel.mjs --dir griff --clips && node tools/add-sfx.mjs --dir griff",
+    "kurzwaffe": "node tools/dev-server.mjs 8098 kurzwaffe",
+    "kurzwaffe:export": "node tools/export-reel.mjs --dir kurzwaffe --clips && node tools/add-sfx.mjs --dir kurzwaffe",
+    "abzug": "node tools/dev-server.mjs 8099 abzug",
+    "abzug:export": "node tools/export-reel.mjs --dir abzug --clips && node tools/add-sfx.mjs --dir abzug",
+    "screens:export": "node tools/export-screens.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -21,6 +42,8 @@
     "@capacitor/ios": "^8.5.2"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5"
+    "@capacitor/assets": "^3.0.5",
+    "ffmpeg-static": "^5.3.0",
+    "puppeteer-core": "^25.12.0"
   }
 }

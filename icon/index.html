@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FORTH TRACE Icon</title>
+<style>
+  @font-face { font-family: Montserrat; src: url(assets/fonts/montserrat-latin.woff2) format('woff2'); font-weight: 100 900; }
+  :root { --bg:#0f1010; --surface:#171a18; --text:#edede6; --muted:#949888; --line:#272c2a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:Montserrat, system-ui, sans-serif; padding:32px 24px 48px; }
+  h1 { font-size:20px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin:0 0 4px; }
+  .lead { color:var(--muted); font-size:14px; margin:0 0 28px; }
+  .row { display:grid; grid-template-columns:160px repeat(4, minmax(0, 1fr)); gap:20px; align-items:center; margin-bottom:28px; }
+  @media (max-width: 760px) {
+    .row { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    .row-head { grid-column:1 / -1; }
+  }
+  .row-head { font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+  .row-head b { display:block; color:var(--text); font-size:15px; letter-spacing:.04em; margin-bottom:4px; }
+  .cell { text-align:center; }
+  .cell svg.big { width:100%; max-width:180px; border-radius:22.4%; display:block; margin:0 auto; }
+  .cell .name { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; margin-top:10px; }
+  .cell .code { font-size:12px; color:var(--muted); margin-top:2px; }
+  .dock { margin-top:12px; display:flex; gap:22px; justify-content:center; align-items:center; background:#2a2f33; border-radius:16px; padding:18px; flex-wrap:wrap; }
+  .dock svg { width:60px; height:60px; border-radius:22.4%; }
+  .dock span { font-size:12px; color:#c9cbc4; letter-spacing:.06em; text-transform:uppercase; }
+</style>
+</head>
+<body>
+<h1>FORTH TRACE Timer · Icon</h1>
+<p class="lead">Minimal: flacher dunkler Grund, ein Symbol, keine Textur.</p>
+<div id="grid"></div>
+<div class="dock" id="dock"><span>Homescreen</span></div>
+
+<script type="module">
+const MARK = (await (await fetch('assets/mark-path.txt')).text()).trim();
+
+const BACKGROUNDS = [
+  { id:'ink', name:'Schwarz', code:'#0f1010', fill:'#0f1010' },
+  { id:'graphite', name:'Dunkelgrau', code:'#1c1f1d', fill:'#1c1f1d' }
+];
+
+// Stoppuhr mit dem Dolch als Zeiger. Ringstaerke, Ringradius und Dolchgroesse
+// haengen zusammen: je schmaler der Ring, desto laenger darf der Dolch werden,
+// die Spitze endet immer kurz vor der Innenkante.
+const HAND = 50; // Zeigerstellung in Grad, 0 = oben
+const DAGGER_REACH = 825; // Ringknauf-Mitte bis Spitze in Pfadeinheiten
+function watch({ w, r, cy = 545, color = '#ff3131', mark = '#edede6', bold = 0 }) {
+  const cx = 512;
+  const s = (r - w / 2 - 34) / DAGGER_REACH;
+  const top = cy - r - w / 2;
+  const stemW = Math.max(w * 0.95, 30);
+  const capH = Math.max(w * 0.9, 30);
+  const capW = Math.max(w * 3.6, 120);
+  const capY = top - 92;
+  return `
+    <rect x="${cx - capW / 2}" y="${capY}" width="${capW}" height="${capH}" rx="${capH / 2}" fill="${color}"/>
+    <rect x="${cx - stemW / 2}" y="${capY + capH / 2}" width="${stemW}" height="${top - capY - capH / 2 + w / 2}" rx="${stemW / 4}" fill="${color}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${w}"/>
+    <use href="#mark" fill="${mark}" ${bold ? `stroke="${mark}" stroke-width="${bold}" stroke-linejoin="round"` : ''}
+      transform="translate(${cx} ${cy}) rotate(${HAND - 180}) scale(${s.toFixed(3)}) translate(-83.3 -83)"/>`;
+}
+
+// Stoppuhr in Bewegung: Ring links offen, drei Tempo-Linien laufen in die
+// Luecke. Der Zeiger ist entweder der Dolch oder eine spitz zulaufende Nadel.
+function speed({ w = 40, color = '#ff3131', lines = color, mark = '#edede6', hand = 'dagger', bg = '#1c1f1d' }) {
+  const cx = 580, cy = 575, r = 265;
+  const pt = (deg, rad = r) => {
+    const a = deg * Math.PI / 180;
+    return [cx + rad * Math.sin(a), cy - rad * Math.cos(a)].map(v => v.toFixed(1));
+  };
+  const [sx, sy] = pt(300), [ex, ey] = pt(240);
+  const top = cy - r - w / 2;
+  const capW = 150, capH = w, capY = top - 92;
+  let out = `
+    <rect x="${cx - capW / 2}" y="${capY}" width="${capW}" height="${capH}" rx="${capH / 2}" fill="${color}"/>
+    <rect x="${cx - w / 2}" y="${capY + capH / 2}" width="${w}" height="${top - capY - capH / 2 + w / 2}" fill="${color}"/>
+    <path d="M ${sx} ${sy} A ${r} ${r} 0 1 1 ${ex} ${ey}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>
+    <g stroke="${lines}" stroke-width="${w}" stroke-linecap="round">
+      <line x1="215" y1="${cy - 92}" x2="335" y2="${cy - 92}"/>
+      <line x1="150" y1="${cy}" x2="345" y2="${cy}"/>
+      <line x1="215" y1="${cy + 92}" x2="335" y2="${cy + 92}"/>
+    </g>`;
+  if (hand === 'dagger') {
+    const s = (r - w / 2 - 40) / DAGGER_REACH;
+    out += `<use href="#mark" fill="${mark}" transform="translate(${cx} ${cy}) rotate(${HAND - 180}) scale(${s.toFixed(3)}) translate(-83.3 -83)"/>`;
+  } else {
+    const [tx, ty] = pt(HAND, 190), [lx, ly] = pt(HAND - 90, 26), [rx, ry] = pt(HAND + 90, 26);
+    out += `<polygon points="${lx},${ly} ${tx},${ty} ${rx},${ry}" fill="${mark}" stroke="${mark}" stroke-width="10" stroke-linejoin="round"/>
+      <circle cx="${cx}" cy="${cy}" r="46" fill="${mark}"/><circle cx="${cx}" cy="${cy}" r="17" fill="${bg}"/>`;
+  }
+  return out;
+}
+
+const SYMBOLS = [
+  { name:'Weiß · Dolch', code:'#ffffff', draw: (bg) => speed({ color:'#ffffff', mark:'#ffffff', bg }) },
+  { name:'Weiß · Nadel', code:'#ffffff', draw: (bg) => speed({ color:'#ffffff', mark:'#ffffff', hand:'needle', bg }) },
+  { name:'Bone · Dolch', code:'#edede6', draw: (bg) => speed({ color:'#edede6', mark:'#edede6', bg }) },
+  { name:'Bone · Nadel', code:'#edede6', draw: (bg) => speed({ color:'#edede6', mark:'#edede6', hand:'needle', bg }) }
+];
+const OLD_SYMBOLS = [
+  { name:'Bisher', code:'Ring 58 · Dolch klein', draw: () => watch({ w:58, r:250, cy:560 }) },
+  { name:'Mittel', code:'Ring 40 · Dolch größer', draw: () => watch({ w:40, r:280 }) },
+  { name:'Schmal', code:'Ring 28 · Dolch gross', draw: () => watch({ w:28, r:290 }) },
+  { name:'Schmal, Dolch kräftig', code:'Ring 28 · Dolch betont', draw: () => watch({ w:28, r:290, bold:14 }) },
+  { name:'Fein', code:'Ring 20 · Dolch gross', draw: () => watch({ w:20, r:295 }) },
+  { name:'Mittel, Sage', code:'Ring Sage · Dolch Bone', draw: () => watch({ w:40, r:280, color:'#a3a398' }) },
+  { name:'Schmal, Bone', code:'Ring Bone · Dolch Bone', draw: () => watch({ w:28, r:290, color:'#edede6', mark:'#edede6' }) },
+  { name:'Schmal, Dolch Rot', code:'Ring Bone · nur Vergleich', draw: () => watch({ w:28, r:290, color:'#edede6', mark:'#ff3131' }) }
+];
+
+const svg = (bg, inner, cls) =>
+  `<svg class="${cls}" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><rect width="1024" height="1024" fill="${bg}"/>${inner}</svg>`;
+document.body.insertAdjacentHTML('afterbegin',
+  `<svg width="0" height="0" style="position:absolute"><defs><path id="mark" d="${MARK}"/></defs></svg>`);
+
+const grid = document.getElementById('grid');
+const dock = document.getElementById('dock');
+for (const b of BACKGROUNDS) {
+  let html = `<div class="row"><div class="row-head"><b>${b.name}</b>${b.code}</div>`;
+  for (const s of SYMBOLS) {
+    html += `<div class="cell">${svg(b.fill, s.draw(b.fill), 'big')}
+      <div class="name">${s.name}</div><div class="code">${s.code}</div></div>`;
+    dock.insertAdjacentHTML('beforeend', svg(b.fill, s.draw(b.fill), ''));
+  }
+  grid.insertAdjacentHTML('beforeend', html + '</div>');
+}
+</script>
+</body>
+</html>

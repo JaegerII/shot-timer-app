@@ -5,28 +5,56 @@
 // assets/       -> Quellbilder für `npm run assets` (@capacitor/assets),
 //                  das daraus die nativen Icon- und Splash-Varianten ableitet.
 import { deflateSync } from 'node:zlib';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const BG = [0x0f, 0x10, 0x10];
-const ACCENT = [0xff, 0x31, 0x31];
+const ICON_BG = [0x1c, 0x1f, 0x1d]; // Dunkelgrau, hebt sich auf dem Home-Bildschirm ab
+const SPLASH_BG = [0x0f, 0x10, 0x10]; // App-Hintergrund, damit der Start nahtlos wirkt
+const INK = [0xff, 0xff, 0xff];
 const SS = 4; // Supersampling-Faktor für weiche Kanten
 
-/* ---------- Geometrie in Einheitskoordinaten (0..1) ---------- */
-// `scale` verkleinert das Motiv um den Mittelpunkt: 1 = formatfüllend,
-// 0.76 = innerhalb der Android-Maske, 0.2 = kleines Logo auf dem Splash.
-function shapes(scale) {
-  const c = 0.5;
-  const s = (v) => c + (v - c) * scale;
-  const k = (v) => v * scale;
-  return {
-    ring: { x: c, y: s(0.565), r: k(0.255), w: k(0.09) },
-    stem: { x0: c - k(0.043), x1: c + k(0.043), y0: s(0.175), y1: s(0.325) },
-    crown: { x0: c - k(0.125), x1: c + k(0.125), y0: s(0.13), y1: s(0.185) },
-    hand: { x0: c, y0: s(0.565), x1: c + k(0.135), y1: s(0.45), w: k(0.088) }
-  };
+/* ---------- Geometrie im 1024er-Raster ---------- */
+// Stoppuhr in Bewegung: Ring links offen, die obere und untere Tempo-Linie
+// gehen nahtlos in die Ringenden über, die mittlere läuft in die Lücke.
+// Der Zeiger ist die FORTH-TRACE-Bildmarke (Dolch), unverändert übernommen.
+const W = 40;                 // einheitliche Strichstärke
+const R = 265;                // Ringradius (Mitte des Strichs)
+const CX = 592, CY = 558;     // so gewählt, dass das Motiv optisch mittig sitzt
+const LINE_DY = 92;           // Abstand der äußeren Tempo-Linien zur Mitte
+const HAND = 50;              // Zeigerstellung in Grad, 0 = oben
+const MARK_PIVOT = [83.3, 83];  // Mitte des Ringknaufs im Pfad
+const MARK_REACH = 825;         // Knaufmitte bis Spitze in Pfadeinheiten
+
+// Übergang Linie -> Ring: Kreisbogen, der beide tangential berührt.
+// Sein Mittelpunkt liegt FILLET über der Linie und R + FILLET vom Ringmittelpunkt.
+const FILLET = 70;
+const FILLET_Y = CY - LINE_DY - FILLET;
+const FILLET_X = CX - Math.sqrt((R + FILLET) ** 2 - (LINE_DY + FILLET) ** 2);
+const RING_GAP = Math.atan2(LINE_DY + FILLET, CX - FILLET_X); // halbe Öffnung ab 9 Uhr
+const LINE_X0 = CX - 365;
+const TOP = CY - R - W / 2;
+
+const GLYPH = {
+  lines: [
+    [CX - 430, CY, CX - 235, CY]
+  ],
+  stem: [CX - W / 2, TOP - 72, CX + W / 2, TOP + W / 2],
+  crown: [CX - 75, TOP - 92, CX + 75, TOP - 92 + W],
+  mark: loadMark(),
+  markScale: (R - W / 2 - 24) / MARK_REACH
+};
+
+// Die Marke ist sehr schlank. Damit sie neben den 40er-Strichen nicht verloren
+// wirkt, wird ihr Umriss gleichmäßig um MARK_BOLD (im 1024er-Raster) verbreitert.
+const MARK_BOLD = 5;
+
+// Pfad der Bildmarke besteht nur aus M/L/Z – als Polygone für den Even-Odd-Test.
+function loadMark() {
+  const d = readFileSync(resolve(ROOT, 'assets/brand/mark-path.txt'), 'utf8');
+  return d.split('Z').map((sub) => [...sub.matchAll(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g)]
+    .map((m) => [Number(m[1]), Number(m[2])])).filter((p) => p.length > 2);
 }
 
 const dist2 = (ax, ay, bx, by) => (ax - bx) ** 2 + (ay - by) ** 2;
@@ -45,21 +73,83 @@ function inCapsule(x, y, x0, y0, x1, y1, w) {
   return dist2(x, y, x0 + t * dx, y0 + t * dy) <= (w / 2) ** 2;
 }
 
-function onGlyph(x, y, g) {
-  const { ring, stem, crown, hand } = g;
-  if (Math.abs(Math.sqrt(dist2(x, y, ring.x, ring.y)) - ring.r) <= ring.w / 2) return true;
-  if (inRoundRect(x, y, stem.x0, stem.y0, stem.x1, stem.y1, (stem.x1 - stem.x0) / 2)) return true;
-  if (inRoundRect(x, y, crown.x0, crown.y0, crown.x1, crown.y1, (crown.y1 - crown.y0) / 2)) return true;
-  if (inCapsule(x, y, hand.x0, hand.y0, hand.x1, hand.y1, hand.w)) return true;
+function inPolygons(x, y, polys) {
+  let inside = false;
+  for (const p of polys) {
+    for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+      const [xi, yi] = p[i], [xj, yj] = p[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function nearEdge(x, y, polys, d) {
+  const d2 = d * d;
+  for (const p of polys) {
+    for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+      const [x0, y0] = p[j], [x1, y1] = p[i];
+      const dx = x1 - x0, dy = y1 - y0;
+      const t = Math.min(1, Math.max(0, ((x - x0) * dx + (y - y0) * dy) / (dx * dx + dy * dy || 1)));
+      if (dist2(x, y, x0 + t * dx, y0 + t * dy) <= d2) return true;
+    }
+  }
   return false;
+}
+
+// Ring, äußere Tempo-Linien und die Ausrundung dazwischen bilden einen Strich
+// konstanter Stärke. Die Ausrundung ist ein Kreisbogen (Radius FILLET), der die
+// Linie und den Ring jeweils tangential berührt. Oben und unten sind
+// spiegelgleich, deshalb wird nur die obere Hälfte geprüft.
+function onArc(x, y) {
+  const yy = CY - Math.abs(y - CY);
+  const half = W / 2;
+  // Ring außerhalb der Öffnung
+  if (Math.abs(Math.atan2(y - CY, CX - x)) >= RING_GAP &&
+      Math.abs(Math.sqrt(dist2(x, y, CX, CY)) - R) <= half) return true;
+  // Linie bis zum Beginn der Ausrundung
+  if (inCapsule(x, yy, LINE_X0, CY - LINE_DY, FILLET_X, CY - LINE_DY, W)) return true;
+  // Ausrundung: nur der Sektor zwischen den beiden Berührpunkten
+  if (Math.abs(Math.sqrt(dist2(x, yy, FILLET_X, FILLET_Y)) - FILLET) > half) return false;
+  const px = x - FILLET_X, py = yy - FILLET_Y;
+  const ax = 0, ay = 1;                                // Richtung zum Berührpunkt der Linie
+  const bx = CX - FILLET_X, by = CY - FILLET_Y;        // Richtung zum Berührpunkt des Rings
+  const cross = (ux, uy, vx, vy) => ux * vy - uy * vx;
+  const s = Math.sign(cross(ax, ay, bx, by));
+  return Math.sign(cross(ax, ay, px, py)) === s && Math.sign(cross(px, py, bx, by)) === s;
+}
+
+const COS = Math.cos(((HAND - 180) * Math.PI) / 180);
+const SIN = Math.sin(((HAND - 180) * Math.PI) / 180);
+
+// x, y im 1024er-Raster
+function onGlyph(x, y) {
+  if (onArc(x, y)) return true;
+  for (const [x0, y0, x1, y1] of GLYPH.lines) if (inCapsule(x, y, x0, y0, x1, y1, W)) return true;
+  const [sx0, sy0, sx1, sy1] = GLYPH.stem;
+  if (inRoundRect(x, y, sx0, sy0, sx1, sy1, 4)) return true;
+  const [cx0, cy0, cx1, cy1] = GLYPH.crown;
+  if (inRoundRect(x, y, cx0, cy0, cx1, cy1, W / 2)) return true;
+  // Rücktransformation in den Pfadraum der Bildmarke: verschieben, drehen, skalieren.
+  const dx = x - CX, dy = y - CY;
+  const mx = (dx * COS + dy * SIN) / GLYPH.markScale + MARK_PIVOT[0];
+  const my = (-dx * SIN + dy * COS) / GLYPH.markScale + MARK_PIVOT[1];
+  const pad = MARK_BOLD / GLYPH.markScale;
+  if (mx < -pad || mx > 167 + pad || my < -pad || my > 909 + pad) return false;
+  return inPolygons(mx, my, GLYPH.mark) || nearEdge(mx, my, GLYPH.mark, pad);
 }
 
 /* ---------- Rasterung ---------- */
 // rounded:     abgerundete Ecken (sonst formatfüllendes Quadrat)
 // glyph:       Motivgröße relativ zur Kantenlänge, 0 = nur Fläche
 // transparent: Hintergrund freistellen (für Android-Adaptive-Icons)
-function render(size, { rounded = false, glyph = 1, transparent = false } = {}) {
-  const g = glyph > 0 ? shapes(glyph) : null;
+// bg:          Hintergrundfarbe
+function render(size, { rounded = false, glyph = 1, transparent = false, bg = ICON_BG } = {}) {
+  const BG = bg;
+  const ACCENT = INK;
+  const g = glyph > 0;
+  // Pixel -> 1024er-Raster, das Motiv um die Bildmitte auf `glyph` skaliert.
+  const toGrid = (v) => 512 + (v / size - 0.5) * 1024 / glyph;
   const corner = rounded ? size * 0.225 : 0;
   const rgba = Buffer.alloc(size * size * 4);
   // Begrenzungsrahmen des Motivs, damit große Flächen nicht supergesampelt werden.
@@ -86,7 +176,7 @@ function render(size, { rounded = false, glyph = 1, transparent = false } = {}) 
           const fy = py + (sy + 0.5) / SS;
           if (rounded && !inRoundRect(fx, fy, 0, 0, size, size, corner)) continue;
           bgHits++;
-          if (g && onGlyph(fx / size, fy / size, g)) fgHits++;
+          if (g && onGlyph(toGrid(fx), toGrid(fy))) fgHits++;
         }
       }
       if (!bgHits) continue; // außerhalb der Rundung: transparent
@@ -127,7 +217,7 @@ function chunk(type, data) {
 
 // App Store Connect weist Icons mit Alphakanal zurück – `alpha:false`
 // kodiert als RGB (Farbtyp 2) und blendet vorher auf den Hintergrund.
-function png(size, rgba, alpha = true) {
+function png(size, rgba, alpha = true, BG = ICON_BG) {
   const channels = alpha ? 4 : 3;
   const stride = size * channels + 1;
   const raw = Buffer.alloc(stride * size);
@@ -170,14 +260,14 @@ const targets = [
   ['assets/icon-only.png', 1024, {}, false],
   ['assets/icon-foreground.png', 1024, { glyph: 0.62, transparent: true }, true],
   ['assets/icon-background.png', 1024, { glyph: 0 }, false],
-  ['assets/splash.png', 2732, { glyph: 0.2 }, false],
-  ['assets/splash-dark.png', 2732, { glyph: 0.2 }, false]
+  ['assets/splash.png', 2732, { glyph: 0.2, bg: SPLASH_BG }, false],
+  ['assets/splash-dark.png', 2732, { glyph: 0.2, bg: SPLASH_BG }, false]
 ];
 
 for (const [rel, size, opts, alpha] of targets) {
   const file = resolve(ROOT, rel);
   mkdirSync(resolve(file, '..'), { recursive: true });
   const started = Date.now();
-  writeFileSync(file, png(size, render(size, opts), alpha));
+  writeFileSync(file, png(size, render(size, opts), alpha, opts.bg));
   console.log(`${rel.padEnd(36)} ${size}px ${alpha ? 'RGBA' : 'RGB '} ${Date.now() - started}ms`);
 }
