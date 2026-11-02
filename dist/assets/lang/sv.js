@@ -1,5 +1,6 @@
 // Svenska – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).sv={
+  "Zufällig 2–4 s": "Slumpvis 2–4 s",
   "Delay": "Fördröjning",
   "Instant": "Direkt",
   "WEITER": "FORTSÄTT",

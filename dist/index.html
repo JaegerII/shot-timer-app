@@ -218,6 +218,9 @@
     #optionGrid:not([hidden])+.stepper-sheet{padding-top:18px}
     /* Auswahl-Sheet (Verzögerung, Par Time, Durchgänge): mehr Luft. */
     #settingsModal .sheet-head{margin-bottom:18px}
+    .rand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:13px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:13px;font-weight:750;font-size:.88rem}
+    .rand-row[hidden]{display:none}
+    .rand-row+.stepper-sheet{padding-top:16px}
     #settingsModal .option{padding:14px 10px;font-size:.88rem}
     #settingsModal .sheet-body{padding-bottom:6px}
     #settingsModal .sheet-action{margin-top:18px}
@@ -267,6 +270,8 @@
     .edge-glow{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;transition:opacity .35s ease,box-shadow .35s ease;border-radius:max(0px,env(safe-area-inset-top,0px))}
     :root[data-run="go"] .edge-glow{opacity:1;box-shadow:inset 0 0 0 3px #35f083,inset 0 0 46px 14px #35f083b3,inset 0 0 140px 36px #35f0834d;animation:glowPulse 1.6s ease-in-out infinite}
     :root[data-run="go"] .state-label{color:#35f083}
+    :root[data-run="standby"] .edge-glow{opacity:1;box-shadow:inset 0 0 0 3px #ffc83d,inset 0 0 42px 12px #ffc83d99,inset 0 0 130px 34px #ffc83d3d;animation:glowPulse 1.2s ease-in-out infinite}
+    :root[data-run="standby"] .state-label{color:#ffc83d}
     :root[data-run="par"] .edge-glow{opacity:1;box-shadow:inset 0 0 0 3px #ff3131,inset 0 0 42px 12px #ff3131a6,inset 0 0 130px 34px #ff31313d;animation:glowPulse .8s ease-in-out infinite}
     @keyframes glowPulse{50%{opacity:.72}}
 
@@ -662,6 +667,7 @@
       <div class="sheet-head"><div><h2 id="sheetTitle">Verzögerung</h2></div><button id="closeModal" aria-label="Schließen">×</button></div>
       <div class="sheet-body">
         <div class="option-grid" id="optionGrid"></div>
+        <div class="rand-row" id="randRow" hidden><span>Zufällig 2–4 s</span><button class="toggle on" id="randToggle" type="button" aria-label="Zufällig 2–4 s" aria-pressed="true"></button></div>
         <div class="stepper-sheet" id="stepperBox" hidden>
           <button class="step big" id="sheetDown" type="button" aria-label="Weniger">−</button>
           <b class="stepper-value" id="sheetValue">0</b>
@@ -910,8 +916,9 @@
       // nach dem bei mehreren Durchgaengen der naechste startet - die Par-Zeit
       // selbst beendet die Messung nicht.
       const PAR_MAX=20, PAR_STEP=.1, PAR_TAIL=2;
-      // Startverzögerung: Instant (Signal direkt nach Standby) oder eine feste Zeit.
-      const DELAY_MIN=.5, DELAY_MAX=10;
+      // Startverzögerung: Instant (Signal direkt nach Standby), zufällig 2–4 s
+      // (Standard) oder eine feste Zeit ab 1 s.
+      const DELAY_MIN=1, DELAY_MAX=99;
       // Länge der Standby-Ansage, falls die Datei noch keine Dauer liefert.
       const STANDBY_FALLBACK_MS=1200;
 
@@ -925,7 +932,7 @@
         dry:{icon:'DF',name:t('Dry Fire / Striker'),desc:t('Hohe Empfindlichkeit für Trigger-Klicks'),sensitivity:78}
       };
       const DEFAULTS={
-        mode:'live',delay:'2',delayManual:2,par:0,reps:1,
+        mode:'live',delay:'random',delayRandom:true,delayManual:2,par:0,reps:1,
         lang:'',theme:'dark',volume:.65,vibration:true,debug:false,drySeen:false,beep:'kurz',
         sensitivity:{live:PROFILES.live.sensitivity,dry:PROFILES.dry.sensitivity},
         noiseFloor:{live:.01,dry:.01}
@@ -940,11 +947,12 @@
           mode:stored.mode==='dry'?'dry':'live',
           // 'instant' oder eine feste Zeit in Sekunden als Zeichenkette. Die frühere
           // Zufallsverzögerung ('random') wird zur gemerkten festen Zeit.
-          // Eine feste Zeit von 0 ist dasselbe wie Instant.
-          delay:stored.delay==='instant'||Number(stored.delay)===0&&stored.delay!==''&&stored.delay!=null?'instant'
+          // 'instant', 'random' oder eine feste Zeit; eine feste Zeit von 0 ist Instant.
+          delay:stored.delay==='instant'||stored.delay==='random'?stored.delay
             :typeof stored.delay==='string'&&stored.delay.trim()!==''&&Number.isFinite(Number(stored.delay))
-            ?String(num(stored.delay,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX))
-            :String(num(stored.delayManual,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX)),
+            ?(Number(stored.delay)===0?'instant':String(num(stored.delay,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX)))
+            :DEFAULTS.delay,
+          delayRandom:typeof stored.delayRandom==='boolean'?stored.delayRandom:DEFAULTS.delayRandom,
           delayManual:num(stored.delayManual,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX),
           par:num(stored.par,DEFAULTS.par,0,20),
           reps:Math.round(num(stored.reps,DEFAULTS.reps,1,99)),
@@ -1102,9 +1110,9 @@
          Oszillator startet exakt zum geplanten Zeitpunkt der AudioContext-Uhr.
          Kurz gehalten, damit die Sperrzeit danach klein bleibt und auch ein
          schneller Draw unter einer halben Sekunde messbar ist. */
-      function playBeep(){
+      function playBeep(offset=0){
         if(!rt.audio||rt.audio.state!=='running')return null;
-        const when=rt.audio.currentTime+CUE_LEAD;
+        const when=rt.audio.currentTime+CUE_LEAD+offset;
         const dauer=BEEP_MS/1000;
         const osz=rt.audio.createOscillator();
         const gain=rt.audio.createGain();
@@ -1117,6 +1125,20 @@
         osz.connect(gain);gain.connect(rt.audio.destination);
         osz.start(when);osz.stop(when+dauer+.02);
         return when;
+      }
+      /* Par-Signal: Doppelpiep wie an Dry-Fire-Stages. Das Mikrofon hört
+         während beider Töne nicht hin, sonst zählten sie als Treffer. */
+      const PAR_GAP_MS=110;
+      function playParSignal(){
+        if(settings.vibration&&navigator.vibrate)navigator.vibrate([35,80,35]);
+        const zweiter=(BEEP_MS+PAR_GAP_MS)/1000;
+        if(playBeep()!==null)playBeep(zweiter);
+        else{
+          const a=$('#signalAudio');
+          const spiel=()=>{try{a.muted=false;a.pause();a.currentTime=0;a.volume=settings.volume;a.play()?.catch?.(()=>{})}catch(e){}};
+          spiel();setTimeout(spiel,zweiter*1000);
+        }
+        rt.ignoreUntil=Math.max(rt.ignoreUntil,performance.now()+CUE_LEAD*1000+2*BEEP_MS+PAR_GAP_MS+BLANK_MARGIN_MS);
       }
       /* Gibt den performance.now()-Zeitpunkt zurück, an dem der Ton hörbar wird. */
       function playCue(type){
@@ -1274,9 +1296,10 @@
       }
 
       /* ---------- Ablauf ---------- */
-      // Leuchtrand: 'go' während die Zeit läuft, 'par' nach der Par Time, sonst aus.
+      // Leuchtrand: 'standby' gelb bis zum Signal, 'go' grün während die Zeit läuft,
+      // 'par' rot nach der Par Time, sonst aus.
       function glow(state){document.documentElement.dataset.run=state||''}
-      function getDelay(){return settings.delay==='instant'?0:Number(settings.delay)}
+      function getDelay(){return settings.delay==='instant'?0:settings.delay==='random'?2+Math.random()*2:Number(settings.delay)}
       async function start(){
         if(rt.running){stop();return}
         unlockCues();
@@ -1293,7 +1316,7 @@
       }
       function queueRep(runId){
         rt.counting=false;
-        glow('');
+        glow('standby');
         rt.threshold=currentThreshold();
         $('#stateLabel').textContent=settings.reps>1?t('STANDBY')+' '+rt.repNow+'/'+settings.reps:t('STANDBY');
         renderTime(0);
@@ -1314,7 +1337,7 @@
             // danach wird weiter erfasst.
             later(()=>{
               if(rt.running&&rt.counting&&rt.runId===runId){
-                playCue('signal');
+                playParSignal();
                 $('#stateLabel').textContent=t('NACH PAR');
                 glow('par');
               }
@@ -1445,7 +1468,7 @@
         $('#sensitivityValue').textContent=value+' %';
       }
       function renderQuickSettings(){
-        $('#delayValue').textContent=settings.delay==='instant'?t('Instant'):de(Number(settings.delay))+' s';
+        $('#delayValue').textContent=settings.delay==='instant'?t('Instant'):settings.delay==='random'?t('Zufall 2–4 s'):de(Number(settings.delay))+' s';
         $('#parValue').textContent=settings.par?de(settings.par)+' s':t('Aus');
         $('#repsValue').textContent=settings.reps===1?t('1 Durchgang'):t('{0} Durchgänge',settings.reps);
       }
@@ -1625,25 +1648,34 @@
         $('#sheetTitle').textContent=titles[key];
         const s=STEPPER[key];
         $('#stepperBox').hidden=!s;
+        $('#randRow').hidden=true;
         $('#quickRow').hidden=!s||!s.schnell.length;
         $('#optionGrid').hidden=!!s&&!s.wahl;
         $('#optionGrid').style.gridTemplateColumns='';
         if(s&&s.wahl){
-          const waehle=wert=>{
-            pendingValue=wert==='instant'?'instant':String(settings.delayManual);
-            const manuell=pendingValue!=='instant';
-            $$('#optionGrid .option').forEach(b=>b.classList.toggle('selected',(b.dataset.value==='manual')===manuell));
-            $('#stepperBox').hidden=!manuell;
-            if(manuell)renderStepper();
+          // Instant oder Delay; bei Delay entweder zufällig 2–4 s (Standard)
+          // oder eine feste Zeit über den Regler.
+          let modus=settings.delay==='instant'?'instant':'manual';
+          let zufall=settings.delay==='instant'?settings.delayRandom:settings.delay==='random';
+          let fest=settings.delay!=='instant'&&settings.delay!=='random'?settings.delay:String(settings.delayManual);
+          const zeige=()=>{
+            $$('#optionGrid .option').forEach(b=>b.classList.toggle('selected',b.dataset.value===modus));
+            $('#randRow').hidden=modus==='instant';
+            setToggle($('#randToggle'),zufall);
+            $('#stepperBox').hidden=modus==='instant'||zufall;
+            pendingValue=modus==='instant'?'instant':zufall?'random':fest;
+            if(!$('#stepperBox').hidden)renderStepper();
           };
           $('#optionGrid').style.gridTemplateColumns='repeat(2,1fr)';
           $('#optionGrid').innerHTML=OPTIONS[key].map(o=>
             '<button class="option" type="button" data-value="'+o[0]+'">'+o[1]+'</button>').join('');
-          $$('#optionGrid .option').forEach(b=>b.onclick=()=>waehle(b.dataset.value));
-          // Beim Öffnen die gespeicherte feste Zeit zeigen, nicht den Merkwert.
-          const fest=settings.delay!=='instant';
-          waehle(fest?'manual':'instant');
-          if(fest){pendingValue=settings.delay;renderStepper()}
+          $$('#optionGrid .option').forEach(b=>b.onclick=()=>{modus=b.dataset.value;zeige()});
+          $('#randToggle').onclick=()=>{
+            if(!zufall)fest=pendingValue; // eingestellte Zeit merken
+            zufall=!zufall;
+            zeige();
+          };
+          zeige();
         }else if(s){
           $('#quickRow').innerHTML=s.schnell.map(w=>
             '<button type="button" data-quick="'+w+'">'+stepperText(key,w)+'</button>').join('');
@@ -1663,7 +1695,7 @@
       }
       function stepSheet(richtung){
         const s=STEPPER[pendingKey];
-        if(!s||pendingValue==='instant')return;
+        if(!s||pendingValue==='instant'||pendingValue==='random')return;
         const roh=Math.round((Number(pendingValue)+richtung*s.step)/s.step)*s.step;
         const wert=Math.min(s.max,Math.max(s.min,roh));
         pendingValue=String(Number(wert.toFixed(2)));
@@ -1693,7 +1725,8 @@
       function applySheet(){
         if(pendingKey==='delay'){
           settings.delay=pendingValue;
-          if(pendingValue!=='instant')settings.delayManual=Number(pendingValue);
+          if(pendingValue==='random')settings.delayRandom=true;
+          else if(pendingValue!=='instant'){settings.delayManual=Number(pendingValue);settings.delayRandom=false}
         }else settings[pendingKey]=Number(pendingValue);
         saveSettings();
         renderQuickSettings();

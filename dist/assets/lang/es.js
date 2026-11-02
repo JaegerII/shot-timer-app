@@ -1,5 +1,6 @@
 // Español – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).es={
+  "Zufällig 2–4 s": "Aleatorio 2–4 s",
   "Delay": "Retardo",
   "Instant": "Instantáneo",
   "WEITER": "CONTINUAR",

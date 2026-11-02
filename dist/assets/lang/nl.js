@@ -1,5 +1,6 @@
 // Nederlands – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).nl={
+  "Zufällig 2–4 s": "Willekeurig 2–4 s",
   "Delay": "Vertraging",
   "Instant": "Direct",
   "WEITER": "VERDER",

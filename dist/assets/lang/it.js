@@ -1,5 +1,6 @@
 // Italiano – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).it={
+  "Zufällig 2–4 s": "Casuale 2–4 s",
   "Delay": "Ritardo",
   "Instant": "Istantaneo",
   "WEITER": "CONTINUA",

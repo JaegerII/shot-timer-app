@@ -1,5 +1,6 @@
 // Polski – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).pl={
+  "Zufällig 2–4 s": "Losowo 2–4 s",
   "Delay": "Opóźnienie",
   "Instant": "Natychmiast",
   "WEITER": "DALEJ",

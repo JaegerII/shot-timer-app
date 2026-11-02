@@ -1,5 +1,6 @@
 // Čeština – übersetzt aus tools/lang-keys.de.json.
 (window.I18N=window.I18N||{}).cs={
+  "Zufällig 2–4 s": "Náhodně 2–4 s",
   "Delay": "Zpoždění",
   "Instant": "Okamžitě",
   "WEITER": "POKRAČOVAT",
