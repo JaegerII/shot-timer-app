@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datenschutz · Privacy – FORTH TRACE Shot Timer</title>
+<style>
+  @font-face{font-family:Montserrat;src:url(assets/fonts/montserrat-latin.woff2) format('woff2');font-weight:100 900}
+  @font-face{font-family:Montserrat;src:url(assets/fonts/montserrat-latin-ext.woff2) format('woff2');font-weight:100 900;unicode-range:U+0100-024F,U+1E00-1EFF}
+  :root{--bg:#0f1010;--surface:#171a18;--text:#edede6;--muted:#949888;--line:#272c2a;--accent:#18e5ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg) url(assets/topo.svg) 0 0/620px 620px repeat;color:var(--text);font-family:Montserrat,system-ui,sans-serif;line-height:1.6}
+  main{width:min(100% - 32px,760px);margin:32px auto 48px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:26px 24px}
+  h1{font-size:1.45rem;margin:0 0 4px;letter-spacing:-.01em}
+  h2{font-size:1.02rem;margin:28px 0 8px;color:var(--accent)}
+  p,li,td,th{font-size:.92rem}
+  .muted{color:var(--muted);font-size:.82rem;margin:0}
+  nav{display:flex;gap:8px;margin:18px 0 6px}
+  nav a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.82rem}
+  nav a:hover{border-color:var(--accent)}
+  table{width:100%;border-collapse:collapse;margin:8px 0}
+  th,td{text-align:left;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:700}
+  code{font-size:.82rem;color:var(--muted)}
+  a{color:var(--accent)}
+  section+section{margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<main>
+  <h1>FORTH TRACE Shot Timer</h1>
+  <p class="muted">Datenschutzerklärung · Privacy Policy · Stand / Last updated: 02.11.2026</p>
+  <nav><a href="#de">Deutsch</a><a href="#en">English</a><a href="support.html">Support</a></nav>
+
+  <section id="de" lang="de">
+    <h2>Verantwortlich</h2>
+    <p>Maximilian Weil<br>Eschberger Weg 19<br>66121 Saarbrücken, Deutschland<br>E-Mail: <a href="mailto:info@wemacon.de">info@wemacon.de</a></p>
+
+    <h2>Kurzfassung</h2>
+    <p>Die App arbeitet ausschließlich auf deinem Gerät. Es werden keine Daten an uns oder an Dritte übertragen. Es gibt keine Konten, kein Tracking, keine Werbung und keine Analyse-Werkzeuge.</p>
+
+    <h2>Mikrofon</h2>
+    <p>Die App benötigt das Mikrofon, um Schüsse und Trigger-Klicks zu erkennen und die Zeiten zu messen.</p>
+    <ul>
+      <li>Das Signal wird nur in Echtzeit auf dem Gerät ausgewertet, und zwar nur der Lautstärkepegel.</li>
+      <li>Es wird <b>keine</b> Aufnahme erstellt, gespeichert oder übertragen. Sprache wird weder erkannt noch verarbeitet.</li>
+      <li>Der Zugriff besteht nur, solange die App geöffnet ist, und kann jederzeit in den Einstellungen des Geräts widerrufen werden.</li>
+    </ul>
+
+    <h2>Lokal gespeicherte Daten</h2>
+    <p>Folgende Daten liegen ausschließlich im Speicher der App auf deinem Gerät:</p>
+    <table>
+      <tr><th>Daten</th><th>Inhalt</th></tr>
+      <tr><td>Einstellungen</td><td>Sprache, Darstellung, Modus, Startverzögerung, Par Time, Durchgänge, Lautstärke, Vibration, Empfindlichkeit und gemessener Grundpegel je Modus</td></tr>
+      <tr><td>Trainings</td><td>Bis zu 50 Trainings mit Zeitpunkt, Modus, Zeiten und Splits</td></tr>
+      <tr><td>Schützen</td><td>Selbst eingegebene Namen und Power Factor für die Hit-Factor-Wertung</td></tr>
+      <tr><td>Matches und Stages</td><td>Match- und Stage-Namen, je Schütze Zeit und Trefferzonen</td></tr>
+    </table>
+    <p>Namen gibst du selbst ein; es findet kein Abgleich mit Kontakten oder anderen Quellen statt. Trainings, Schützen, Matches und Stages kannst du in der App löschen. Beim Löschen der App werden alle Daten vollständig entfernt.</p>
+
+    <h2>Links zu YouTube und Instagram</h2>
+    <p>In den Einstellungen gibt es Links zu unseren Kanälen auf YouTube und Instagram. Erst wenn du einen Link antippst, öffnet sich die jeweilige App oder der Browser; ab dann gelten die Datenschutzbestimmungen von Google (YouTube) bzw. Meta (Instagram). Die App selbst überträgt dabei keine Daten.</p>
+
+    <h2>Keine Übermittlung an Dritte</h2>
+    <p>Die App enthält keine Werbe-, Tracking- oder Analysebibliotheken und stellt im Betrieb keine Netzwerkverbindungen her. Schriften, Symbole und Töne sind in der App enthalten. Apple und Google erheben beim Download eigene Daten; dafür gelten deren Datenschutzbestimmungen.</p>
+
+    <h2>Berechtigungen</h2>
+    <table>
+      <tr><th>Plattform</th><th>Berechtigung</th><th>Zweck</th></tr>
+      <tr><td>iOS</td><td><code>NSMicrophoneUsageDescription</code></td><td>Schusserkennung</td></tr>
+      <tr><td>Android</td><td><code>RECORD_AUDIO</code></td><td>Schusserkennung</td></tr>
+      <tr><td>Android</td><td><code>INTERNET</code></td><td>technisch von der Web-Ansicht vorgegeben; die App lädt keine externen Inhalte</td></tr>
+    </table>
+
+    <h2>Rechtsgrundlage und deine Rechte</h2>
+    <p>Soweit überhaupt personenbezogene Daten verarbeitet werden, geschieht dies zur Bereitstellung der Funktion (Art. 6 Abs. 1 lit. b DSGVO); der Mikrofonzugriff zusätzlich mit deiner Einwilligung über die Systemabfrage (Art. 6 Abs. 1 lit. a DSGVO), die du jederzeit widerrufen kannst. Da bei uns keine Daten aus der App ankommen, liegen dort auch keine Daten vor, die Gegenstand von Auskunft, Berichtigung oder Löschung sein könnten. Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.</p>
+  </section>
+
+  <section id="en" lang="en">
+    <h2>Controller</h2>
+    <p>Maximilian Weil<br>Eschberger Weg 19<br>66121 Saarbrücken, Germany<br>Email: <a href="mailto:info@wemacon.de">info@wemacon.de</a></p>
+
+    <h2>Summary</h2>
+    <p>The app works entirely on your device. No data is sent to us or to third parties. There are no accounts, no tracking, no ads and no analytics.</p>
+
+    <h2>Microphone</h2>
+    <p>The app uses the microphone to detect shots and trigger clicks and to measure your times.</p>
+    <ul>
+      <li>The signal is analysed in real time on the device only, and only its loudness level.</li>
+      <li><b>Nothing</b> is recorded, stored or transmitted. Speech is neither recognised nor processed.</li>
+      <li>Access exists only while the app is open and can be revoked at any time in your device settings.</li>
+    </ul>
+
+    <h2>Data stored on your device</h2>
+    <table>
+      <tr><th>Data</th><th>Content</th></tr>
+      <tr><td>Settings</td><td>Language, appearance, mode, start delay, par time, runs, volume, vibration, sensitivity and measured noise floor per mode</td></tr>
+      <tr><td>Training history</td><td>Up to 50 runs with time, mode, times and splits</td></tr>
+      <tr><td>Shooters</td><td>Names and power factor you enter for Hit Factor scoring</td></tr>
+      <tr><td>Matches and stages</td><td>Match and stage names, time and hit zones per shooter</td></tr>
+    </table>
+    <p>You can delete runs, shooters, matches and stages in the app. Deleting the app removes all data completely.</p>
+
+    <h2>Links to YouTube and Instagram</h2>
+    <p>The settings contain links to our YouTube and Instagram channels. Only when you tap a link does the respective app or browser open; from then on the privacy policies of Google (YouTube) or Meta (Instagram) apply. The app itself transmits no data.</p>
+
+    <h2>No sharing with third parties</h2>
+    <p>The app contains no advertising, tracking or analytics libraries and makes no network connections during use. Fonts, icons and sounds are bundled. Apple and Google collect their own data when you download apps; their privacy policies apply.</p>
+
+    <h2>Legal basis and your rights</h2>
+    <p>Where personal data is processed at all, this is to provide the requested function (Art. 6(1)(b) GDPR); microphone access additionally with your consent via the system prompt (Art. 6(1)(a) GDPR), which you can withdraw at any time. As no data from the app reaches us, we hold no data that could be subject to access, correction or deletion requests. You have the right to lodge a complaint with a data protection supervisory authority.</p>
+  </section>
+</main>
+</body>
+</html>

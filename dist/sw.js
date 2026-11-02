@@ -1,5 +1,5 @@
 /* Erzeugt von tools/make-sw.mjs – nicht von Hand ändern. */
-const VERSION = 'shot-timer-5ac73cdcdf';
+const VERSION = 'shot-timer-57b5084068';
 const ASSETS = [
   "./",
   "assets/apple-touch-icon.png",
@@ -24,7 +24,9 @@ const ASSETS = [
   "assets/topo-light.svg",
   "assets/topo.svg",
   "index.html",
-  "manifest.webmanifest"
+  "manifest.webmanifest",
+  "privacy.html",
+  "support.html"
 ];
 
 self.addEventListener('install', event => {
