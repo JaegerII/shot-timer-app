@@ -1,6 +1,6 @@
 /* ============ Video-Analyse ============
    Stage-Video laden, Startsignal und Schüsse aus der Tonspur erkennen,
-   Timer oben links und Splits unten einblenden, Marker auf der Tonspur
+   Timer mit durchlaufenden Splits in einer wählbaren Ecke einblenden, Marker auf der Tonspur
    verschieben und das Video mit Einblendung als neue Datei exportieren.
    Alles passiert auf dem Gerät; das Video verlässt das Telefon nur, wenn
    man es selbst teilt.
@@ -23,8 +23,10 @@ window.FTVideo = function (api) {
     file: null, url: null, dur: 0, w: 0, h: 0,
     pcm: null, rate: 48000, env: null, envMax: 1,
     beep: null, beepEnd: null, shots: [], sel: null,
-    zoom: 1, sens: 50, rateIdx: 0, busy: false, cancel: false, result: null
+    zoom: 1, sens: 50, rateIdx: 0, busy: false, cancel: false, result: null,
+    corner: 'tl'
   };
+  try { const c = localStorage.getItem('ft-video-corner'); if (c) S.corner = c; } catch (e) {}
   const video = $('#vidEl'), over = $('#vidOver'), wave = $('#vidWave'), track = $('#vidTrack'), inner = $('#vidTrackInner');
 
   /* ---------- Hilfen ---------- */
@@ -284,10 +286,10 @@ window.FTVideo = function (api) {
     S.sel = null;
   }
 
-  /* ---------- Einblendung ---------- */
-  // Eigene Formensprache: Kanten oben rechts und unten links abgeschrägt,
-  // große Zeit mit kleinen Hundertsteln, darunter die „Trace“: der Lauf als Linie
-  // mit einem Strich je Schuss.
+  /* ---------- Einblendung ----------
+     Ein halbtransparentes Feld in der gewählten Ecke: oben die große Zeit,
+     darunter laufen die Schüsse mit Gesamtzeit und Split durch, am Ende die
+     Kennzahlen. Der Rest des Videos bleibt frei. */
   function phaseAt(time, D) {
     const beep = D.beep, shots = D.shots;
     if (beep == null || time < beep) return { phase: 'ready', el: 0, n: 0 };
@@ -297,21 +299,10 @@ window.FTVideo = function (api) {
     if (last != null && time >= last) return { phase: 'done', el: last - beep, n };
     return { phase: 'go', el: time - beep, n };
   }
-  function cut(ctx, x, y, w, h, c) {
+  function rrect(ctx, x, y, w, h, r) {
     ctx.beginPath();
-    ctx.moveTo(x, y); ctx.lineTo(x + w - c, y); ctx.lineTo(x + w, y + c);
-    ctx.lineTo(x + w, y + h); ctx.lineTo(x + c, y + h); ctx.lineTo(x, y + h - c);
-    ctx.closePath();
-  }
-  function glass(ctx, x, y, w, h, c, u) {
-    const g = ctx.createLinearGradient(x, y, x + w, y + h);
-    g.addColorStop(0, 'rgba(5,8,8,.9)');
-    g.addColorStop(1, 'rgba(5,8,8,.72)');
-    ctx.fillStyle = g;
-    cut(ctx, x, y, w, h, c); ctx.fill();
-    ctx.strokeStyle = 'rgba(237,237,230,.13)';
-    ctx.lineWidth = Math.max(1, 0.16 * u);
-    ctx.stroke();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+    else { ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
   }
   // Ziffern in fester Breite, damit die laufende Zeit nicht zittert.
   function tab(ctx, text, x, y, draw) {
@@ -340,186 +331,154 @@ window.FTVideo = function (api) {
     return i < 0 ? [txt, ''] : [txt.slice(0, i), txt.slice(i)];
   }
   const ease = (a) => 1 - Math.pow(1 - clamp(a, 0, 1), 3);
+  const CORNERS = ['tl', 'tr', 'bl', 'br'];
 
-  function drawOverlay(ctx, W, H, time, keep, D) {
+  function drawOverlay(ctx, W, H, time, keep, D, corner) {
     D = D || S;
+    corner = corner || S.corner;
     if (!keep) ctx.clearRect(0, 0, W, H);
     if (D.beep == null && !D.shots.length) return;
     const u = Math.min(W, H) / 100;
     const st = phaseAt(time, D), shots = D.shots, beep = D.beep ?? 0;
     const acc = st.phase === 'ready' ? C.ready : C.live;
-    const lastShot = st.n ? shots[st.n - 1] : null;
-    const flash = lastShot != null ? 1 - clamp((time - lastShot) / 0.32, 0, 1) : 0;
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'left';
 
-    // --- Werte für das Feld oben links ---
+    // --- Maße ---
+    const pad = 2.4 * u, BIG = 11.5 * u, SMALL = 6 * u, ROW = 3.9 * u, RF = 2.7 * u;
+    const K = Math.min(W > H ? 4 : 5, shots.length);          // sichtbare Zeilen
     const label = st.phase === 'ready' ? t('BEREIT') : st.phase === 'go' ? (st.n ? t('SCHUSS {0}', st.n) : t('LÄUFT')) : t('ZEIT');
     const [whole, frac] = parts(sec(st.el));
-    const cells = [];
-    if (st.phase === 'done') {
-      let best = Infinity;
-      for (let i = 1; i < shots.length; i++) best = Math.min(best, shots[i] - shots[i - 1]);
-      cells.push([t('Schüsse'), String(shots.length)], [t('Erster Schuss'), sec(shots[0] - beep)]);
-      if (best < Infinity) cells.push([t('Bester Split'), sec(best), true]);
-    } else if (st.n > 1) {
-      cells.push(['Split', sec(shots[st.n - 1] - shots[st.n - 2]), true], [t('Erster Schuss'), sec(shots[0] - beep)]);
-    } else if (st.n === 1) cells.push([t('Erster Schuss'), sec(shots[0] - beep), true]);
-
-    const x = 3 * u, y = 3 * u, pad = 2.6 * u, c = 2.8 * u;
-    const BIG = 15 * u, SMALL = 7.4 * u, LAB = 1.75 * u, VAL = 3.5 * u, CGAP = 3.2 * u;
+    let best = Infinity;
+    for (let i = 1; i < shots.length; i++) best = Math.min(best, shots[i] - shots[i - 1]);
+    // Breite immer mit den Kennzahlen vom Ende rechnen, damit das Feld nicht springt.
+    const statsAll = shots.length
+      ? [[t('Schüsse'), String(shots.length)], [t('Erster Schuss'), sec(shots[0] - beep)]].concat(best < Infinity ? [[t('Bester Split'), sec(best)]] : [])
+      : [];
+    const stats = st.phase === 'done' ? statsAll : [];
     ctx.font = font(800, BIG);
-    const ww = tab(ctx, whole.replace(/\d/g, '0'), 0, 0, false);
+    const ww = tab(ctx, '00', 0, 0, false);
     ctx.font = font(800, SMALL);
-    const fw = tab(ctx, frac.replace(/\d/g, '0'), 0, 0, false);
-    const cw = cells.map((cl) => {
-      ctx.font = font(750, LAB);
-      const a = spaced(ctx, cl[0].toUpperCase(), 0, 0, 0.16 * u, false);
-      ctx.font = font(800, VAL);
-      return Math.max(a, tab(ctx, cl[1], 0, 0, false));
-    });
-    const cellsW = cw.reduce((a, b) => a + b, 0) + CGAP * Math.max(0, cw.length - 1);
-    const bw = Math.max(36 * u, ww + fw + 0.6 * u + 2 * pad, cellsW + 2 * pad);
+    const fw = tab(ctx, ',00', 0, 0, false);
+    ctx.font = font(700, RF);
+    const colN = ctx.measureText('#00').width, colV = tab(ctx, '00,00', 0, 0, false), colS = tab(ctx, '+0,00', 0, 0, false);
+    const rowW = colN + colV + colS + 5 * u;
+    const statW = statsAll.reduce((a, s) => {
+      ctx.font = font(700, 1.55 * u);
+      const l = spaced(ctx, s[0].toUpperCase(), 0, 0, 0.12 * u, false);
+      ctx.font = font(800, 3 * u);
+      return a + Math.max(l, tab(ctx, s[1], 0, 0, false));
+    }, 0) + 2.6 * u * Math.max(0, statsAll.length - 1);
+    const bw = Math.max(30 * u, ww + fw + 2 * pad + 4 * u, rowW + 2 * pad, statW + 2 * pad);
+    const hHead = pad + 1.6 * u + 1.4 * u + 9 * u;               // Phase + Zeit bis Grundlinie
+    // Liste wächst mit jedem Schuss, bis K Zeilen erreicht sind.
+    const aNew = st.n ? ease((time - shots[st.n - 1]) / 0.18) : 1;
+    const rows = st.n <= K ? Math.max(0, st.n - 1 + aNew) : K;
+    const hList = rows > 0 ? 2 * u + rows * ROW : 0;
+    const hStats = stats.length ? 2 * u + 1.6 * u + 1 * u + 3 * u : 0;
+    const hBrand = 3 * u;
+    const bh = hHead + hList + hStats + hBrand + pad - 0.6 * u;
+    const m = 3 * u;
+    const x = corner === 'tr' || corner === 'br' ? W - m - bw : m;
+    const y = corner === 'bl' || corner === 'br' ? H - m - bh : m;
 
-    const yLab = y + pad + 1.6 * u;
-    const yTime = yLab + 1.7 * u + 10.9 * u;
-    const yTrace = yTime + 2.9 * u;
-    const yCellL = yTrace + 4.2 * u, yCellV = yCellL + 4.1 * u;
-    const yBrand = (cells.length ? yCellV : yTrace + 1 * u) + 3.6 * u;
-    const bh = yBrand + pad - 0.4 * u - y;
+    // --- Feld ---
+    ctx.fillStyle = 'rgba(0,0,0,.48)';
+    rrect(ctx, x, y, bw, bh, 2 * u); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.1)';
+    ctx.lineWidth = Math.max(1, 0.15 * u);
+    ctx.stroke();
 
-    // Rahmen, beim Schuss kurz aufleuchtend
-    if (flash > 0) {
-      ctx.save();
-      ctx.shadowColor = acc; ctx.shadowBlur = 3 * u * flash;
-      ctx.strokeStyle = acc; ctx.globalAlpha = 0.85 * flash; ctx.lineWidth = 0.35 * u;
-      cut(ctx, x, y, bw, bh, c); ctx.stroke();
-      ctx.restore();
-    }
-    glass(ctx, x, y, bw, bh, c, u);
+    // Ohne Schatten: weiche Schatten je Ziffer bremsen den Export spürbar.
+    ctx.save();
+    const L = x + pad, R = x + bw - pad;
+
+    // Phase
+    let cy = y + pad + 1.6 * u;
     ctx.fillStyle = acc;
-    ctx.fillRect(x, y, bw - c, 0.5 * u);
-    ctx.fillRect(x, y, 0.5 * u, 3.2 * u);
+    ctx.beginPath(); ctx.arc(L + 0.6 * u, cy - 0.6 * u, 0.6 * u, 0, Math.PI * 2); ctx.fill();
+    ctx.font = font(800, 1.8 * u);
+    spaced(ctx, label, L + 2 * u, cy, 0.2 * u, true);
 
-    // Zeile 1: Lampe, Phase, Haarlinie
-    const L = x + pad;
-    const led = 1.25 * u * (1 + 0.45 * flash);
-    ctx.fillStyle = acc;
-    ctx.fillRect(L, yLab - 0.62 * u - led / 2, led, led);
-    ctx.font = font(800, 1.95 * u);
-    const lw = spaced(ctx, label, L + 2.4 * u, yLab, 0.24 * u, true);
-    ctx.fillStyle = 'rgba(237,237,230,.16)';
-    const rx = L + 2.4 * u + lw + 1.6 * u;
-    if (rx < x + bw - pad - c) ctx.fillRect(rx, yLab - 0.75 * u, x + bw - pad - c * 0.6 - rx, Math.max(1, 0.14 * u));
-
-    // Zeile 2: Zeit
+    // Zeit
+    cy += 1.4 * u + 9 * u;
     ctx.fillStyle = st.phase === 'done' ? C.live : C.ink;
     ctx.font = font(800, BIG);
-    const wDrawn = tab(ctx, whole, L - 0.5 * u, yTime, true);
+    const wd = tab(ctx, whole, L - 0.4 * u, cy, true);
     ctx.font = font(800, SMALL);
-    ctx.globalAlpha = st.phase === 'done' ? 1 : 0.72;
-    tab(ctx, frac, L - 0.5 * u + wDrawn + 0.3 * u, yTime, true);
-    ctx.globalAlpha = 1;
+    tab(ctx, frac, L - 0.4 * u + wd + 0.2 * u, cy, true);
 
-    // Zeile 3: Trace
-    const x0 = L, x1 = x + bw - pad;
-    const span = shots.length ? Math.max(0.01, shots[shots.length - 1] - beep) : Math.max(1, st.el);
-    const px = (s) => x0 + clamp((s - beep) / span, 0, 1) * (x1 - x0);
-    const p = st.phase === 'ready' ? x0 : px(beep + st.el);
-    ctx.fillStyle = 'rgba(237,237,230,.15)';
-    ctx.fillRect(x0, yTrace - 0.12 * u, x1 - x0, 0.24 * u);
-    if (st.phase !== 'ready') {
-      const g = ctx.createLinearGradient(x0, 0, x1, 0);
-      g.addColorStop(0, 'rgba(24,229,255,.25)'); g.addColorStop(1, C.live);
-      ctx.fillStyle = g;
-      ctx.fillRect(x0, yTrace - 0.26 * u, p - x0, 0.52 * u);
-    }
-    ctx.fillStyle = C.ready;
-    ctx.fillRect(x0, yTrace - 1.1 * u, 0.36 * u, 2.2 * u);
-    for (let i = 0; i < st.n; i++) {
-      const sx = px(shots[i]), nw = i === st.n - 1;
-      const hgt = (nw ? 2.6 + 1.2 * flash : 1.9) * u;
-      ctx.fillStyle = nw ? '#fff' : 'rgba(237,237,230,.85)';
-      ctx.fillRect(sx - 0.18 * u, yTrace - hgt / 2, 0.36 * u, hgt);
-    }
-    if (st.phase === 'go') {
-      const d = 0.95 * u;
-      ctx.fillStyle = C.live;
-      ctx.beginPath(); ctx.moveTo(p, yTrace - d); ctx.lineTo(p + d, yTrace); ctx.lineTo(p, yTrace + d); ctx.lineTo(p - d, yTrace); ctx.closePath(); ctx.fill();
+    // Schüsse: die letzten K, neue Zeile schiebt die Liste nach oben.
+    if (rows > 0) {
+      cy += 2 * u;
+      ctx.fillStyle = 'rgba(255,255,255,.14)';
+      ctx.fillRect(L, cy - 0.6 * u, R - L, Math.max(1, 0.12 * u));
+      const top = cy, listH = rows * ROW;
+      const lastIdx = st.n - 1, a = aNew;
+      const shift = st.n > K ? (1 - a) * ROW : 0;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x, top - 0.4 * u, bw, listH + 0.4 * u); ctx.clip();
+      const first = Math.max(0, st.n - K - (shift > 0 ? 1 : 0));
+      for (let i = first; i < st.n; i++) {
+        const slot = i - Math.max(0, st.n - K);                  // 0 … K-1, -1 = rutscht hinaus
+        const ry = top + (slot + 1) * ROW - 1.1 * u + shift;
+        const nw = i === lastIdx, split = i ? shots[i] - shots[i - 1] : shots[0] - beep;
+        ctx.globalAlpha = nw ? 0.25 + 0.75 * a : 1;
+        ctx.font = font(700, RF);
+        ctx.fillStyle = 'rgba(244,244,238,.55)';
+        ctx.fillText('#' + String(i + 1).padStart(2, '0'), L, ry);
+        ctx.fillStyle = nw ? C.live : C.ink;
+        ctx.font = font(800, RF);
+        ctx.textAlign = 'right';
+        tabRight(ctx, sec(shots[i] - beep), L + colN + 2.5 * u + colV, ry);
+        ctx.fillStyle = nw ? C.live : best < Infinity && i && Math.abs(split - best) < 1e-6 && st.phase === 'done' ? C.ready : 'rgba(244,244,238,.8)';
+        ctx.font = font(700, RF);
+        tabRight(ctx, (i ? '+' : '') + sec(split), R, ry);
+        ctx.textAlign = 'left';
+      }
+      ctx.restore();
+      ctx.globalAlpha = 1;
+      cy = top + listH;
     }
 
-    // Zeile 4: Kennzahlen
-    let cx = L;
-    cells.forEach((cl, i) => {
-      ctx.font = font(750, LAB);
-      ctx.fillStyle = 'rgba(237,237,230,.55)';
-      spaced(ctx, cl[0].toUpperCase(), cx, yCellL, 0.16 * u, true);
-      ctx.font = font(800, VAL);
-      ctx.fillStyle = cl[2] ? C.live : C.ink;
-      tab(ctx, cl[1], cx, yCellV, true);
-      cx += cw[i] + CGAP;
-    });
-
-    // Zeile 5: Marke
-    ctx.fillStyle = C.live;
-    ctx.beginPath();
-    ctx.moveTo(L + 0.5 * u, yBrand - 1.3 * u); ctx.lineTo(L + 1.4 * u, yBrand - 1.3 * u);
-    ctx.lineTo(L + 0.9 * u, yBrand); ctx.lineTo(L, yBrand); ctx.closePath(); ctx.fill();
-    ctx.font = font(800, 1.45 * u);
-    ctx.fillStyle = 'rgba(237,237,230,.62)';
-    const bwm = spaced(ctx, 'FORTH TRACE', L + 2.2 * u, yBrand, 0.42 * u, true);
-    ctx.fillStyle = 'rgba(237,237,230,.32)';
-    spaced(ctx, 'SHOT TIMER', L + 2.2 * u + bwm + 1.2 * u, yBrand, 0.42 * u, true);
-
-    // --- Splits unten ---
-    if (!st.n) return;
-    const K = W > H ? 7 : 4, gap = 1.1 * u, tc = 1.7 * u;
-    const tw = (W - 6 * u - gap * (K - 1)) / K, th = 10.6 * u, by = H - 3 * u - th;
-    const first = Math.max(0, st.n - K);
-    let maxSplit = 0, best = Infinity, bestI = -1;
-    for (let i = 1; i < st.n; i++) {
-      const s = shots[i] - shots[i - 1];
-      maxSplit = Math.max(maxSplit, s);
-      if (s < best) { best = s; bestI = i; }
+    // Kennzahlen am Ende
+    if (stats.length) {
+      cy += 2 * u;
+      ctx.fillStyle = 'rgba(255,255,255,.14)';
+      ctx.fillRect(L, cy - 0.6 * u, R - L, Math.max(1, 0.12 * u));
+      const gap = stats.length > 1 ? (R - L - stats.reduce((acc2, s) => {
+        ctx.font = font(700, 1.55 * u);
+        const l = spaced(ctx, s[0].toUpperCase(), 0, 0, 0.12 * u, false);
+        ctx.font = font(800, 3 * u);
+        return acc2 + Math.max(l, tab(ctx, s[1], 0, 0, false));
+      }, 0)) / (stats.length - 1) : 0;
+      let cx = L;
+      const ly = cy + 1.6 * u, vy = ly + 1 * u + 3 * u;
+      stats.forEach((s, i) => {
+        ctx.font = font(700, 1.55 * u);
+        ctx.fillStyle = 'rgba(244,244,238,.55)';
+        const l = spaced(ctx, s[0].toUpperCase(), cx, ly, 0.12 * u, true);
+        ctx.font = font(800, 3 * u);
+        ctx.fillStyle = i === 2 ? C.ready : C.ink;
+        const v = tab(ctx, s[1], cx, vy, true);
+        cx += Math.max(l, v) + gap;
+      });
+      cy = vy;
     }
-    for (let i = first; i < st.n; i++) {
-      const tx = 3 * u + (i - first) * (tw + gap);
-      const nw = i === st.n - 1, a = nw ? ease((time - shots[i]) / 0.2) : 1;
-      const ty = by + (1 - a) * 2.4 * u;
-      const split = i ? shots[i] - shots[i - 1] : shots[0] - beep;
-      const hi = i === bestI && st.n > 2;
-      ctx.globalAlpha = 0.2 + 0.8 * a;
-      glass(ctx, tx, ty, tw, th, tc, u);
-      ctx.fillStyle = nw ? C.live : i === 0 ? C.ready : 'rgba(237,237,230,.22)';
-      ctx.fillRect(tx, ty, tw - tc, (nw ? 0.42 : 0.24) * u);
-      // Nummer links, Gesamtzeit rechts
-      ctx.font = font(800, 1.7 * u);
-      ctx.fillStyle = i === 0 ? C.ready : 'rgba(237,237,230,.55)';
-      spaced(ctx, String(i + 1).padStart(2, '0'), tx + 1.4 * u, ty + 3.1 * u, 0.16 * u, true);
-      ctx.font = font(700, 1.7 * u);
-      ctx.fillStyle = 'rgba(237,237,230,.55)';
-      ctx.textAlign = 'right';
-      ctx.fillText(sec(shots[i] - beep), tx + tw - 1.4 * u, ty + 3.1 * u);
-      ctx.textAlign = 'left';
-      // Split groß
-      ctx.font = font(800, 4.4 * u);
-      const [sw, sf] = parts(sec(split));
-      ctx.fillStyle = hi ? C.live : C.ink;
-      const w1 = tab(ctx, sw, 0, 0, false);
-      const sx = tx + 1.4 * u, sy = ty + th - 3.2 * u;
-      ctx.font = font(800, 4.4 * u);
-      tab(ctx, sw, sx, sy, true);
-      ctx.font = font(800, 2.8 * u);
-      tab(ctx, sf, sx + w1 + 0.15 * u, sy, true);
-      // Rhythmus: Balkenlänge = Split im Verhältnis zum längsten Split
-      const bx = tx + 1.4 * u, bwid = tw - 2.8 * u - tc * 0.4, bty = ty + th - 1.6 * u;
-      ctx.fillStyle = 'rgba(237,237,230,.12)';
-      ctx.fillRect(bx, bty, bwid, 0.34 * u);
-      const f = i === 0 ? 1 : maxSplit ? split / maxSplit : 1;
-      ctx.fillStyle = i === 0 ? C.ready : hi ? C.live : 'rgba(237,237,230,.7)';
-      ctx.fillRect(bx, bty, Math.max(0.5 * u, bwid * f * a), 0.34 * u);
-    }
-    ctx.globalAlpha = 1;
+
+    // Marke
+    ctx.font = font(800, 1.3 * u);
+    ctx.fillStyle = 'rgba(244,244,238,.45)';
+    spaced(ctx, 'FORTH TRACE SHOT TIMER', L, y + bh - pad + 0.6 * u, 0.35 * u, true);
+    ctx.restore();
+  }
+  // Rechtsbündig mit fester Ziffernbreite.
+  function tabRight(ctx, text, xr, y) {
+    const al = ctx.textAlign;
+    ctx.textAlign = 'left';
+    const w = tab(ctx, text, 0, 0, false);
+    tab(ctx, text, xr - w, y, true);
+    ctx.textAlign = al;
   }
 
   /* ---------- Vorschau ---------- */
@@ -802,6 +761,25 @@ window.FTVideo = function (api) {
     clearTimeout(sensTimer);
     sensTimer = setTimeout(async () => { await detect(false); changed(); fitStage(); }, 180);
   });
+
+  // Ecke der Einblendung: oben links, oben rechts, unten links, unten rechts.
+  function renderCorner() {
+    document.querySelectorAll('#vidCorners button').forEach((b) => {
+      const on = b.dataset.corner === S.corner;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
+  $('#vidCorners').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-corner]');
+    if (!b || S.busy) return;
+    S.corner = CORNERS.includes(b.dataset.corner) ? b.dataset.corner : 'tl';
+    try { localStorage.setItem('ft-video-corner', S.corner); } catch (err) {}
+    renderCorner();
+    paint();
+    drawDemo();
+  });
+  renderCorner();
 
   function renderSummary() {
     const shots = S.shots, beep = S.beep;

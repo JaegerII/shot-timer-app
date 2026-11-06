@@ -280,6 +280,12 @@
     :root[data-theme="light"] .vid-head:before{border-top-color:#0a0b0a}
     .vid-sens{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
     .vid-sens input{flex:1}
+    .vid-pos{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    .vid-pos>span{flex:1}
+    .vid-corners{display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+    .vid-corners button{width:40px;height:32px;border:0;border-radius:9px;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+    .vid-corners button svg{width:22px;height:22px}
+    .vid-corners button.on{background:var(--accent-soft);color:var(--accent)}
     .vid-sum{cursor:default;border:0;background:none;padding:0;gap:6px}
     .vid-sum .chip{position:relative;text-align:left;padding:8px 9px 7px;border:0;border-radius:0;background:var(--surface-2);clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))}
     .vid-sum .chip:before{content:"";position:absolute;left:0;top:0;width:calc(100% - 9px);height:2px;background:var(--line-strong)}
@@ -780,7 +786,7 @@
         <ol class="vid-steps">
           <li><b>Erkennen</b><span>Startsignal und Schüsse kommen aus der Tonspur.</span></li>
           <li><b>Korrigieren</b><span>Marker auf der Tonspur verschieben, ergänzen oder löschen.</span></li>
-          <li><b>Teilen</b><span>Video mit Timer oben links und Splits unten exportieren.</span></li>
+          <li><b>Teilen</b><span>Video mit Timer und Splits in der Ecke deiner Wahl exportieren.</span></li>
         </ol>
         <p class="vid-note">Das Video bleibt auf deinem Gerät.</p>
       </div>
@@ -835,6 +841,7 @@
           <button class="vid-small del" id="vidDel" type="button" aria-label="Marker löschen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
         </div>
 
+        <div class="vid-pos"><span>Einblendung</span><div class="vid-corners" id="vidCorners" role="radiogroup" aria-label="Einblendung"><button type="button" role="radio" data-corner="tl" aria-label="Oben links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="tr" aria-label="Oben rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="bl" aria-label="Unten links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="br" aria-label="Unten rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button></div></div>
         <div class="vid-sens"><span>Empfindlichkeit</span><input type="range" id="vidSens" min="0" max="100" value="50" aria-label="Empfindlichkeit"></div>
         <div class="splits vid-sum" id="vidSum"></div>
         <div class="score-footer">
