@@ -248,7 +248,21 @@ window.FTVideo = function (api) {
     if (!cands.length) return [];
     const loud = cands.map((c) => c.pk).sort((a, b) => a - b);
     const ref = loud[Math.floor((loud.length - 1) * 0.9)];
-    return cands.filter((c) => c.pk >= ref * rel).map((c) => onset(c.i, c.pk));
+    // Ende der Stage: Nach einer Pause muss der nächste Schuss lauter sein, um
+    // noch dazuzugehören (eigene Schüsse sind an der Kamera am lautesten);
+    // nach langer Stille ist Schluss. So fallen Nachbarstand, Hantieren und
+    // angehängte Szenen weg.
+    const own = [], base = 0.6 * Math.pow(0.55, k), maxGap = 4000 + 3000 * k;
+    for (const c of cands) {
+      if (c.pk < ref * rel) continue;
+      if (own.length) {
+        const pause = (c.i - own[own.length - 1].i) / 1000;
+        if (pause * 1000 > maxGap) break;
+        if (c.pk < ref * base * Math.min(1.8, 1 + 0.15 * pause)) continue;
+      }
+      own.push(c);
+    }
+    return own.map((c) => onset(c.i, c.pk));
   }
   // Auf die Probe genau: erstes Sample über 30 % der Spitze.
   function onset(ms, pk) {
@@ -786,7 +800,7 @@ window.FTVideo = function (api) {
   $('#vidSens').addEventListener('input', (e) => {
     S.sens = Number(e.target.value);
     clearTimeout(sensTimer);
-    sensTimer = setTimeout(async () => { await detect(false); changed(); }, 180);
+    sensTimer = setTimeout(async () => { await detect(false); changed(); fitStage(); }, 180);
   });
 
   function renderSummary() {
