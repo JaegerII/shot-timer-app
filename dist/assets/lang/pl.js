@@ -251,5 +251,17 @@
   "Video wird geladen …": "Wczytywanie wideo …",
   "Video wird vorbereitet …": "Przygotowywanie wideo …",
   "Video zu groß – bitte vorher kürzen.": "Wideo jest za duże – najpierw je przytnij.",
-  "ZEIT": "CZAS"
+  "ZEIT": "CZAS",
+  "Exportieren": "Eksportuj",
+  "Ton aus": "Wycisz",
+  "Ton an": "Włącz dźwięk",
+  "{0} Schüsse erkannt": "Wykryte strzały: {0}",
+  "Voriger Marker": "Poprzedni znacznik",
+  "Nächster Marker": "Następny znacznik",
+  "1 s zurück": "1 s wstecz",
+  "1 s vor": "1 s do przodu",
+  "Übernehmen": "Zastosuj",
+  "Marker hinzufügen": "Dodaj znacznik",
+  "Schuss": "Strzał",
+  "Schuss {0}": "Strzał {0}"
 };

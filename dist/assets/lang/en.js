@@ -251,5 +251,17 @@
   "Video wird geladen …": "Loading video …",
   "Video wird vorbereitet …": "Preparing video …",
   "Video zu groß – bitte vorher kürzen.": "Video too large – please trim it first.",
-  "ZEIT": "TIME"
+  "ZEIT": "TIME",
+  "Exportieren": "Export",
+  "Ton aus": "Mute",
+  "Ton an": "Unmute",
+  "{0} Schüsse erkannt": "{0} shots detected",
+  "Voriger Marker": "Previous marker",
+  "Nächster Marker": "Next marker",
+  "1 s zurück": "Back 1 s",
+  "1 s vor": "Forward 1 s",
+  "Übernehmen": "Apply",
+  "Marker hinzufügen": "Add marker",
+  "Schuss": "Shot",
+  "Schuss {0}": "Shot {0}"
 };

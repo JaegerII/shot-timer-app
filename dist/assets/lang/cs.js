@@ -251,5 +251,17 @@
   "Video wird geladen …": "Načítám video …",
   "Video wird vorbereitet …": "Připravuji video …",
   "Video zu groß – bitte vorher kürzen.": "Video je příliš velké – nejdřív ho zkraťte.",
-  "ZEIT": "ČAS"
+  "ZEIT": "ČAS",
+  "Exportieren": "Exportovat",
+  "Ton aus": "Ztlumit",
+  "Ton an": "Zapnout zvuk",
+  "{0} Schüsse erkannt": "Rozpoznané výstřely: {0}",
+  "Voriger Marker": "Předchozí značka",
+  "Nächster Marker": "Další značka",
+  "1 s zurück": "O 1 s zpět",
+  "1 s vor": "O 1 s vpřed",
+  "Übernehmen": "Použít",
+  "Marker hinzufügen": "Přidat značku",
+  "Schuss": "Výstřel",
+  "Schuss {0}": "Výstřel {0}"
 };

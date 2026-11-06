@@ -242,59 +242,77 @@
     .vid-hint{margin:0;color:#949888;font-size:.74rem;line-height:1.4}
     .vid-sheet-row{display:flex;gap:8px;align-items:center}
     .vid-sheet-row .sheet-action{flex:1;margin-top:0}
-    .vid-bar,.vid-tools{flex:0 0 auto;display:flex;align-items:center;gap:6px}
     .vid-play{width:42px;height:42px;border-radius:0;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));border:0;background:var(--accent-fill);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
     .vid-play svg{width:20px;height:20px}
     .vid-play .i-pause,.vid-play.playing .i-play{display:none}
     .vid-play.playing .i-pause{display:block}
-    .vid-clock{flex:1;min-width:0;font-variant-numeric:tabular-nums;font-weight:750;font-size:.84rem;white-space:nowrap}
-    .vid-small{min-width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-weight:800;font-size:.8rem;cursor:pointer;padding:0 9px;display:grid;place-items:center;white-space:nowrap}
-    .vid-small:hover{border-color:var(--line-strong)}
-    .vid-small:disabled{opacity:.35;cursor:default}
-    .vid-small.wide{color:var(--accent);border-color:var(--accent-line)}
-    .vid-small.del{color:var(--danger)}
-    .vid-small svg{width:17px;height:17px}
-    .vid-gap{flex:1}
-    .vid-clock b{color:var(--accent);margin-right:6px}
-    .vid-sum .chip small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .vid-track{flex:0 0 auto;height:86px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:13px;background:linear-gradient(180deg,var(--sunken),var(--surface-2));overscroll-behavior:contain;scrollbar-width:none}
-    .vid-track::-webkit-scrollbar{display:none}
-    .vid-track-inner{position:relative;height:100%;min-width:100%}
-    #vidWave{position:absolute;left:0;top:4px;width:100%;height:52px;display:block}
-    .vid-marks{position:absolute;inset:0}
-    .vm{position:absolute;top:0;bottom:0;width:0}
-    .vm:before{content:"";position:absolute;left:-.75px;top:0;height:60px;width:1.5px;background:linear-gradient(180deg,rgba(24,229,255,.15),#18e5ff);opacity:.9}
-    .vm b{position:absolute;bottom:4px;left:0;transform:translateX(-50%);min-width:24px;height:21px;padding:0 6px;background:#18e5ff;color:#06171a;font-size:.66rem;font-weight:900;letter-spacing:.02em;font-variant-numeric:tabular-nums;display:grid;place-items:center;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
-    .vm b:after{content:"";position:absolute;inset:-9px -6px}
-    .vm.up b{bottom:29px}
-    .vm.beep:before{background:linear-gradient(180deg,rgba(255,200,61,.15),#ffc83d)}
-    .vm.beep b{background:#ffc83d}
-    .vm.sel{z-index:2}
-    .vm.sel{filter:drop-shadow(0 0 5px rgba(24,229,255,.9))}
-    .vm.sel:before{background:#fff;opacity:1}
-    .vm.sel b{background:#fff}
-    :root[data-theme="light"] .vm.sel:before,:root[data-theme="light"] .vm.sel b{background:#0a0b0a;color:#fff}
-    .vid-head{position:absolute;left:-1px;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.55);pointer-events:none;z-index:3}
-    .vid-head:before{content:"";position:absolute;left:-5px;top:0;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
-    :root[data-theme="light"] .vid-head{background:#0a0b0a;box-shadow:none}
-    :root[data-theme="light"] .vid-head:before{border-top-color:#0a0b0a}
     .vid-sens{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
     .vid-sens input{flex:1}
+    .vid-ov{position:absolute;bottom:10px;z-index:2;min-width:38px;height:38px;padding:0 10px;border-radius:99px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;font-weight:800;font-size:.74rem;font-variant-numeric:tabular-nums;display:grid;place-items:center;cursor:pointer}
+    .vid-ov.l{left:10px}.vid-ov.r{right:10px}
+    .vid-stage.ov-top .vid-ov{bottom:auto;top:10px}
+    .vid-stage .vid-busy,.vid-stage .vid-sheet{z-index:3}
+    .vid-ov svg{width:18px;height:18px}
+    .vid-ov .i-off,.vid-ov.off .i-on{display:none}
+    .vid-ov.off .i-off{display:block}
+    .vid-next{display:inline-flex;align-items:center;gap:3px;height:40px;padding:0 10px 0 15px;border:0;border-radius:12px;background:var(--accent-fill);color:var(--accent-ink);font-family:var(--font-display);font-weight:900;font-size:.84rem;letter-spacing:.02em;cursor:pointer;flex:0 0 auto}
+    .vid-next[hidden]{display:none}
+    .vid-next:disabled{opacity:.4}
+    .vid-next svg{width:17px;height:17px}
+    .vid-info,.vid-scrub-row,.vid-transport,.vid-editbar{flex:0 0 auto}
+    .vid-info[hidden],.vid-scrub-row[hidden],.vid-transport[hidden],.vid-editbar[hidden]{display:none}
+    .vid-info{display:flex;align-items:center;gap:10px}
+    .vid-info-text{flex:1;min-width:0;display:grid;gap:3px}
+    .vid-info-text>b{font-size:.88rem;font-weight:800}
+    .vid-info-text span{font-size:.72rem;color:var(--muted);font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+    .vid-info-text span b{color:var(--text);font-weight:800;margin-right:12px}
+    .vid-info-text i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+    .vid-ico{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+    .vid-ico svg{width:20px;height:20px}
+    .vid-scrub-row{display:flex;align-items:center;gap:10px}
+    .vid-time{font-size:.68rem;font-weight:750;color:var(--muted);font-variant-numeric:tabular-nums;min-width:54px}
+    .vid-time.r{text-align:right}
+    .vid-scrub{position:relative;flex:1;height:26px;cursor:pointer;touch-action:none}
+    .vid-scrub-line{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:var(--line-strong);border-radius:2px}
+    #vidScrubDots i{position:absolute;top:50%;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;background:var(--accent)}
+    #vidScrubDots i.beep{background:#ffc83d;width:7px;height:7px;margin:-3.5px 0 0 -3.5px}
+    #vidScrubKnob{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--text);box-shadow:0 1px 5px rgba(0,0,0,.45)}
+    .vid-transport{display:flex;align-items:center;justify-content:center;gap:10px}
+    .vid-tr{width:46px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:0 0 auto;touch-action:manipulation}
+    .vid-tr svg{width:18px;height:18px}
+    .vid-tr:disabled{opacity:.3;cursor:default}
+    .vid-tr.del{color:var(--danger)}
+    .vid-tr.ok{background:var(--accent-fill);border-color:transparent;color:var(--accent-ink)}
+    .vid-transport .vid-play{width:56px;height:48px}
+    .vid-editbar{display:grid;gap:8px}
+    .vid-edit-top{display:flex;align-items:center;gap:8px}
+    .vid-edit-time{flex:1;min-width:0;text-align:center;display:grid;gap:1px}
+    .vid-edit-time b{font-size:1.1rem;font-weight:850;font-variant-numeric:tabular-nums}
+    .vid-edit-time small{font-size:.66rem;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .vid-nudges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .vid-nudges button{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);display:grid;place-items:center;align-content:center;gap:2px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+    .vid-nudges svg{width:17px;height:17px}
+    .vid-nudges small{font-size:.62rem;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+    .vid-track{flex:0 0 auto;position:relative;height:136px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--sunken),var(--surface-2));overflow:hidden}
+    #vidWave{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+    .vid-add{position:absolute;right:6px;top:5px;width:30px;height:30px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface-3);color:var(--text);display:grid;place-items:center;cursor:pointer;z-index:2}
+    .vid-add svg{width:16px;height:16px;transition:transform .15s}
+    .vid-add.open svg{transform:rotate(45deg)}
+    .vid-addmenu{position:absolute;right:6px;top:40px;z-index:3;display:grid;min-width:130px;background:var(--surface-3);border:1px solid var(--line-strong);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-soft)}
+    .vid-addmenu[hidden]{display:none}
+    .vid-addmenu button{border:0;background:none;color:var(--text);text-align:left;padding:11px 14px;font-weight:750;font-size:.86rem;cursor:pointer}
+    .vid-addmenu button+button{border-top:1px solid var(--line)}
+    .vid-sheet .vid-pos,.vid-sheet .vid-sens{color:#b8bcae}
+    .vid-sheet .vid-corners{background:rgba(237,237,230,.06);border-color:rgba(237,237,230,.14)}
+    .vid-sheet .vid-corners button{color:#b8bcae}
+    .vid-sheet .vid-corners button.on{background:rgba(24,229,255,.16);color:#18e5ff}
+    @media(max-height:720px){.vid-track{height:116px}}
     .vid-pos{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
     .vid-pos>span{flex:1}
     .vid-corners{display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
     .vid-corners button{width:40px;height:32px;border:0;border-radius:9px;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
     .vid-corners button svg{width:22px;height:22px}
     .vid-corners button.on{background:var(--accent-soft);color:var(--accent)}
-    .vid-sum{cursor:default;border:0;background:none;padding:0;gap:6px}
-    .vid-sum .chip{position:relative;text-align:left;padding:8px 9px 7px;border:0;border-radius:0;background:var(--surface-2);clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))}
-    .vid-sum .chip:before{content:"";position:absolute;left:0;top:0;width:calc(100% - 9px);height:2px;background:var(--line-strong)}
-    .vid-sum .chip.first:before{background:#18e5ff}
-    .vid-sum .chip small{font-size:.54rem;letter-spacing:.08em;color:var(--muted)}
-    .vid-sum .chip b{font-size:1.05rem;font-weight:850;margin-top:2px}
-    .vid-sum .chip.first b{color:var(--accent)}
-    .vid-edit .score-footer .sheet-action:disabled{opacity:.4}
-    @media(max-height:720px){.vid-sens{display:none}.vid-track{height:76px}}
 
     /* ============ Sheets ============ */
     .modal{position:fixed;z-index:50;inset:0;background:var(--scrim);display:none;align-items:flex-end;justify-content:center;padding:14px;backdrop-filter:blur(5px)}
@@ -771,7 +789,7 @@
           <h1 id="videoTitle">Video</h1>
           <p id="videoSub">Timer und Splits im eigenen Stage-Video</p>
         </div>
-        <button class="ghost-btn" id="vidNew" type="button" hidden>Anderes Video</button>
+        <button class="vid-next" id="vidExport" type="button" hidden><span>Exportieren</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
       </div>
       <input type="file" id="vidFile" accept="video/*" hidden>
 
@@ -797,6 +815,8 @@
             <video id="vidEl" playsinline webkit-playsinline preload="auto"></video>
             <canvas id="vidOver"></canvas>
           </div>
+          <button class="vid-ov l" id="vidMute" type="button" aria-label="Ton aus"><svg class="i-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></svg><svg class="i-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="m16 9.5 5 5M21 9.5l-5 5"/></svg></button>
+          <button class="vid-ov r" id="vidRate" type="button" aria-label="Geschwindigkeit">1,0×</button>
           <div class="vid-busy" id="vidBusy" hidden>
             <span class="vid-spin"></span>
             <b id="vidBusyText"></b>
@@ -809,6 +829,12 @@
             <p class="vid-hint">Der Export läuft in Echtzeit. Bildschirm anlassen und die App nicht verlassen.</p>
             <div class="vid-sheet-row"><button class="ghost-btn" id="vidExportCancel" type="button">Abbrechen</button><button class="sheet-action" id="vidExportGo" type="button">STARTEN</button></div>
           </div>
+          <div class="vid-sheet" id="vidSetSheet" hidden>
+            <h3>Einstellungen</h3>
+            <div class="vid-pos"><span>Einblendung</span><div class="vid-corners" id="vidCorners" role="radiogroup" aria-label="Einblendung"><button type="button" role="radio" data-corner="tl" aria-label="Oben links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="tr" aria-label="Oben rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="bl" aria-label="Unten links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="br" aria-label="Unten rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button></div></div>
+            <div class="vid-sens"><span>Empfindlichkeit</span><input type="range" id="vidSens" min="0" max="100" value="50" aria-label="Empfindlichkeit"></div>
+            <div class="vid-sheet-row"><button class="ghost-btn" id="vidNew" type="button">Anderes Video</button><button class="sheet-action" id="vidSetClose" type="button">FERTIG</button></div>
+          </div>
           <div class="vid-sheet" id="vidDone" hidden>
             <h3>Video fertig</h3>
             <p class="vid-hint" id="vidDoneSize"></p>
@@ -816,36 +842,35 @@
           </div>
         </div>
 
-        <div class="vid-bar">
+        <div class="vid-info" id="vidInfo">
+          <div class="vid-info-text"><b id="vidCount"></b><span id="vidSum"></span></div>
+          <button class="vid-ico" id="vidSettings" type="button" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+        </div>
+        <div class="vid-scrub-row" id="vidScrubRow">
+          <span class="vid-time" id="vidClock">00:00,00</span>
+          <div class="vid-scrub" id="vidScrub"><span class="vid-scrub-line"></span><div id="vidScrubDots"></div><b id="vidScrubKnob"></b></div>
+          <span class="vid-time r" id="vidRemain">-00:00,00</span>
+        </div>
+        <div class="vid-transport" id="vidTransport">
+          <button class="vid-tr" id="vidPrev" type="button" aria-label="Voriger Marker"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M19 5.5v13L8.5 12z"/></svg></button>
+          <button class="vid-tr" id="vidBack" type="button" aria-label="1 s zurück"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 6v12L3 12z"/><path d="M21 6v12l-8.5-6z"/></svg></button>
           <button class="vid-play" id="vidPlay" type="button" aria-label="Abspielen"><svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg></button>
-          <span class="vid-clock" id="vidClock">0,00 / 0,00 s</span>
-          <button class="vid-small" id="vidRate" type="button" aria-label="Geschwindigkeit">1×</button>
-          <button class="vid-small" id="vidZoomOut" type="button" aria-label="Tonspur verkleinern">−</button>
-          <button class="vid-small" id="vidZoomIn" type="button" aria-label="Tonspur vergrößern">+</button>
+          <button class="vid-tr" id="vidFwd" type="button" aria-label="1 s vor"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 6v12L21 12z"/><path d="M3 6v12l8.5-6z"/></svg></button>
+          <button class="vid-tr" id="vidNext" type="button" aria-label="Nächster Marker"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="17.4" y="5" width="2.6" height="14" rx="1"/><path d="M5 5.5v13L15.5 12z"/></svg></button>
         </div>
-
-        <div class="vid-track" id="vidTrack">
-          <div class="vid-track-inner" id="vidTrackInner">
-            <canvas id="vidWave"></canvas>
-            <div class="vid-marks" id="vidMarks"></div>
-            <div class="vid-head" id="vidHead"></div>
+        <div class="vid-editbar" id="vidEditBar" hidden>
+          <div class="vid-edit-top">
+            <button class="vid-tr" id="vidCancelEdit" type="button" aria-label="Abbrechen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+            <button class="vid-tr del" id="vidDel" type="button" aria-label="Marker löschen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+            <div class="vid-edit-time"><b id="vidEditTime">00:00,00</b><small id="vidEditName"></small></div>
+            <button class="vid-tr ok" id="vidOkEdit" type="button" aria-label="Übernehmen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
           </div>
+          <div class="vid-nudges" id="vidNudges"><button type="button" data-nudge="-0.1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 6v12L3 12z"/><path d="M21 6v12l-8.5-6z"/></svg><small></small></button><button type="button" data-nudge="-0.01"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="6" width="2.6" height="12" rx="1"/><path d="M19 6v12l-9-6z"/></svg><small></small></button><button type="button" data-nudge="0.01"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="16.4" y="6" width="2.6" height="12" rx="1"/><path d="M5 6v12l9-6z"/></svg><small></small></button><button type="button" data-nudge="0.1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 6v12L21 12z"/><path d="M3 6v12l8.5-6z"/></svg><small></small></button></div>
         </div>
-
-        <div class="vid-tools">
-          <button class="vid-small wide" id="vidAddShot" type="button">+ Schuss</button>
-          <button class="vid-small wide" id="vidSetStart" type="button">Start hier</button>
-          <span class="vid-gap"></span>
-          <button class="vid-small" id="vidNudgeL" type="button" aria-label="Marker früher">‹</button>
-          <button class="vid-small" id="vidNudgeR" type="button" aria-label="Marker später">›</button>
-          <button class="vid-small del" id="vidDel" type="button" aria-label="Marker löschen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
-        </div>
-
-        <div class="vid-pos"><span>Einblendung</span><div class="vid-corners" id="vidCorners" role="radiogroup" aria-label="Einblendung"><button type="button" role="radio" data-corner="tl" aria-label="Oben links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="tr" aria-label="Oben rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="bl" aria-label="Unten links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="br" aria-label="Unten rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button></div></div>
-        <div class="vid-sens"><span>Empfindlichkeit</span><input type="range" id="vidSens" min="0" max="100" value="50" aria-label="Empfindlichkeit"></div>
-        <div class="splits vid-sum" id="vidSum"></div>
-        <div class="score-footer">
-          <button class="sheet-action" id="vidExport" type="button">VIDEO EXPORTIEREN</button>
+        <div class="vid-track" id="vidTrack">
+          <canvas id="vidWave"></canvas>
+          <button class="vid-add" id="vidAdd" type="button" aria-label="Marker hinzufügen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          <div class="vid-addmenu" id="vidAddMenu" hidden><button id="vidSetStart" type="button">Start</button><button id="vidAddShot" type="button">Schuss</button></div>
         </div>
       </div>
     </section>

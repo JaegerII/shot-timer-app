@@ -251,5 +251,17 @@
   "Video wird geladen …": "Chargement de la vidéo …",
   "Video wird vorbereitet …": "Préparation de la vidéo …",
   "Video zu groß – bitte vorher kürzen.": "Vidéo trop volumineuse – raccourcissez-la d'abord.",
-  "ZEIT": "TEMPS"
+  "ZEIT": "TEMPS",
+  "Exportieren": "Exporter",
+  "Ton aus": "Couper le son",
+  "Ton an": "Activer le son",
+  "{0} Schüsse erkannt": "{0} tirs détectés",
+  "Voriger Marker": "Repère précédent",
+  "Nächster Marker": "Repère suivant",
+  "1 s zurück": "Reculer de 1 s",
+  "1 s vor": "Avancer de 1 s",
+  "Übernehmen": "Valider",
+  "Marker hinzufügen": "Ajouter un repère",
+  "Schuss": "Tir",
+  "Schuss {0}": "Tir {0}"
 };

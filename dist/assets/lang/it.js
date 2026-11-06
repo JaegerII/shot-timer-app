@@ -251,5 +251,17 @@
   "Video wird geladen …": "Caricamento del video …",
   "Video wird vorbereitet …": "Preparazione del video …",
   "Video zu groß – bitte vorher kürzen.": "Video troppo grande – accorcialo prima.",
-  "ZEIT": "TEMPO"
+  "ZEIT": "TEMPO",
+  "Exportieren": "Esporta",
+  "Ton aus": "Disattiva audio",
+  "Ton an": "Attiva audio",
+  "{0} Schüsse erkannt": "{0} colpi rilevati",
+  "Voriger Marker": "Marcatore precedente",
+  "Nächster Marker": "Marcatore successivo",
+  "1 s zurück": "Indietro di 1 s",
+  "1 s vor": "Avanti di 1 s",
+  "Übernehmen": "Applica",
+  "Marker hinzufügen": "Aggiungi marcatore",
+  "Schuss": "Colpo",
+  "Schuss {0}": "Colpo {0}"
 };

@@ -251,5 +251,17 @@
   "Video wird geladen …": "Läser in video …",
   "Video wird vorbereitet …": "Förbereder video …",
   "Video zu groß – bitte vorher kürzen.": "Videon är för stor – korta den först.",
-  "ZEIT": "TID"
+  "ZEIT": "TID",
+  "Exportieren": "Exportera",
+  "Ton aus": "Ljud av",
+  "Ton an": "Ljud på",
+  "{0} Schüsse erkannt": "{0} skott hittade",
+  "Voriger Marker": "Föregående markör",
+  "Nächster Marker": "Nästa markör",
+  "1 s zurück": "1 s bakåt",
+  "1 s vor": "1 s framåt",
+  "Übernehmen": "Använd",
+  "Marker hinzufügen": "Lägg till markör",
+  "Schuss": "Skott",
+  "Schuss {0}": "Skott {0}"
 };

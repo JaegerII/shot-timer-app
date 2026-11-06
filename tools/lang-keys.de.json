@@ -250,5 +250,17 @@
  "Video wird geladen …",
  "Video wird vorbereitet …",
  "Video zu groß – bitte vorher kürzen.",
- "ZEIT"
+ "ZEIT",
+ "Exportieren",
+ "Ton aus",
+ "Ton an",
+ "{0} Schüsse erkannt",
+ "Voriger Marker",
+ "Nächster Marker",
+ "1 s zurück",
+ "1 s vor",
+ "Übernehmen",
+ "Marker hinzufügen",
+ "Schuss",
+ "Schuss {0}"
 ]

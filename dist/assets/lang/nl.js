@@ -251,5 +251,17 @@
   "Video wird geladen …": "Video wordt geladen …",
   "Video wird vorbereitet …": "Video wordt voorbereid …",
   "Video zu groß – bitte vorher kürzen.": "Video te groot – knip hem eerst in.",
-  "ZEIT": "TIJD"
+  "ZEIT": "TIJD",
+  "Exportieren": "Exporteren",
+  "Ton aus": "Geluid uit",
+  "Ton an": "Geluid aan",
+  "{0} Schüsse erkannt": "{0} schoten herkend",
+  "Voriger Marker": "Vorige marker",
+  "Nächster Marker": "Volgende marker",
+  "1 s zurück": "1 s terug",
+  "1 s vor": "1 s vooruit",
+  "Übernehmen": "Toepassen",
+  "Marker hinzufügen": "Marker toevoegen",
+  "Schuss": "Schot",
+  "Schuss {0}": "Schot {0}"
 };

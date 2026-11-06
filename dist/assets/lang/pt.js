@@ -251,5 +251,17 @@
   "Video wird geladen …": "A carregar o vídeo …",
   "Video wird vorbereitet …": "A preparar o vídeo …",
   "Video zu groß – bitte vorher kürzen.": "Vídeo demasiado grande – corta-o primeiro.",
-  "ZEIT": "TEMPO"
+  "ZEIT": "TEMPO",
+  "Exportieren": "Exportar",
+  "Ton aus": "Sem som",
+  "Ton an": "Com som",
+  "{0} Schüsse erkannt": "{0} tiros detetados",
+  "Voriger Marker": "Marcador anterior",
+  "Nächster Marker": "Marcador seguinte",
+  "1 s zurück": "Recuar 1 s",
+  "1 s vor": "Avançar 1 s",
+  "Übernehmen": "Aplicar",
+  "Marker hinzufügen": "Adicionar marcador",
+  "Schuss": "Tiro",
+  "Schuss {0}": "Tiro {0}"
 };

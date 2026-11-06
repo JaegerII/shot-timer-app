@@ -24,10 +24,10 @@ window.FTVideo = function (api) {
     pcm: null, rate: 48000, env: null, envMax: 1,
     beep: null, beepEnd: null, shots: [], sel: null,
     zoom: 1, sens: 50, rateIdx: 0, busy: false, cancel: false, result: null,
-    corner: 'tl'
+    corner: 'tl', pxs: 160, view: 0, muted: false
   };
   try { const c = localStorage.getItem('ft-video-corner'); if (c) S.corner = c; } catch (e) {}
-  const video = $('#vidEl'), over = $('#vidOver'), wave = $('#vidWave'), track = $('#vidTrack'), inner = $('#vidTrackInner');
+  const video = $('#vidEl'), over = $('#vidOver'), wave = $('#vidWave'), track = $('#vidTrack');
 
   /* ---------- Hilfen ---------- */
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -49,7 +49,7 @@ window.FTVideo = function (api) {
     e.target.value = '';
     if (f) load(f);
   });
-  $('#vidNew').onclick = () => { if (!S.busy) $('#vidFile').click(); };
+  $('#vidNew').onclick = () => { if (!S.busy) { $('#vidSetSheet').hidden = true; $('#vidFile').click(); } };
 
   async function load(file) {
     if (S.busy) return;
@@ -60,6 +60,7 @@ window.FTVideo = function (api) {
     $('#vidEmpty').hidden = true;
     $('#vidEdit').hidden = false;
     $('#vidNew').hidden = false;
+    $('#vidExport').hidden = false;
     $('#videoSub').textContent = file.name || '';
     S.busy = true;
     setBusy(t('Video wird geladen …'));
@@ -90,7 +91,7 @@ window.FTVideo = function (api) {
       await detect(true);
       S.busy = false;
       setBusy(null);
-      S.zoom = 1;
+      S.view = 0;
       renderAll();
       fitStage();
       if (S.beep == null) showToast(t('Kein Startsignal erkannt – setze den Start-Marker selbst.'));
@@ -107,13 +108,16 @@ window.FTVideo = function (api) {
   function unload(toEmpty) {
     video.pause();
     if (S.url) URL.revokeObjectURL(S.url);
-    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null });
+    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null, view: 0 });
+    edit = null;
     video.removeAttribute('src');
     video.load();
     if (toEmpty) {
       $('#vidEmpty').hidden = false;
       $('#vidEdit').hidden = true;
       $('#vidNew').hidden = true;
+      $('#vidExport').hidden = true;
+      $('#vidSetSheet').hidden = true;
       requestAnimationFrame(drawDemo);
       $('#videoSub').textContent = t('Timer und Splits im eigenen Stage-Video');
     }
@@ -495,25 +499,36 @@ window.FTVideo = function (api) {
     over.width = Math.round(w * dpr); over.height = Math.round(h * dpr);
     paint();
   }
+  // Angezeigte Zeit: beim Abspielen die des Videos, sonst die gewählte (das
+  // Video springt beim Ziehen nur verzögert hinterher).
+  const nowT = () => (video.paused ? S.view : video.currentTime);
+  // 6,2 → „00:06,20“
+  function clock(v) {
+    v = Math.max(0, v);
+    const m = Math.floor(v / 60), s = v - m * 60;
+    return String(m).padStart(2, '0') + ':' + s.toFixed(2).padStart(5, '0').replace('.', api.DEC);
+  }
   function paint() {
     if (!S.w) return;
-    drawOverlay(over.getContext('2d'), over.width, over.height, video.currentTime);
-    const sel = S.sel == null ? '' : '<b>' + (S.sel === 'beep' ? t('Start') : '#' + (S.sel + 1)) + '</b>';
-    $('#vidClock').innerHTML = sel + sec(video.currentTime) + ' / ' + sec(S.dur) + ' s';
-    placeHead();
+    const tm = nowT();
+    drawOverlay(over.getContext('2d'), over.width, over.height, tm);
+    $('#vidClock').textContent = clock(tm);
+    $('#vidRemain').textContent = '-' + clock(S.dur - tm);
+    $('#vidScrubKnob').style.left = (S.dur ? (tm / S.dur) * 100 : 0).toFixed(3) + '%';
+    if (edit) renderEditBar();
+    drawWave();
   }
   let raf = 0;
   function loop() {
-    paint();
     if (!video.paused && !video.ended) {
-      followHead();
+      S.view = video.currentTime;
+      paint();
       raf = requestAnimationFrame(loop);
-    } else raf = 0;
+    } else { raf = 0; paint(); }
   }
   video.addEventListener('play', () => { setPlayIcon(true); if (!raf) raf = requestAnimationFrame(loop); });
-  video.addEventListener('pause', () => setPlayIcon(false));
+  video.addEventListener('pause', () => { setPlayIcon(false); S.view = video.currentTime; paint(); });
   video.addEventListener('ended', () => setPlayIcon(false));
-  video.addEventListener('seeked', paint);
   video.addEventListener('loadeddata', paint);
   function setPlayIcon(playing) {
     $('#vidPlay').classList.toggle('playing', playing);
@@ -523,124 +538,264 @@ window.FTVideo = function (api) {
     if (S.busy) return;
     resumeAudio();
     if (video.paused || video.ended) {
-      if (video.ended || video.currentTime >= S.dur - 0.05) video.currentTime = 0;
+      if (video.ended || S.view >= S.dur - 0.05) seek(0, true);
       video.play().catch(() => {});
     } else video.pause();
   };
   const RATES = [1, 0.5, 0.25];
+  function rateLabel() { return String(RATES[S.rateIdx].toFixed(RATES[S.rateIdx] < 1 ? 2 : 1)).replace('.', api.DEC) + '×'; }
   $('#vidRate').onclick = () => {
     S.rateIdx = (S.rateIdx + 1) % RATES.length;
     video.playbackRate = RATES[S.rateIdx];
-    $('#vidRate').textContent = String(RATES[S.rateIdx]).replace('.', api.DEC) + '×';
+    $('#vidRate').textContent = rateLabel();
   };
-  window.addEventListener('resize', () => { layout(); renderTrack(); });
-
-  /* ---------- Tonspur ---------- */
-  const innerW = () => inner.clientWidth || 1;
-  const xOf = (time) => (time / (S.dur || 1)) * innerW();
-  const tOf = (x) => clamp((x / innerW()) * S.dur, 0, S.dur);
-  function renderTrack() {
-    if (!S.w) return;
-    const vw = track.clientWidth;
-    if (!vw) return;
-    S.zoom = clamp(S.zoom, 1, maxZoom());
-    inner.style.width = Math.round(vw * S.zoom) + 'px';
-    drawWave();
-    renderMarks();
-    placeHead();
+  // Ton der Vorschau; der Export nimmt den Ton immer mit.
+  function setMute(m) {
+    S.muted = m;
+    if (gain) gain.gain.value = m ? 0 : 1;
+    else video.muted = m;
+    $('#vidMute').classList.toggle('off', m);
+    $('#vidMute').setAttribute('aria-label', m ? t('Ton an') : t('Ton aus'));
   }
-  function drawWave() {
-    const w = innerW(), h = wave.clientHeight || 56;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const cols = Math.min(16000, Math.round(w * dpr));
-    wave.width = cols; wave.height = Math.round(h * dpr);
-    const ctx = wave.getContext('2d'), H = wave.height, mid = H / 2;
-    ctx.clearRect(0, 0, cols, H);
-    if (!S.env) return;
-    const env = S.env, n = env.length, msPerCol = n / cols;
-    // Sekundenraster
-    const pxs = cols / (S.dur || 1), step = pxs > 500 ? 0.1 : pxs > 40 ? 1 : 5;
-    ctx.fillStyle = 'rgba(148,152,136,.16)';
-    for (let k = 1; k * step < S.dur; k++) {
-      const tt = k * step, major = step >= 1 || k % 10 === 0;
-      ctx.fillRect(Math.round(tt * pxs), major ? 0 : H * 0.38, 1, major ? H : H * 0.24);
-    }
-    // Zwischen Signal und letztem Schuss: Welle in Akzentfarbe, Rest gedämpft.
-    const a0 = S.beep != null ? (S.beep / S.dur) * cols : -1;
-    const b0 = S.beep != null && S.shots.length ? (S.shots[S.shots.length - 1] / S.dur) * cols : a0;
-    if (a0 >= 0) {
-      const g = ctx.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, 'rgba(24,229,255,0)'); g.addColorStop(0.5, 'rgba(24,229,255,.12)'); g.addColorStop(1, 'rgba(24,229,255,0)');
-      ctx.fillStyle = g;
-      ctx.fillRect(a0, 0, Math.max(1, b0 - a0), H);
-    }
+  $('#vidMute').onclick = () => setMute(!S.muted);
+  window.addEventListener('resize', () => { layout(); drawWave(); });
+
+  /* ---------- Tonspur ----------
+     Die Linie in der Mitte ist die aktuelle Zeit, die Welle läuft darunter
+     durch. Ziehen verschiebt die Zeit; im Bearbeiten-Modus wandert der
+     gewählte Marker mit. Zwei Finger (oder Strg + Mausrad) zoomen. */
+  const PXS_MIN = 25, PXS_MAX = 1200;
+  let edit = null;               // { orig } solange ein Marker bearbeitet wird
+  let hits = [];                 // Trefferflächen der Marker
+  let col = {};                  // Farben aus dem Thema
+  function readColors() {
     const css = getComputedStyle(document.documentElement);
-    const muted = css.getPropertyValue('--muted').trim() || '#949888';
-    const accent = css.getPropertyValue('--accent').trim() || '#18e5ff';
-    for (let c = 0; c < cols; c++) {
-      const a = Math.floor(c * msPerCol), b = Math.max(a + 1, Math.floor((c + 1) * msPerCol));
-      let m = 0;
-      for (let i = a; i < b && i < n; i++) if (env[i] > m) m = env[i];
-      const v = Math.pow(m / S.envMax, 0.6) * (mid - 2 * dpr);
-      const inStage = c >= a0 && c <= b0;
-      ctx.fillStyle = inStage ? accent : muted;
-      ctx.globalAlpha = inStage ? 0.85 : 0.5;
-      ctx.fillRect(c, mid - v, 1, Math.max(1, v * 2));
-    }
-    ctx.globalAlpha = 1;
+    const g = (n, d) => css.getPropertyValue(n).trim() || d;
+    col = { muted: g('--muted', '#949888'), accent: g('--accent', '#18e5ff'), text: g('--text', '#edede6'), faint: g('--faint', '#5a625b'), line: g('--line', 'rgba(237,237,230,.12)') };
   }
-  function renderMarks() {
-    const box = $('#vidMarks');
-    let html = '';
-    // Dicht liegende Marker abwechselnd eine Reihe höher, damit jeder greifbar bleibt.
-    let lastX = -1e9, up = false;
-    if (S.beep != null) html += mark('beep', S.beep, 'S');
-    S.shots.forEach((s, i) => { html += mark(i, s, String(i + 1)); });
-    box.innerHTML = html;
-    function mark(id, time, txt) {
-      const sel = S.sel === id, x = xOf(time);
-      up = x - lastX < 28 ? !up : false;
+  const tw = () => track.clientWidth || 1;
+  const xAt = (time) => tw() / 2 + (time - S.view) * S.pxs;
+  const tAt = (x) => S.view + (x - tw() / 2) / S.pxs;
+  function renderTrack() { drawWave(); renderDots(); }
+  function drawWave() {
+    const w = track.clientWidth, h = track.clientHeight;
+    if (!w || !h || !S.w) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = Math.round(w * dpr), H = Math.round(h * dpr);
+    if (wave.width !== W || wave.height !== H) { wave.width = W; wave.height = H; }
+    const ctx = wave.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const RUL = 20, LAB = 22, mid = RUL + (h - RUL - LAB) / 2, amp = (h - RUL - LAB) / 2 - 4;
+    const t0 = tAt(0), t1 = tAt(w);
+
+    // Stage hinterlegen
+    if (S.beep != null) {
+      const last = S.shots.length ? S.shots[S.shots.length - 1] : S.beep;
+      const a = Math.max(0, xAt(S.beep)), b = Math.min(w, xAt(last));
+      if (b > a) { ctx.fillStyle = 'rgba(24,229,255,.07)'; ctx.fillRect(a, RUL, b - a, h - RUL - LAB); }
+    }
+    // Lineal mit Sekunden
+    const step = S.pxs >= 500 ? 0.5 : S.pxs >= 110 ? 1 : S.pxs >= 50 ? 2 : 5;
+    const sub = step / 5;
+    ctx.font = '700 10px Montserrat, system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    for (let k = Math.max(0, Math.floor(t0 / sub)); k * sub <= Math.min(S.dur, t1); k++) {
+      const tt = k * sub, x = Math.round(xAt(tt)) + 0.5, major = k % 5 === 0;
+      ctx.fillStyle = major ? col.muted : col.faint;
+      ctx.fillRect(x - 0.5, major ? RUL - 7 : RUL - 4, 1, major ? 7 : 4);
+      if (major) ctx.fillText(String(+tt.toFixed(1)).replace('.', api.DEC) + 's', x, RUL - 9);
+    }
+    // Welle als feine Balken
+    if (S.env) {
+      const env = S.env, n = env.length, bar = 2;
+      const stA = S.beep ?? Infinity, stB = S.shots.length ? S.shots[S.shots.length - 1] : stA;
+      for (let x = 0; x < w; x += bar) {
+        const ta = tAt(x), tb = tAt(x + bar);
+        if (tb < 0 || ta > S.dur) continue;
+        const a = Math.max(0, Math.floor(ta * 1000)), b = Math.min(n, Math.max(a + 1, Math.ceil(tb * 1000)));
+        let m = 0;
+        for (let i = a; i < b; i++) if (env[i] > m) m = env[i];
+        const v = Math.max(0.5, Math.pow(m / S.envMax, 0.6) * amp);
+        const inSt = ta >= stA && ta <= stB;
+        ctx.fillStyle = inSt ? col.accent : col.muted;
+        ctx.globalAlpha = inSt ? 0.9 : 0.55;
+        ctx.fillRect(x, mid - v, 1.2, v * 2);
+      }
+      ctx.globalAlpha = 1;
+    }
+    // Marker als Pillen mit Zeit darunter
+    hits = [];
+    const marks = [];
+    if (S.beep != null) marks.push({ id: 'beep', time: S.beep, txt: 'S' });
+    S.shots.forEach((s, i) => marks.push({ id: i, time: s, txt: String(i + 1) }));
+    const PW = 22, PH = 32;
+    let lastX = -1e9, lastLab = -1e9, up = false;
+    const draws = [];
+    marks.forEach((m) => {
+      const x = xAt(m.time);
+      up = x - lastX < PW + 2 ? !up : false;
       lastX = x;
-      return '<div class="vm' + (id === 'beep' ? ' beep' : '') + (sel ? ' sel' : '') + (up ? ' up' : '') + '" data-id="' + id + '" style="left:' + x.toFixed(1) + 'px"><b>' + txt + '</b></div>';
+      if (x < -40 || x > w + 40) return;
+      const sel = S.sel === m.id;
+      const lab = sel || x - lastLab >= 46;
+      if (lab) lastLab = x;
+      draws.push({ m, x, y: mid + (sel ? 0 : up ? -PH * 0.55 : 0), sel, lab });
+    });
+    // Ausgewählter Marker zuletzt, damit er oben liegt.
+    draws.sort((a, b) => (a.sel ? 1 : 0) - (b.sel ? 1 : 0));
+    draws.forEach(({ m, x, y, sel, lab }) => {
+      const beep = m.id === 'beep';
+      const fill = beep ? '#ffc83d' : col.accent;
+      ctx.globalAlpha = edit && !sel ? 0.4 : 1;
+      rrect(ctx, x - PW / 2, y - PH / 2, PW, PH, PW / 2);
+      if (sel) {
+        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = fill; ctx.stroke();
+      } else { ctx.fillStyle = fill; ctx.fill(); }
+      ctx.fillStyle = sel ? fill : '#06171a';
+      ctx.font = '900 ' + (m.txt.length > 2 ? 10 : 12) + 'px Montserrat, system-ui, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(m.txt, x, y + 0.5);
+      ctx.textBaseline = 'alphabetic';
+      hits.push({ id: m.id, x0: x - PW / 2 - 4, x1: x + PW / 2 + 4, y0: y - PH / 2 - 6, y1: y + PH / 2 + 6, sel });
+      // Zeit: Schuss ab Signal, Start als „Start“
+      const label = beep ? t('Start') : sec(m.time - (S.beep ?? 0)) + 's';
+      if (lab) {
+        ctx.font = '700 10px Montserrat, system-ui, sans-serif';
+        const lw = ctx.measureText(label).width + 10;
+        const ly = h - LAB / 2 - 1;
+        rrect(ctx, x - lw / 2, ly - 8, lw, 16, 5);
+        ctx.fillStyle = sel ? fill : 'rgba(0,0,0,.25)'; ctx.fill();
+        ctx.strokeStyle = sel ? fill : col.line; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = sel ? '#06171a' : col.muted;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, x, ly + 0.5);
+        ctx.textBaseline = 'alphabetic';
+      }
+    });
+    ctx.globalAlpha = 1;
+    // Feste Mitte; im Bearbeiten-Modus mit Pfeilen auf den Marker
+    const cx = Math.round(w / 2) + 0.5;
+    ctx.fillStyle = col.text;
+    ctx.fillRect(cx - 1, RUL, 2, h - RUL - LAB + 2);
+    ctx.beginPath(); ctx.moveTo(cx - 6, RUL); ctx.lineTo(cx + 6, RUL); ctx.lineTo(cx, RUL + 7); ctx.closePath(); ctx.fill();
+    if (edit) {
+      const yb = h - LAB + 2;
+      ctx.beginPath(); ctx.moveTo(cx - 6, yb); ctx.lineTo(cx + 6, yb); ctx.lineTo(cx, yb - 7); ctx.closePath(); ctx.fill();
     }
-  }
-  function placeHead() {
-    $('#vidHead').style.transform = 'translateX(' + xOf(video.currentTime).toFixed(1) + 'px)';
-  }
-  function followHead() {
-    const x = xOf(video.currentTime), l = track.scrollLeft, w = track.clientWidth;
-    if (x < l || x > l + w - 30) track.scrollLeft = x - w * 0.25;
-  }
-  const maxZoom = () => Math.max(1, (S.dur * MAX_PX_PER_S) / (track.clientWidth || 1));
-  function zoomBy(f) {
-    const z = clamp(S.zoom * f, 1, maxZoom());
-    if (Math.abs(z - S.zoom) < 1e-3) return;
-    S.zoom = z;
-    renderTrack();
-    const focus = S.sel != null ? markTime(S.sel) : video.currentTime;
-    track.scrollLeft = xOf(focus) - track.clientWidth / 2;
-  }
-  $('#vidZoomIn').onclick = () => zoomBy(2);
-  $('#vidZoomOut').onclick = () => zoomBy(0.5);
-  // Nach dem Laden: Signal bis letzter Schuss füllen die Tonspur.
-  function fitStage() {
-    if (S.beep == null || !S.shots.length) return;
-    const a = Math.max(0, S.beep - 0.6), b = Math.min(S.dur, S.shots[S.shots.length - 1] + 0.6);
-    S.zoom = clamp(S.dur / (b - a), 1, maxZoom());
-    renderTrack();
-    track.scrollLeft = xOf(a);
   }
 
-  // Antippen der Tonspur: dorthin springen.
-  inner.addEventListener('click', (e) => {
-    if (e.target.closest('.vm') || !S.dur) return;
-    const r = inner.getBoundingClientRect();
-    seek(tOf(e.clientX - r.left));
-    select(null);
-  });
-  function seek(time) {
-    video.currentTime = clamp(time, 0, S.dur);
+  // Übersicht: ganze Länge mit Punkten für Start und Schüsse
+  function renderDots() {
+    let html = '';
+    const p = (v) => (S.dur ? (v / S.dur) * 100 : 0).toFixed(3) + '%';
+    if (S.beep != null) html += '<i class="beep" style="left:' + p(S.beep) + '"></i>';
+    S.shots.forEach((s) => { html += '<i style="left:' + p(s) + '"></i>'; });
+    $('#vidScrubDots').innerHTML = html;
+  }
+
+  // Zeit setzen: Ansicht sofort, Video gedrosselt hinterher.
+  let seekAt = 0, seekTimer = 0;
+  function seek(time, now) {
+    S.view = clamp(time, 0, S.dur || 0);
+    if (edit && S.sel != null) { setMark(S.sel, S.view); sortShots(); renderDots(); }
+    const go = () => { seekAt = performance.now(); video.currentTime = S.view; };
+    clearTimeout(seekTimer);
+    if (now || performance.now() - seekAt > 70) go();
+    else seekTimer = setTimeout(go, 70);
     paint();
+  }
+
+  // Ziehen, Antippen, Zoomen auf der Tonspur
+  const ptrs = new Map();
+  let gest = null;
+  function hitAt(x, y) {
+    for (let i = hits.length - 1; i >= 0; i--) {
+      const hh = hits[i];
+      if (x >= hh.x0 && x <= hh.x1 && y >= hh.y0 && y <= hh.y1) return hh.id;
+    }
+    return null;
+  }
+  wave.addEventListener('pointerdown', (e) => {
+    if (!S.dur || S.busy) return;
+    e.preventDefault();
+    try { wave.setPointerCapture(e.pointerId); } catch (err) {}
+    ptrs.set(e.pointerId, e.clientX);
+    if (ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()];
+      gest = { pinch: true, d0: Math.max(10, Math.abs(a - b)), p0: S.pxs };
+      return;
+    }
+    if (ptrs.size > 2) return;
+    video.pause();
+    closeAddMenu();
+    const r = wave.getBoundingClientRect();
+    gest = { x0: e.clientX, v0: S.view, moved: false, hit: hitAt(e.clientX - r.left, e.clientY - r.top), lx: e.clientX - r.left };
+  });
+  wave.addEventListener('pointermove', (e) => {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, e.clientX);
+    if (!gest) return;
+    if (gest.pinch) {
+      if (ptrs.size < 2) return;
+      const [a, b] = [...ptrs.values()];
+      S.pxs = clamp(gest.p0 * (Math.max(10, Math.abs(a - b)) / gest.d0), PXS_MIN, PXS_MAX);
+      drawWave();
+      return;
+    }
+    const dx = e.clientX - gest.x0;
+    if (Math.abs(dx) > 4) gest.moved = true;
+    if (gest.moved) seek(gest.v0 - dx / S.pxs);
+  });
+  const endPtr = (e) => {
+    ptrs.delete(e.pointerId);
+    if (!gest) return;
+    if (gest.pinch) { if (!ptrs.size) gest = null; return; }
+    const g = gest;
+    gest = null;
+    if (g.moved) { seek(S.view, true); return; }
+    if (g.hit != null) { if (S.sel !== g.hit) startEdit(g.hit); return; }
+    if (!edit) seek(tAt(g.lx), true);
+  };
+  wave.addEventListener('pointerup', endPtr);
+  wave.addEventListener('pointercancel', endPtr);
+  wave.addEventListener('wheel', (e) => {
+    if (!S.dur) return;
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) { S.pxs = clamp(S.pxs * Math.exp(-e.deltaY * 0.01), PXS_MIN, PXS_MAX); drawWave(); return; }
+    video.pause();
+    seek(S.view + (e.deltaX || e.deltaY) / S.pxs);
+  }, { passive: false });
+
+  // Übersicht antippen oder ziehen
+  const scrub = $('#vidScrub');
+  let scrubbing = false;
+  const scrubTo = (e) => {
+    const r = scrub.getBoundingClientRect();
+    seek(((e.clientX - r.left) / r.width) * S.dur);
+  };
+  scrub.addEventListener('pointerdown', (e) => {
+    if (!S.dur || S.busy || edit) return;
+    scrubbing = true; video.pause();
+    try { scrub.setPointerCapture(e.pointerId); } catch (err) {}
+    scrubTo(e);
+  });
+  scrub.addEventListener('pointermove', (e) => { if (scrubbing) scrubTo(e); });
+  const endScrub = () => { if (scrubbing) { scrubbing = false; seek(S.view, true); } };
+  scrub.addEventListener('pointerup', endScrub);
+  scrub.addEventListener('pointercancel', endScrub);
+
+  // Nach dem Laden: Stage füllt die Tonspur, Ansicht auf dem Startsignal.
+  function fitStage() {
+    if (S.beep == null || !S.shots.length) { S.pxs = 160; renderTrack(); return; }
+    // So weit hineinzoomen, dass typische Splits ihre Pille frei haben.
+    const sp = S.shots.map((v, i) => v - (i ? S.shots[i - 1] : S.beep)).sort((a, b) => a - b);
+    const med = sp[Math.floor(sp.length / 2)] || 0.3;
+    const span = S.shots[S.shots.length - 1] - S.beep + 1.2;
+    S.pxs = clamp(Math.max((tw() * 0.9) / span, 30 / med), 60, 400);
+    seek(Math.max(0, S.beep + Math.min(1, (tw() * 0.3) / S.pxs)), true);
+    renderTrack();
   }
 
   /* ---------- Marker bearbeiten ---------- */
@@ -656,62 +811,59 @@ window.FTVideo = function (api) {
     S.shots.sort((a, b) => a - b);
     S.sel = S.shots.indexOf(v);
   }
-  function select(id) {
-    S.sel = id;
-    renderMarks();
-    renderTools();
-  }
-  let drag = null;
-  $('#vidMarks').addEventListener('pointerdown', (e) => {
-    const m = e.target.closest('.vm');
-    if (!m || S.busy) return;
-    e.preventDefault();
-    const id = m.dataset.id === 'beep' ? 'beep' : Number(m.dataset.id);
+  function startEdit(id, isNew) {
+    if (edit) commitEdit(true);
     video.pause();
-    select(id);
-    drag = { id, x: e.clientX, t0: markTime(id), el: $('#vidMarks .vm[data-id="' + id + '"]'), moved: false, seekAt: 0 };
-    drag.el.setPointerCapture(e.pointerId);
-    seek(drag.t0);
-  });
-  $('#vidMarks').addEventListener('pointermove', (e) => {
-    if (!drag) return;
-    const dx = e.clientX - drag.x;
-    if (Math.abs(dx) > 2) drag.moved = true;
-    if (!drag.moved) return;
-    const time = clamp(drag.t0 + (dx / innerW()) * S.dur, 0, S.dur);
-    setMark(drag.id, time);
-    drag.el.style.left = xOf(time).toFixed(1) + 'px';
-    // Bild mitführen, damit man den Marker aufs Mündungsfeuer legen kann.
-    const now = performance.now();
-    if (now - drag.seekAt > 60) { drag.seekAt = now; video.currentTime = time; }
-    paint();
+    S.sel = id;
+    edit = { orig: isNew ? null : markTime(id) };
+    seek(markTime(id), true);
     renderTools();
-  });
-  const endDrag = () => {
-    if (!drag) return;
-    const moved = drag.moved;
-    drag = null;
-    if (moved) changed();
-  };
-  $('#vidMarks').addEventListener('pointerup', endDrag);
-  $('#vidMarks').addEventListener('pointercancel', endDrag);
-
-  function changed() {
-    sortShots();
-    drawWave();
-    renderMarks();
-    renderTools();
-    renderSummary();
-    if (S.sel != null) seek(markTime(S.sel));
-    else paint();
   }
-  function nudge(d) {
-    if (S.sel == null) return;
-    setMark(S.sel, clamp(markTime(S.sel) + d, 0, S.dur));
+  function commitEdit(quiet) {
+    if (!edit) return;
+    edit = null; S.sel = null;
+    if (!quiet) changed(); else { sortShots(); renderSummary(); renderDots(); }
+  }
+  function cancelEdit() {
+    if (!edit) return;
+    if (edit.orig == null) { deleteSel(); return; }       // neu gesetzt: wieder weg
+    setMark(S.sel, edit.orig);
+    sortShots();
+    edit = null; S.sel = null;
     changed();
   }
-  holdRepeat($('#vidNudgeL'), () => nudge(-NUDGE));
-  holdRepeat($('#vidNudgeR'), () => nudge(NUDGE));
+  function deleteSel() {
+    if (typeof S.sel !== 'number') { if (S.sel === 'beep' && edit && edit.orig == null) S.beep = null; else return; }
+    else S.shots.splice(S.sel, 1);
+    edit = null; S.sel = null;
+    changed();
+  }
+  function changed() {
+    sortShots();
+    renderDots();
+    renderTools();
+    renderSummary();
+    paint();
+  }
+  function renderEditBar() {
+    const id = S.sel;
+    $('#vidEditName').textContent = id === 'beep' ? t('Start') : t('Schuss {0}', id + 1) + ' · ' + sec(S.shots[id] - (S.beep ?? 0)) + ' s';
+    $('#vidEditTime').textContent = clock(markTime(id));
+  }
+  function renderTools() {
+    const on = !!edit;
+    $('#vidEditBar').hidden = !on;
+    $('#vidInfo').hidden = $('#vidScrubRow').hidden = $('#vidTransport').hidden = on;
+    $('#vidDel').disabled = !(typeof S.sel === 'number' || (S.sel === 'beep' && edit && edit.orig == null));
+    if (on) renderEditBar();
+    paint();
+  }
+  $('#vidOkEdit').onclick = () => commitEdit();
+  $('#vidCancelEdit').onclick = cancelEdit;
+  $('#vidDel').onclick = deleteSel;
+  document.querySelectorAll('#vidNudges button').forEach((b) => {
+    holdRepeat(b, () => { if (edit) seek(markTime(S.sel) + Number(b.dataset.nudge), true); });
+  });
   function holdRepeat(btn, fn) {
     let timer = 0;
     const stop = () => { clearTimeout(timer); timer = 0; };
@@ -724,35 +876,44 @@ window.FTVideo = function (api) {
     ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, stop));
     btn.addEventListener('click', (e) => { if (e.detail === 0) fn(); }); // Tastatur
   }
+  // Springen: voriger/nächster Marker, eine Sekunde zurück/vor
+  function allMarks() { return (S.beep != null ? [S.beep] : []).concat(S.shots).sort((a, b) => a - b); }
+  $('#vidPrev').onclick = () => { video.pause(); const m = allMarks().filter((v) => v < S.view - 0.005); seek(m.length ? m[m.length - 1] : 0, true); };
+  $('#vidNext').onclick = () => { video.pause(); const m = allMarks().find((v) => v > S.view + 0.005); seek(m != null ? m : S.dur, true); };
+  holdRepeat($('#vidBack'), () => { video.pause(); seek(S.view - 1, true); });
+  holdRepeat($('#vidFwd'), () => { video.pause(); seek(S.view + 1, true); });
+  // „+“: Start oder Schuss an der Mitte setzen
+  function closeAddMenu() { $('#vidAddMenu').hidden = true; $('#vidAdd').classList.remove('open'); }
+  $('#vidAdd').onclick = (e) => {
+    e.stopPropagation();
+    if (!S.dur || S.busy) return;
+    const open = $('#vidAddMenu').hidden;
+    $('#vidAddMenu').hidden = !open;
+    $('#vidAdd').classList.toggle('open', open);
+  };
   $('#vidAddShot').onclick = () => {
-    if (!S.dur) return;
+    closeAddMenu();
     video.pause();
-    const time = video.currentTime;
+    const time = S.view;
     if (S.shots.some((s) => Math.abs(s - time) < 0.005)) return;
+    if (edit) commitEdit(true);
     S.shots.push(time);
-    S.sel = S.shots.length - 1;
-    changed();
+    S.shots.sort((a, b) => a - b);
+    startEdit(S.shots.indexOf(time), true);
+    renderDots(); renderSummary();
   };
   $('#vidSetStart').onclick = () => {
-    if (!S.dur) return;
+    closeAddMenu();
     video.pause();
-    S.beep = video.currentTime;
-    S.sel = 'beep';
-    changed();
+    if (edit) commitEdit(true);
+    const had = S.beep != null;
+    const before = S.beep;
+    S.beep = S.view;
+    startEdit('beep', !had);
+    if (had) edit.orig = before;
+    renderDots(); renderSummary();
   };
-  $('#vidDel').onclick = () => {
-    if (typeof S.sel !== 'number') return;
-    S.shots.splice(S.sel, 1);
-    S.sel = null;
-    changed();
-  };
-  function renderTools() {
-    const sel = S.sel;
-    const has = sel != null;
-    $('#vidNudgeL').disabled = $('#vidNudgeR').disabled = !has;
-    $('#vidDel').disabled = typeof sel !== 'number';
-    paint();
-  }
+  document.addEventListener('pointerdown', (e) => { if (!e.target.closest('#vidAdd,#vidAddMenu')) closeAddMenu(); });
 
   // Empfindlichkeit: erkennt die Schüsse neu (das Startsignal bleibt).
   let sensTimer = 0;
@@ -764,6 +925,8 @@ window.FTVideo = function (api) {
 
   // Ecke der Einblendung: oben links, oben rechts, unten links, unten rechts.
   function renderCorner() {
+    // Ton- und Tempo-Knopf auf die andere Seite, damit sie die Einblendung nicht verdecken.
+    $('#vidStage').classList.toggle('ov-top', S.corner === 'bl' || S.corner === 'br');
     document.querySelectorAll('#vidCorners button').forEach((b) => {
       const on = b.dataset.corner === S.corner;
       b.classList.toggle('on', on);
@@ -780,42 +943,55 @@ window.FTVideo = function (api) {
     drawDemo();
   });
   renderCorner();
+  $('#vidSettings').onclick = () => { if (!S.busy) { video.pause(); $('#vidSetSheet').hidden = false; } };
+  $('#vidSetClose').onclick = () => { $('#vidSetSheet').hidden = true; };
+  document.querySelectorAll('#vidNudges button').forEach((b) => {
+    const d = Number(b.dataset.nudge);
+    b.querySelector('small').textContent = (d > 0 ? '+' : '−') + Math.abs(d).toFixed(2).replace('.', api.DEC);
+  });
 
   function renderSummary() {
     const shots = S.shots, beep = S.beep;
-    const box = $('#vidSum');
+    const cnt = $('#vidCount'), box = $('#vidSum');
     if (beep == null || !shots.length) {
-      box.innerHTML = '<span class="splits-empty">' + (S.pcm ? t('Keine Schüsse erkannt – Empfindlichkeit erhöhen oder mit + Schuss setzen.') : t('Ohne Tonspur: Start und Schüsse von Hand setzen.')) + '</span>';
+      cnt.textContent = t('{0} Schüsse erkannt', shots.length);
+      box.textContent = beep == null && shots.length ? t('Kein Startsignal erkannt – setze den Start-Marker selbst.')
+        : S.pcm ? t('Keine Schüsse erkannt – Empfindlichkeit erhöhen oder mit + Schuss setzen.') : t('Ohne Tonspur: Start und Schüsse von Hand setzen.');
       return;
     }
     let best = Infinity;
     for (let i = 1; i < shots.length; i++) best = Math.min(best, shots[i] - shots[i - 1]);
-    let html = '<div class="chip first"><small>' + t('ZEIT') + '</small><b>' + sec(shots[shots.length - 1] - beep) + '</b></div>' +
-      '<div class="chip"><small>' + t('SCHÜSSE') + '</small><b>' + shots.length + '</b></div>' +
-      '<div class="chip"><small>' + t('ERSTER') + '</small><b>' + sec(shots[0] - beep) + '</b></div>';
-    if (best < Infinity) html += '<div class="chip"><small>' + t('BESTER SPLIT') + '</small><b>' + sec(best) + '</b></div>';
-    box.innerHTML = html;
+    cnt.textContent = t('{0} Schüsse erkannt', shots.length) + ' · ' + sec(shots[shots.length - 1] - beep) + ' s';
+    box.innerHTML = '<i style="background:#ffc83d"></i>' + t('Erster Schuss') + ' <b>' + sec(shots[0] - beep) + '</b>' +
+      (best < Infinity ? '<i style="background:var(--accent)"></i>' + t('Bester Split') + ' <b>' + sec(best) + '</b>' : '');
   }
   function renderAll() {
+    readColors();
     layout();
     renderTrack();
     renderTools();
     renderSummary();
     $('#vidSens').value = S.sens;
+    $('#vidRate').textContent = rateLabel();
     $('#vidExport').disabled = !S.dur;
   }
+
 
   /* ---------- Ton der Vorschau und des Exports ----------
      Der Ton des Videos läuft über einen AudioContext, damit der Export ihn
      mitschneiden kann. Ein Video lässt sich nur einmal daran anschließen. */
-  let ac = null, src = null;
+  let ac = null, src = null, gain = null;
   function audioGraph() {
     if (src) return true;
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       ac = new AC();
       src = ac.createMediaElementSource(video);
-      src.connect(ac.destination);
+      gain = ac.createGain();
+      gain.gain.value = S.muted ? 0 : 1;
+      video.muted = false;
+      src.connect(gain);
+      gain.connect(ac.destination);
       return true;
     } catch (e) { return false; }
   }
@@ -927,7 +1103,7 @@ window.FTVideo = function (api) {
     } catch (e) {
       try { rec.state !== 'inactive' && rec.stop(); } catch (_) {}
     }
-    if (dest) { src.disconnect(); src.connect(ac.destination); }
+    if (dest) { src.disconnect(); src.connect(gain); }
     stream.getTracks().forEach((tr) => tr.stop());
     video.playbackRate = rateBefore;
     allowSleep && allowSleep();
@@ -1018,8 +1194,8 @@ window.FTVideo = function (api) {
 
   return {
     // Beim Wechsel in den Reiter: Maße neu bestimmen, beim Verlassen anhalten.
-    shown() { requestAnimationFrame(() => { layout(); renderTrack(); drawDemo(); }); },
-    hidden() { video.pause(); },
+    shown() { requestAnimationFrame(() => { readColors(); layout(); renderTrack(); drawDemo(); }); },
+    hidden() { video.pause(); if (edit) commitEdit(); },
     // Für Tests: Zustand und Zeichnen von außen.
     _state: S, _draw: drawOverlay
   };
