@@ -65,11 +65,15 @@ window.FTVideo = function (api) {
     S.busy = true;
     setBusy(t('Video wird geladen …'));
     try {
-      video.src = S.url;
-      await new Promise((res, rej) => {
-        video.onloadedmetadata = res;
-        video.onerror = () => rej(new Error('video'));
-      });
+      try {
+        await openSrc(S.url, 10000);
+      } catch (e) {
+        // iOS-App: WKWebView kann blob:-Adressen oft nicht als Video laden.
+        // Dann das Video in den App-Cache kopieren und von dort öffnen.
+        const src = await nativeCopy(file);
+        if (!src) throw e;
+        await openSrc(src, 20000);
+      }
       S.dur = video.duration;
       S.w = video.videoWidth; S.h = video.videoHeight;
       layout();
@@ -103,6 +107,44 @@ window.FTVideo = function (api) {
       if (!keinTon) unload(true);
       else { S.pcm = null; renderAll(); }
     }
+  }
+
+  function openSrc(src, ms) {
+    return new Promise((res, rej) => {
+      let to = 0;
+      const done = (ok) => {
+        clearTimeout(to);
+        video.onloadedmetadata = video.onerror = null;
+        if (ok) res(); else rej(new Error('video'));
+      };
+      to = setTimeout(() => done(false), ms);
+      video.onloadedmetadata = () => done(true);
+      video.onerror = () => done(false);
+      video.src = src;
+      video.load();
+    });
+  }
+
+  let cacheName = null;
+  async function nativeCopy(file) {
+    const C = window.Capacitor;
+    const P = C && C.Plugins;
+    if (!(C && C.isNativePlatform && C.isNativePlatform() && P && P.Filesystem && C.convertFileSrc)) return null;
+    try {
+      if (cacheName) { try { await P.Filesystem.deleteFile({ path: cacheName, directory: 'CACHE' }); } catch (_) {} }
+      const m = /\.(\w{2,4})$/.exec(file.name || '');
+      cacheName = 'quelle-' + Date.now() + '.' + (m ? m[1].toLowerCase() : 'mov');
+      const CH = 3 * 1024 * 1024;
+      for (let o = 0; o < file.size; o += CH) {
+        setBusy(t('Video wird geladen …'), o / file.size);
+        const part = new Uint8Array(await file.slice(o, Math.min(file.size, o + CH)).arrayBuffer());
+        const opt = { path: cacheName, data: b64(part), directory: 'CACHE' };
+        if (o === 0) await P.Filesystem.writeFile(opt); else await P.Filesystem.appendFile(opt);
+      }
+      setBusy(t('Video wird geladen …'));
+      const { uri } = await P.Filesystem.getUri({ path: cacheName, directory: 'CACHE' });
+      return C.convertFileSrc(uri);
+    } catch (_) { return null; }
   }
 
   function unload(toEmpty) {
