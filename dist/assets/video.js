@@ -386,15 +386,28 @@ window.FTVideo = function (api) {
     const x = corner === 'tr' || corner === 'br' ? W - m - bw : m;
     const y = corner === 'bl' || corner === 'br' ? H - m - bh : m;
 
-    // --- Feld ---
-    ctx.fillStyle = 'rgba(0,0,0,.48)';
-    rrect(ctx, x, y, bw, bh, 2 * u); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,.1)';
-    ctx.lineWidth = Math.max(1, 0.15 * u);
-    ctx.stroke();
+    // --- Hintergrund: weicher schwarzer Verlauf aus der Ecke, kein Kasten ---
+    {
+      const ox = corner === 'tr' || corner === 'br' ? W : 0;
+      const oy = corner === 'bl' || corner === 'br' ? H : 0;
+      ctx.save();
+      ctx.translate(ox, oy);
+      ctx.scale((bw + m) * 1.9, (bh + m) * 1.9);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(0, 'rgba(0,0,0,.6)');
+      g.addColorStop(0.45, 'rgba(0,0,0,.45)');
+      g.addColorStop(0.75, 'rgba(0,0,0,.2)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(-1, -1, 2, 2);
+      ctx.restore();
+    }
 
-    // Ohne Schatten: weiche Schatten je Ziffer bremsen den Export spürbar.
+    // Feiner, scharfer Schatten für helle Stellen; weichgezeichnete Schatten
+    // je Ziffer würden den Export bremsen.
     ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.55)';
+    ctx.shadowOffsetY = Math.max(1, 0.18 * u);
     const L = x + pad, R = x + bw - pad;
 
     // Phase
