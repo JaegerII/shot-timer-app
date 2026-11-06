@@ -65,6 +65,7 @@ window.FTVideo = function (api) {
     S.busy = true;
     setBusy(t('Video wird geladen …'));
     try {
+      stage = 'video';
       diag = [(file.size / 1048576).toFixed(0) + 'MB', file.type || '?', (/\.(\w+)$/.exec(file.name || '') || [, '?'])[1]];
       try {
         await openSrc(S.url, 10000);
@@ -82,15 +83,22 @@ window.FTVideo = function (api) {
       video.currentTime = Math.min(0.05, S.dur / 2);
       setBusy(t('Ton wird analysiert …'));
       await tick();
-      const buf = await file.arrayBuffer();
-      const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-      const ac = new Offline(1, 1, 48000);
-      const audio = await new Promise((res, rej) => {
-        const p = ac.decodeAudioData(buf, res, rej);
-        if (p && p.then) p.then(res, rej);
-      });
+      stage = 'audio';
+      let audio, trim = 0;
+      try {
+        audio = await decodeAudio(await file.arrayBuffer());
+      } catch (e1) {
+        // Safari dekodiert den Ton aus iPhone-.mov nicht direkt. Dann die
+        // AAC-Spur selbst aus dem Container holen und als ADTS dekodieren.
+        diag.push('D1');
+        const a = mp4Adts(new Uint8Array(await file.arrayBuffer()));
+        if (typeof a === 'string') { diag.push(a); throw new Error('audio'); }
+        try { audio = await decodeAudio(a.data.slice().buffer); } catch (e2) { diag.push('D2'); throw new Error('audio'); }
+        trim = a.trim;
+      }
       S.rate = audio.sampleRate;
       S.pcm = mono(audio);
+      if (trim > 0) S.pcm = S.pcm.subarray(Math.min(S.pcm.length - 1, Math.round(trim * S.rate)));
       S.env = envelope(S.pcm, S.rate);
       S.envMax = S.env.reduce((m, v) => (v > m ? v : m), 1e-6);
       await detect(true);
@@ -103,8 +111,8 @@ window.FTVideo = function (api) {
     } catch (err) {
       S.busy = false;
       setBusy(null);
-      const keinTon = err && err.message !== 'video';
-      if (keinTon) diag.push('A:' + String((err && (err.name || err.message)) || err).slice(0, 40));
+      const keinTon = stage === 'audio';
+      if (keinTon && err && err.message !== 'audio') diag.push('A:' + String(err.name || err.message || err).slice(0, 40));
       showToast((keinTon ? t('Die Tonspur konnte nicht gelesen werden.') : t('Dieses Video kann nicht geöffnet werden.')) + ' [' + diag.join(' ') + ']');
       const el = document.getElementById('toast');
       if (el) { clearTimeout(el.t); el.t = setTimeout(() => el.classList.remove('show'), 10000); }
@@ -131,6 +139,135 @@ window.FTVideo = function (api) {
   }
 
   let cacheName = null;
+  let stage = 'video';
+
+  function decodeAudio(buf) {
+    const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const ac = new Offline(1, 1, 48000);
+    return new Promise((res, rej) => {
+      const p = ac.decodeAudioData(buf, res, (e) => rej(e || new Error('decode')));
+      if (p && p.then) p.then(res, (e) => rej(e || new Error('decode')));
+    });
+  }
+
+  /* Holt die AAC-Tonspur aus einer MP4/MOV-Datei und baut daraus einen
+     ADTS-Strom. Gibt {data, trim} zurück (trim = Vorlauf des Encoders in s,
+     aus der Edit-Liste) oder einen kurzen Fehlercode als Text. */
+  function mp4Adts(u8) {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    const typ = (o) => String.fromCharCode(u8[o], u8[o + 1], u8[o + 2], u8[o + 3]);
+    function boxes(start, end) {
+      const out = [];
+      let o = start;
+      while (o + 8 <= end) {
+        let size = dv.getUint32(o), hdr = 8;
+        if (size === 1) { size = dv.getUint32(o + 8) * 4294967296 + dv.getUint32(o + 12); hdr = 16; }
+        else if (size === 0) size = end - o;
+        if (size < hdr || o + size > end) break;
+        out.push({ type: typ(o + 4), start: o + hdr, end: o + size });
+        o += size;
+      }
+      return out;
+    }
+    const child = (b, t) => b && boxes(b.start, b.end).find((x) => x.type === t);
+    const path = (b, ...ts) => ts.reduce((x, t) => child(x, t), b);
+    const moov = boxes(0, u8.length).find((x) => x.type === 'moov');
+    if (!moov) return 'M0';
+    let trak = null;
+    for (const tk of boxes(moov.start, moov.end)) {
+      if (tk.type !== 'trak') continue;
+      const h = path(tk, 'mdia', 'hdlr');
+      if (h && typ(h.start + 8) === 'soun') { trak = tk; break; }
+    }
+    if (!trak) return 'M1';
+    const mdhd = path(trak, 'mdia', 'mdhd');
+    const scale = mdhd ? dv.getUint32(mdhd.start + (u8[mdhd.start] === 1 ? 20 : 12)) : 0;
+    const stbl = path(trak, 'mdia', 'minf', 'stbl');
+    const stsd = child(stbl, 'stsd');
+    if (!stsd) return 'M2';
+    const ent = stsd.start + 8;
+    const fmt = typ(ent + 4);
+    if (fmt !== 'mp4a') return 'F:' + fmt.trim();
+    const sdEnd = ent + dv.getUint32(ent);
+    // esds steckt je nach Version direkt im Eintrag oder in einer wave-Box.
+    let es = -1;
+    for (let o = ent + 28; o + 8 <= sdEnd; o++) {
+      if (u8[o + 4] === 0x65 && typ(o + 4) === 'esds') { es = o + 12; break; }
+    }
+    let ch = dv.getUint16(ent + 24);
+    let aot = 2, sfi = -1;
+    if (es > 0) {
+      let o = es;
+      const len = () => { let n = 0; for (let i = 0; i < 4; i++) { const b = u8[o++]; n = (n << 7) | (b & 0x7f); if (!(b & 0x80)) break; } return n; };
+      const lim = Math.min(sdEnd, es + 200);
+      while (o < lim) {
+        const tag = u8[o++]; const l = len();
+        if (tag === 0x03) { const fl = u8[o + 2]; o += 3; if (fl & 0x80) o += 2; if (fl & 0x40) o += 1 + u8[o]; if (fl & 0x20) o += 2; }
+        else if (tag === 0x04) { o += 13; }
+        else if (tag === 0x05) {
+          aot = u8[o] >> 3;
+          sfi = ((u8[o] & 7) << 1) | (u8[o + 1] >> 7);
+          const c = (u8[o + 1] >> 3) & 15;
+          if (c) ch = c;
+          break;
+        } else o += l;
+      }
+    }
+    if (sfi < 0 || sfi > 12) {
+      const rate = dv.getUint32(ent + 32) >>> 16;
+      sfi = [96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350].indexOf(rate);
+      if (sfi < 0) return 'R:' + rate;
+    }
+    if (aot === 5 || aot === 29) aot = 2;  // HE-AAC: Grundschicht als AAC-LC
+    if (aot < 1 || aot > 4) return 'O:' + aot;
+    // Probentabellen
+    const stsz = child(stbl, 'stsz'), stsc = child(stbl, 'stsc');
+    const stco = child(stbl, 'stco'), co64 = child(stbl, 'co64');
+    if (!stsz || !stsc || !(stco || co64)) return 'M3';
+    const fix = dv.getUint32(stsz.start + 4), n = dv.getUint32(stsz.start + 8);
+    const size = (i) => fix || dv.getUint32(stsz.start + 12 + i * 4);
+    const nc = dv.getUint32((stco || co64).start + 4);
+    const chunk = (i) => co64
+      ? dv.getUint32(co64.start + 8 + i * 8) * 4294967296 + dv.getUint32(co64.start + 12 + i * 8)
+      : dv.getUint32(stco.start + 8 + i * 4);
+    const ns = dv.getUint32(stsc.start + 4);
+    let total = 0;
+    for (let i = 0; i < n; i++) total += size(i) + 7;
+    const out = new Uint8Array(total);
+    let w = 0, si = 0;
+    for (let e = 0; e < ns && si < n; e++) {
+      const first = dv.getUint32(stsc.start + 8 + e * 12) - 1;
+      const per = dv.getUint32(stsc.start + 12 + e * 12);
+      const next = e + 1 < ns ? dv.getUint32(stsc.start + 8 + (e + 1) * 12) - 1 : nc;
+      for (let c = first; c < next && si < n; c++) {
+        let off = chunk(c);
+        for (let k = 0; k < per && si < n; k++, si++) {
+          const sz = size(si), fl = sz + 7;
+          if (off + sz > u8.length) return 'M4';
+          out[w] = 0xff; out[w + 1] = 0xf1;
+          out[w + 2] = ((aot - 1) << 6) | (sfi << 2) | ((ch >> 2) & 1);
+          out[w + 3] = ((ch & 3) << 6) | ((fl >> 11) & 3);
+          out[w + 4] = (fl >> 3) & 0xff;
+          out[w + 5] = ((fl & 7) << 5) | 0x1f;
+          out[w + 6] = 0xfc;
+          out.set(u8.subarray(off, off + sz), w + 7);
+          w += fl; off += sz;
+        }
+      }
+    }
+    if (!w) return 'M5';
+    // Encoder-Vorlauf aus der Edit-Liste, damit Ton und Bild synchron bleiben.
+    let trim = 0;
+    const elst = path(trak, 'edts', 'elst');
+    if (elst && scale) {
+      const v1 = u8[elst.start] === 1, cnt = dv.getUint32(elst.start + 4);
+      for (let i = 0, o = elst.start + 8; i < cnt; i++, o += v1 ? 20 : 12) {
+        const mt = v1 ? dv.getInt32(o + 8) * 4294967296 + dv.getUint32(o + 12) : dv.getInt32(o + 4);
+        if (mt >= 0) { trim = mt / scale; break; }
+      }
+    }
+    return { data: out.subarray(0, w), trim };
+  }
   let diag = [];
   async function nativeCopy(file) {
     const C = window.Capacitor;
