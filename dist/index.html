@@ -205,13 +205,18 @@
     #videoSub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .vid-empty{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px}
     .vid-empty[hidden],.vid-edit[hidden]{display:none}
-    .vid-pick{display:grid;justify-items:center;gap:6px;padding:34px 16px;border:1.5px dashed var(--accent-line);border-radius:20px;background:var(--accent-soft);color:var(--accent);cursor:pointer;text-align:center}
-    .vid-pick svg{width:44px;height:44px;margin-bottom:4px}
-    .vid-pick b{font-family:var(--font-display);font-size:1.05rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
-    .vid-pick span{color:var(--muted);font-size:.76rem;font-weight:650}
+    .vid-pick{position:relative;display:block;flex:0 0 auto;cursor:pointer;background:#0b0d0c;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+    .vid-pick:before{content:"";position:absolute;left:0;top:0;width:calc(100% - 18px);height:3px;background:#18e5ff;z-index:1}
+    #vidDemo{display:block;width:100%;aspect-ratio:16/10}
+    .vid-pick-cta{position:absolute;right:14px;top:44%;transform:translateY(-50%);display:flex;align-items:center;gap:10px;padding:10px 16px 10px 12px;background:#18e5ff;color:#06171a;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:transform .15s}
+    .vid-pick:active .vid-pick-cta{transform:translateY(-50%) scale(.97)}
+    .vid-pick-cta svg{width:24px;height:24px;flex:0 0 auto}
+    .vid-pick-cta>span{display:grid;text-align:left;line-height:1.15}
+    .vid-pick-cta b{font-family:var(--font-display);font-size:.9rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+    .vid-pick-cta span span{font-size:.66rem;font-weight:700;opacity:.72}
     .vid-steps{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:s}
     .vid-steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;column-gap:10px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
-    .vid-steps li:before{content:counter(s);grid-row:span 2;width:30px;height:30px;border-radius:9px;background:var(--surface-3);color:var(--accent);display:grid;place-items:center;font-weight:900;font-size:.85rem}
+    .vid-steps li:before{content:counter(s,decimal-leading-zero);grid-row:span 2;width:30px;height:30px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:900;font-size:.78rem;letter-spacing:.04em;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
     .vid-steps b{font-size:.86rem}
     .vid-steps span{color:var(--muted);font-size:.74rem;line-height:1.35}
     .vid-note{margin:0;color:var(--faint);font-size:.72rem;text-align:center}
@@ -238,7 +243,7 @@
     .vid-sheet-row{display:flex;gap:8px;align-items:center}
     .vid-sheet-row .sheet-action{flex:1;margin-top:0}
     .vid-bar,.vid-tools{flex:0 0 auto;display:flex;align-items:center;gap:6px}
-    .vid-play{width:42px;height:42px;border-radius:13px;border:0;background:var(--accent-fill);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+    .vid-play{width:42px;height:42px;border-radius:0;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));border:0;background:var(--accent-fill);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
     .vid-play svg{width:20px;height:20px}
     .vid-play .i-pause,.vid-play.playing .i-play{display:none}
     .vid-play.playing .i-pause{display:block}
@@ -252,25 +257,36 @@
     .vid-gap{flex:1}
     .vid-clock b{color:var(--accent);margin-right:6px}
     .vid-sum .chip small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .vid-track{flex:0 0 auto;height:86px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:13px;background:var(--sunken);overscroll-behavior:contain}
+    .vid-track{flex:0 0 auto;height:86px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:13px;background:linear-gradient(180deg,var(--sunken),var(--surface-2));overscroll-behavior:contain;scrollbar-width:none}
+    .vid-track::-webkit-scrollbar{display:none}
     .vid-track-inner{position:relative;height:100%;min-width:100%}
     #vidWave{position:absolute;left:0;top:4px;width:100%;height:52px;display:block}
     .vid-marks{position:absolute;inset:0}
     .vm{position:absolute;top:0;bottom:0;width:0}
-    .vm:before{content:"";position:absolute;left:-1px;top:2px;height:58px;width:2px;background:#18e5ff;opacity:.85}
-    .vm b{position:absolute;bottom:3px;left:0;transform:translateX(-50%);min-width:24px;height:22px;padding:0 5px;border-radius:7px;background:#18e5ff;color:#06171a;font-size:.68rem;font-weight:900;display:grid;place-items:center;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+    .vm:before{content:"";position:absolute;left:-.75px;top:0;height:60px;width:1.5px;background:linear-gradient(180deg,rgba(24,229,255,.15),#18e5ff);opacity:.9}
+    .vm b{position:absolute;bottom:4px;left:0;transform:translateX(-50%);min-width:24px;height:21px;padding:0 6px;background:#18e5ff;color:#06171a;font-size:.66rem;font-weight:900;letter-spacing:.02em;font-variant-numeric:tabular-nums;display:grid;place-items:center;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
     .vm b:after{content:"";position:absolute;inset:-9px -6px}
     .vm.up b{bottom:29px}
-    .vm.beep:before{background:#ffc83d}
+    .vm.beep:before{background:linear-gradient(180deg,rgba(255,200,61,.15),#ffc83d)}
     .vm.beep b{background:#ffc83d}
     .vm.sel{z-index:2}
+    .vm.sel{filter:drop-shadow(0 0 5px rgba(24,229,255,.9))}
     .vm.sel:before{background:#fff;opacity:1}
-    .vm.sel b{background:#fff;box-shadow:0 0 0 3px rgba(24,229,255,.45)}
+    .vm.sel b{background:#fff}
     :root[data-theme="light"] .vm.sel:before,:root[data-theme="light"] .vm.sel b{background:#0a0b0a;color:#fff}
-    .vid-head{position:absolute;left:-1px;top:0;bottom:0;width:2px;background:#ff3131;pointer-events:none;z-index:3}
+    .vid-head{position:absolute;left:-1px;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.55);pointer-events:none;z-index:3}
+    .vid-head:before{content:"";position:absolute;left:-5px;top:0;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+    :root[data-theme="light"] .vid-head{background:#0a0b0a;box-shadow:none}
+    :root[data-theme="light"] .vid-head:before{border-top-color:#0a0b0a}
     .vid-sens{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
     .vid-sens input{flex:1}
-    .vid-sum{cursor:default}
+    .vid-sum{cursor:default;border:0;background:none;padding:0;gap:6px}
+    .vid-sum .chip{position:relative;text-align:left;padding:8px 9px 7px;border:0;border-radius:0;background:var(--surface-2);clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))}
+    .vid-sum .chip:before{content:"";position:absolute;left:0;top:0;width:calc(100% - 9px);height:2px;background:var(--line-strong)}
+    .vid-sum .chip.first:before{background:#18e5ff}
+    .vid-sum .chip small{font-size:.54rem;letter-spacing:.08em;color:var(--muted)}
+    .vid-sum .chip b{font-size:1.05rem;font-weight:850;margin-top:2px}
+    .vid-sum .chip.first b{color:var(--accent)}
     .vid-edit .score-footer .sheet-action:disabled{opacity:.4}
     @media(max-height:720px){.vid-sens{display:none}.vid-track{height:76px}}
 
@@ -755,9 +771,11 @@
 
       <div class="vid-empty" id="vidEmpty">
         <label class="vid-pick" for="vidFile">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="14" rx="3"/><path d="m16 10 6-3v10l-6-3"/></svg>
-          <b>Video wählen</b>
-          <span>Aus Fotos oder Dateien</span>
+          <canvas id="vidDemo" aria-hidden="true"></canvas>
+          <span class="vid-pick-cta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="14" rx="3"/><path d="m16 10 6-3v10l-6-3"/></svg>
+            <span><b>Video wählen</b><span>Aus Fotos oder Dateien</span></span>
+          </span>
         </label>
         <ol class="vid-steps">
           <li><b>Erkennen</b><span>Startsignal und Schüsse kommen aus der Tonspur.</span></li>
