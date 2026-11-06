@@ -13,7 +13,7 @@ window.FTVideo = function (api) {
 
   // Farben wie Leuchtrand und Akzent der App.
   const C = { ready: '#ffc83d', live: '#18e5ff', ink: '#f4f4ee' };
-  const EXPORT_MAX = 1920;      // längste Kante des exportierten Videos
+  const EXPORT_MAX = 3840;      // längste Kante des exportierten Videos (bis 4K, sonst Originalgröße)
   const MAX_FILE = 1.5e9;       // größere Dateien sprengen den Speicher beim Dekodieren
   const NUDGE = 0.01;           // Schritt der Pfeiltasten in Sekunden
   const MAX_PX_PER_S = 600;      // stärkste Vergrößerung der Tonspur
@@ -386,7 +386,17 @@ window.FTVideo = function (api) {
     const x = corner === 'tr' || corner === 'br' ? W - m - bw : m;
     const y = corner === 'bl' || corner === 'br' ? H - m - bh : m;
 
-    // --- Hintergrund: weicher schwarzer Verlauf aus der Ecke, kein Kasten ---
+    // --- Hintergrund: leichter Verlauf am unteren Rand über die ganze Breite ---
+    {
+      const gh = H * 0.24;
+      const g = ctx.createLinearGradient(0, H, 0, H - gh);
+      g.addColorStop(0, 'rgba(0,0,0,.5)');
+      g.addColorStop(0.5, 'rgba(0,0,0,.22)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, H - gh, W, gh);
+    }
+    // --- dazu ein weicher schwarzer Verlauf aus der Ecke, kein Kasten ---
     {
       const ox = corner === 'tr' || corner === 'br' ? W : 0;
       const oy = corner === 'bl' || corner === 'br' ? H : 0;
@@ -1052,6 +1062,10 @@ window.FTVideo = function (api) {
     const W = Math.round((S.w * scale) / 2) * 2, H = Math.round((S.h * scale) / 2) * 2;
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    // Hohe Datenrate (≈ 0,3 Bit je Bildpunkt bei 30 Bildern/s), damit das
+    // Ergebnis optisch nicht vom Original zu unterscheiden ist.
+    const vbr = Math.round(clamp(W * H * 30 * 0.3, 12e6, 80e6));
     const drawFrame = () => {
       ctx.drawImage(video, 0, 0, W, H);
       drawOverlay(ctx, W, H, video.currentTime, true);
@@ -1065,7 +1079,8 @@ window.FTVideo = function (api) {
     const rateBefore = video.playbackRate;
     video.playbackRate = 1;
 
-    const stream = canvas.captureStream(30);
+    // Bis 60 Bilder/s: gezeichnet wird je Videobild, also mit der Bildrate des Originals.
+    const stream = canvas.captureStream(60);
     let dest = null;
     if (audioGraph()) {
       await ac.resume().catch(() => {});
@@ -1077,7 +1092,7 @@ window.FTVideo = function (api) {
     const chunks = [];
     let rec;
     try {
-      rec = new MediaRecorder(stream, Object.assign(mime ? { mimeType: mime } : {}, { videoBitsPerSecond: 10e6, audioBitsPerSecond: 160e3 }));
+      rec = new MediaRecorder(stream, Object.assign(mime ? { mimeType: mime } : {}, { videoBitsPerSecond: vbr, audioBitsPerSecond: 256e3 }));
     } catch (e) {
       rec = new MediaRecorder(stream);
     }
