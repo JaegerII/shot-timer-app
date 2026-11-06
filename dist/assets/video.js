@@ -65,6 +65,7 @@ window.FTVideo = function (api) {
     S.busy = true;
     setBusy(t('Video wird geladen …'));
     try {
+      diag = [(file.size / 1048576).toFixed(0) + 'MB', file.type || '?', (/\.(\w+)$/.exec(file.name || '') || [, '?'])[1]];
       try {
         await openSrc(S.url, 10000);
       } catch (e) {
@@ -103,7 +104,10 @@ window.FTVideo = function (api) {
       S.busy = false;
       setBusy(null);
       const keinTon = err && err.message !== 'video';
-      showToast(keinTon ? t('Die Tonspur konnte nicht gelesen werden.') : t('Dieses Video kann nicht geöffnet werden.'));
+      if (keinTon) diag.push('A:' + String((err && (err.name || err.message)) || err).slice(0, 40));
+      showToast((keinTon ? t('Die Tonspur konnte nicht gelesen werden.') : t('Dieses Video kann nicht geöffnet werden.')) + ' [' + diag.join(' ') + ']');
+      const el = document.getElementById('toast');
+      if (el) { clearTimeout(el.t); el.t = setTimeout(() => el.classList.remove('show'), 10000); }
       if (!keinTon) unload(true);
       else { S.pcm = null; renderAll(); }
     }
@@ -112,12 +116,13 @@ window.FTVideo = function (api) {
   function openSrc(src, ms) {
     return new Promise((res, rej) => {
       let to = 0;
-      const done = (ok) => {
+      const done = (ok, why) => {
         clearTimeout(to);
+        if (!ok) diag.push((src.slice(0, 4) === 'blob' ? 'B' : 'F') + (why || (video.error ? video.error.code : '?')));
         video.onloadedmetadata = video.onerror = null;
         if (ok) res(); else rej(new Error('video'));
       };
-      to = setTimeout(() => done(false), ms);
+      to = setTimeout(() => done(false, 'T'), ms);
       video.onloadedmetadata = () => done(true);
       video.onerror = () => done(false);
       video.src = src;
@@ -126,10 +131,12 @@ window.FTVideo = function (api) {
   }
 
   let cacheName = null;
+  let diag = [];
   async function nativeCopy(file) {
     const C = window.Capacitor;
     const P = C && C.Plugins;
-    if (!(C && C.isNativePlatform && C.isNativePlatform() && P && P.Filesystem && C.convertFileSrc)) return null;
+    if (!(C && C.isNativePlatform && C.isNativePlatform())) { diag.push('web'); return null; }
+    if (!(P && P.Filesystem && C.convertFileSrc)) { diag.push('noFS'); return null; }
     try {
       if (cacheName) { try { await P.Filesystem.deleteFile({ path: cacheName, directory: 'CACHE' }); } catch (_) {} }
       const m = /\.(\w{2,4})$/.exec(file.name || '');
@@ -144,7 +151,7 @@ window.FTVideo = function (api) {
       setBusy(t('Video wird geladen …'));
       const { uri } = await P.Filesystem.getUri({ path: cacheName, directory: 'CACHE' });
       return C.convertFileSrc(uri);
-    } catch (_) { return null; }
+    } catch (e) { diag.push('C:' + String((e && e.message) || e).slice(0, 40)); return null; }
   }
 
   function unload(toEmpty) {
