@@ -58,6 +58,10 @@
       </array>
     </dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>FORTH TRACE Shot Timer uses the camera only if you choose to record a stage video in the app. The video stays on your iPhone.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>FORTH TRACE Shot Timer saves the stage video with timer overlay to your photo library when you choose &quot;Save Video&quot;.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>FORTH TRACE Shot Timer listens through the microphone to detect shots and trigger clicks and measure your times. Nothing is recorded or transmitted.</string>
 	<key>UILaunchStoryboardName</key>

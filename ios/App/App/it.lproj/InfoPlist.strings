@@ -1,2 +1,8 @@
 /* Text der iOS-Abfrage zum Mikrofonzugriff. */
 "NSMicrophoneUsageDescription" = "FORTH TRACE Shot Timer ascolta tramite il microfono per rilevare i colpi e i clic del grilletto e misurare i tuoi tempi. Nulla viene registrato o trasmesso.";
+
+/* Kamera, falls im Video-Reiter direkt aufgenommen wird. */
+"NSCameraUsageDescription" = "FORTH TRACE Shot Timer usa la fotocamera solo se scegli di registrare un video della stage nell’app. Il video resta sul tuo iPhone.";
+
+/* Teilen-Menü „Video sichern“ im Video-Reiter. */
+"NSPhotoLibraryAddUsageDescription" = "FORTH TRACE Shot Timer salva il video della stage con il timer nella tua libreria foto quando scegli «Salva video».";

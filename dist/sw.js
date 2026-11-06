@@ -1,5 +1,5 @@
 /* Erzeugt von tools/make-sw.mjs – nicht von Hand ändern. */
-const VERSION = 'shot-timer-e03183e8e9';
+const VERSION = 'shot-timer-47d4072594';
 const ASSETS = [
   "./",
   "assets/apple-touch-icon.png",
@@ -23,6 +23,7 @@ const ASSETS = [
   "assets/standby.mp3",
   "assets/topo-light.svg",
   "assets/topo.svg",
+  "assets/video.js",
   "index.html",
   "manifest.webmanifest",
   "privacy.html",

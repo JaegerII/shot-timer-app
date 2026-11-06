@@ -1,2 +1,8 @@
 /* Text der iOS-Abfrage zum Mikrofonzugriff. */
 "NSMicrophoneUsageDescription" = "FORTH TRACE Shot Timer hört über das Mikrofon mit, um Schüsse und Trigger-Klicks zu erkennen und die Zeiten zu messen. Es wird nichts aufgezeichnet oder übertragen.";
+
+/* Kamera, falls im Video-Reiter direkt aufgenommen wird. */
+"NSCameraUsageDescription" = "FORTH TRACE Shot Timer nutzt die Kamera nur, wenn du in der App ein Stage-Video aufnehmen willst. Das Video bleibt auf deinem iPhone.";
+
+/* Teilen-Menü „Video sichern“ im Video-Reiter. */
+"NSPhotoLibraryAddUsageDescription" = "FORTH TRACE Shot Timer speichert das Stage-Video mit eingeblendetem Timer in deiner Fotomediathek, wenn du „Video sichern“ wählst.";

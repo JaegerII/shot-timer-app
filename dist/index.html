@@ -181,7 +181,7 @@
     /* Die Leiste reicht bis zur Bildschirmkante; nur ihr Inhalt wird um die
        Safe Area nach oben gepolstert. Sonst bleibt darunter ein leerer
        Streifen in der reinen Hintergrundfarbe stehen. */
-    .bottom-nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);background:var(--nav-bg);border:1px solid var(--line);border-bottom:0;border-radius:19px 19px 0 0;margin:0 -11px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(18px);box-shadow:var(--shadow-soft)}
+    .bottom-nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);background:var(--nav-bg);border:1px solid var(--line);border-bottom:0;border-radius:19px 19px 0 0;margin:0 -11px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(18px);box-shadow:var(--shadow-soft)}
     .nav-btn{border:0;background:transparent;color:var(--faint);border-radius:14px;padding:7px 4px 6px;display:grid;justify-items:center;gap:3px;font-size:.66rem;font-weight:700;cursor:pointer}
     .nav-btn svg{width:20px;height:20px}
     .nav-btn.active{background:var(--accent-soft);color:var(--accent)}
@@ -194,6 +194,85 @@
     .sheet-action{font-family:var(--font-display);width:100%;height:50px;border:0;border-radius:15px;background:var(--accent-fill);color:var(--accent-ink);font-weight:900;margin-top:8px;cursor:pointer}
     .danger-link{border:0;background:transparent;color:var(--danger);font-weight:750;cursor:pointer;padding:5px}
     .empty{padding:22px 12px;color:var(--faint);text-align:center;font-size:.85rem;border:1px dashed var(--line);border-radius:14px}
+
+
+    /* ============ Video ============ */
+    #videoView{background:rgba(23,26,24,.86);border:1px solid var(--line);border-radius:24px;padding:14px 14px 12px}
+    :root[data-theme="light"] #videoView{background:rgba(255,255,255,.88)}
+    #videoView .panel-head{margin-bottom:10px}
+    #videoView .title-text{min-width:0}
+    #vidNew{flex:0 0 auto}
+    #videoSub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .vid-empty{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px}
+    .vid-empty[hidden],.vid-edit[hidden]{display:none}
+    .vid-pick{display:grid;justify-items:center;gap:6px;padding:34px 16px;border:1.5px dashed var(--accent-line);border-radius:20px;background:var(--accent-soft);color:var(--accent);cursor:pointer;text-align:center}
+    .vid-pick svg{width:44px;height:44px;margin-bottom:4px}
+    .vid-pick b{font-family:var(--font-display);font-size:1.05rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+    .vid-pick span{color:var(--muted);font-size:.76rem;font-weight:650}
+    .vid-steps{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:s}
+    .vid-steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;column-gap:10px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
+    .vid-steps li:before{content:counter(s);grid-row:span 2;width:30px;height:30px;border-radius:9px;background:var(--surface-3);color:var(--accent);display:grid;place-items:center;font-weight:900;font-size:.85rem}
+    .vid-steps b{font-size:.86rem}
+    .vid-steps span{color:var(--muted);font-size:.74rem;line-height:1.35}
+    .vid-note{margin:0;color:var(--faint);font-size:.72rem;text-align:center}
+    .vid-edit{flex:1;min-height:0;display:flex;flex-direction:column;gap:9px}
+    .vid-stage{flex:1;min-height:120px;position:relative;display:grid;place-items:center;border-radius:16px;background:#000;overflow:hidden}
+    .vid-frame{position:relative}
+    .vid-frame video,.vid-frame canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .vid-frame canvas{pointer-events:none}
+    .vid-busy,.vid-sheet{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(10,11,10,.78);backdrop-filter:blur(4px);color:#edede6;text-align:center;padding:18px}
+    .vid-busy[hidden],.vid-sheet[hidden]{display:none}
+    .vid-busy b{font-size:.86rem}
+    .vid-spin{width:30px;height:30px;border-radius:50%;border:3px solid rgba(24,229,255,.25);border-top-color:#18e5ff;animation:vidSpin .8s linear infinite}
+    @keyframes vidSpin{to{transform:rotate(360deg)}}
+    .vid-progress{width:min(80%,260px);height:6px;border-radius:99px;background:rgba(237,237,230,.15);overflow:hidden}
+    .vid-progress[hidden]{display:none}
+    .vid-progress i{display:block;height:100%;width:0;background:#18e5ff;border-radius:inherit;transition:width .2s linear}
+    .vid-busy .clear-btn{color:#edede6;border-color:rgba(237,237,230,.3)}
+    .vid-sheet{background:rgba(10,11,10,.9);align-items:stretch}
+    .vid-sheet h3{font-family:var(--font-display);margin:0;font-size:1.05rem}
+    .vid-sheet .rand-row{text-align:left;color:#edede6;margin:0;background:rgba(237,237,230,.06);border-color:rgba(237,237,230,.14)}
+    .vid-sheet .rand-row[hidden]{display:none}
+    .vid-sheet .rand-row small{display:block;color:#949888;font-size:.68rem;font-weight:600;margin-top:2px}
+    .vid-hint{margin:0;color:#949888;font-size:.74rem;line-height:1.4}
+    .vid-sheet-row{display:flex;gap:8px;align-items:center}
+    .vid-sheet-row .sheet-action{flex:1;margin-top:0}
+    .vid-bar,.vid-tools{flex:0 0 auto;display:flex;align-items:center;gap:6px}
+    .vid-play{width:42px;height:42px;border-radius:13px;border:0;background:var(--accent-fill);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+    .vid-play svg{width:20px;height:20px}
+    .vid-play .i-pause,.vid-play.playing .i-play{display:none}
+    .vid-play.playing .i-pause{display:block}
+    .vid-clock{flex:1;min-width:0;font-variant-numeric:tabular-nums;font-weight:750;font-size:.84rem;white-space:nowrap}
+    .vid-small{min-width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-weight:800;font-size:.8rem;cursor:pointer;padding:0 9px;display:grid;place-items:center;white-space:nowrap}
+    .vid-small:hover{border-color:var(--line-strong)}
+    .vid-small:disabled{opacity:.35;cursor:default}
+    .vid-small.wide{color:var(--accent);border-color:var(--accent-line)}
+    .vid-small.del{color:var(--danger)}
+    .vid-small svg{width:17px;height:17px}
+    .vid-gap{flex:1}
+    .vid-clock b{color:var(--accent);margin-right:6px}
+    .vid-sum .chip small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .vid-track{flex:0 0 auto;height:86px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:13px;background:var(--sunken);overscroll-behavior:contain}
+    .vid-track-inner{position:relative;height:100%;min-width:100%}
+    #vidWave{position:absolute;left:0;top:4px;width:100%;height:52px;display:block}
+    .vid-marks{position:absolute;inset:0}
+    .vm{position:absolute;top:0;bottom:0;width:0}
+    .vm:before{content:"";position:absolute;left:-1px;top:2px;height:58px;width:2px;background:#18e5ff;opacity:.85}
+    .vm b{position:absolute;bottom:3px;left:0;transform:translateX(-50%);min-width:24px;height:22px;padding:0 5px;border-radius:7px;background:#18e5ff;color:#06171a;font-size:.68rem;font-weight:900;display:grid;place-items:center;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+    .vm b:after{content:"";position:absolute;inset:-9px -6px}
+    .vm.up b{bottom:29px}
+    .vm.beep:before{background:#ffc83d}
+    .vm.beep b{background:#ffc83d}
+    .vm.sel{z-index:2}
+    .vm.sel:before{background:#fff;opacity:1}
+    .vm.sel b{background:#fff;box-shadow:0 0 0 3px rgba(24,229,255,.45)}
+    :root[data-theme="light"] .vm.sel:before,:root[data-theme="light"] .vm.sel b{background:#0a0b0a;color:#fff}
+    .vid-head{position:absolute;left:-1px;top:0;bottom:0;width:2px;background:#ff3131;pointer-events:none;z-index:3}
+    .vid-sens{flex:0 0 auto;display:flex;align-items:center;gap:10px;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    .vid-sens input{flex:1}
+    .vid-sum{cursor:default}
+    .vid-edit .score-footer .sheet-action:disabled{opacity:.4}
+    @media(max-height:720px){.vid-sens{display:none}.vid-track{height:76px}}
 
     /* ============ Sheets ============ */
     .modal{position:fixed;z-index:50;inset:0;background:var(--scrim);display:none;align-items:flex-end;justify-content:center;padding:14px;backdrop-filter:blur(5px)}
@@ -664,9 +743,92 @@
       </div>
     </section>
 
+    <section id="videoView" class="view-panel" aria-labelledby="videoTitle">
+      <div class="panel-head">
+        <div class="title-text">
+          <h1 id="videoTitle">Video</h1>
+          <p id="videoSub">Timer und Splits im eigenen Stage-Video</p>
+        </div>
+        <button class="ghost-btn" id="vidNew" type="button" hidden>Anderes Video</button>
+      </div>
+      <input type="file" id="vidFile" accept="video/*" hidden>
+
+      <div class="vid-empty" id="vidEmpty">
+        <label class="vid-pick" for="vidFile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="14" rx="3"/><path d="m16 10 6-3v10l-6-3"/></svg>
+          <b>Video wählen</b>
+          <span>Aus Fotos oder Dateien</span>
+        </label>
+        <ol class="vid-steps">
+          <li><b>Erkennen</b><span>Startsignal und Schüsse kommen aus der Tonspur.</span></li>
+          <li><b>Korrigieren</b><span>Marker auf der Tonspur verschieben, ergänzen oder löschen.</span></li>
+          <li><b>Teilen</b><span>Video mit Timer oben links und Splits unten exportieren.</span></li>
+        </ol>
+        <p class="vid-note">Das Video bleibt auf deinem Gerät.</p>
+      </div>
+
+      <div class="vid-edit" id="vidEdit" hidden>
+        <div class="vid-stage" id="vidStage">
+          <div class="vid-frame" id="vidFrame">
+            <video id="vidEl" playsinline webkit-playsinline preload="auto"></video>
+            <canvas id="vidOver"></canvas>
+          </div>
+          <div class="vid-busy" id="vidBusy" hidden>
+            <span class="vid-spin"></span>
+            <b id="vidBusyText"></b>
+            <div class="vid-progress" id="vidBusyBar" hidden><i></i></div>
+            <button class="clear-btn" id="vidBusyCancel" type="button" hidden>Abbrechen</button>
+          </div>
+          <div class="vid-sheet" id="vidExportSheet" hidden>
+            <h3>Video exportieren</h3>
+            <div class="rand-row" id="vidTrimRow"><span>Nur die Stage<small>2 s vor dem Signal bis 2,5 s nach dem letzten Schuss</small></span><button class="toggle on" id="vidTrim" type="button" aria-label="Nur die Stage" aria-pressed="true"></button></div>
+            <p class="vid-hint">Der Export läuft in Echtzeit. Bildschirm anlassen und die App nicht verlassen.</p>
+            <div class="vid-sheet-row"><button class="ghost-btn" id="vidExportCancel" type="button">Abbrechen</button><button class="sheet-action" id="vidExportGo" type="button">STARTEN</button></div>
+          </div>
+          <div class="vid-sheet" id="vidDone" hidden>
+            <h3>Video fertig</h3>
+            <p class="vid-hint" id="vidDoneSize"></p>
+            <div class="vid-sheet-row"><button class="ghost-btn" id="vidDoneClose" type="button">Schließen</button><button class="sheet-action" id="vidShare" type="button">TEILEN / SICHERN</button></div>
+          </div>
+        </div>
+
+        <div class="vid-bar">
+          <button class="vid-play" id="vidPlay" type="button" aria-label="Abspielen"><svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg></button>
+          <span class="vid-clock" id="vidClock">0,00 / 0,00 s</span>
+          <button class="vid-small" id="vidRate" type="button" aria-label="Geschwindigkeit">1×</button>
+          <button class="vid-small" id="vidZoomOut" type="button" aria-label="Tonspur verkleinern">−</button>
+          <button class="vid-small" id="vidZoomIn" type="button" aria-label="Tonspur vergrößern">+</button>
+        </div>
+
+        <div class="vid-track" id="vidTrack">
+          <div class="vid-track-inner" id="vidTrackInner">
+            <canvas id="vidWave"></canvas>
+            <div class="vid-marks" id="vidMarks"></div>
+            <div class="vid-head" id="vidHead"></div>
+          </div>
+        </div>
+
+        <div class="vid-tools">
+          <button class="vid-small wide" id="vidAddShot" type="button">+ Schuss</button>
+          <button class="vid-small wide" id="vidSetStart" type="button">Start hier</button>
+          <span class="vid-gap"></span>
+          <button class="vid-small" id="vidNudgeL" type="button" aria-label="Marker früher">‹</button>
+          <button class="vid-small" id="vidNudgeR" type="button" aria-label="Marker später">›</button>
+          <button class="vid-small del" id="vidDel" type="button" aria-label="Marker löschen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+        </div>
+
+        <div class="vid-sens"><span>Empfindlichkeit</span><input type="range" id="vidSens" min="0" max="100" value="50" aria-label="Empfindlichkeit"></div>
+        <div class="splits vid-sum" id="vidSum"></div>
+        <div class="score-footer">
+          <button class="sheet-action" id="vidExport" type="button">VIDEO EXPORTIEREN</button>
+        </div>
+      </div>
+    </section>
+
     <nav class="bottom-nav" aria-label="Hauptnavigation">
       <button class="nav-btn active" id="timerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Timer</span></button>
       <button class="nav-btn" id="scoreBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/></svg><span>Score</span></button>
+      <button class="nav-btn" id="videoBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="3"/><path d="m16 10.5 6-3.5v10l-6-3.5"/></svg><span>Video</span></button>
       <button class="nav-btn" id="historyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Verlauf</span></button>
     </nav>
   </div>
@@ -849,6 +1011,7 @@
   <script src="assets/lang/cs.js"></script>
   <script src="assets/lang/pt.js"></script>
   <script src="assets/lang/sv.js"></script>
+  <script src="assets/video.js"></script>
 
   <script>
     (()=>{
@@ -2457,15 +2620,23 @@
 
       /* ---------- Sheets der Score-Ansicht ---------- */
       /* ---------- Ansichtswechsel ---------- */
-      const VIEW_NAV={timer:'timerBtn',score:'scoreBtn',history:'historyBtn'};
+      const VIEW_NAV={timer:'timerBtn',score:'scoreBtn',video:'videoBtn',history:'historyBtn'};
       function showView(name){
+        const vorher=currentView;
         currentView=name;
         $('#timerView').classList.toggle('hidden',name!=='timer');
         $('#scoreView').classList.toggle('active',name==='score');
+        $('#videoView').classList.toggle('active',name==='video');
         $('#historyView').classList.toggle('active',name==='history');
         setNav(VIEW_NAV[name]||'timerBtn');
         if(name==='history')setHistorySegment(currentSegment);
+        if(videoTool){if(name==='video')videoTool.shown();else if(vorher==='video')videoTool.hidden()}
       }
+      /* Video-Analyse (assets/video.js): eigener Reiter, eigene Logik. */
+      const videoTool=window.FTVideo?window.FTVideo({t,de,DEC,showToast,
+        keepAwake:()=>{if(KEEP_AWAKE)KEEP_AWAKE.keepAwake().catch(()=>{});else requestWakeLock()},
+        allowSleep:()=>releaseWakeLock()}):null;
+      $('#videoBtn').onclick=()=>{closeModals();showView('video')};
 
       /* ---------- Ereignisse ---------- */
       function entryFor(el){
