@@ -263,5 +263,17 @@
   "Übernehmen": "Použít",
   "Marker hinzufügen": "Přidat značku",
   "Schuss": "Výstřel",
-  "Schuss {0}": "Výstřel {0}"
+  "Schuss {0}": "Výstřel {0}",
+  "Ausschnitt": "Výřez",
+  "Schneiden": "Oříznout",
+  "Auflösung": "Rozlišení",
+  "Signal": "Signál",
+  "Video schneiden": "Oříznout video",
+  "Anfang hier": "Začátek zde",
+  "Ganzes Video": "Celé video",
+  "Ende hier": "Konec zde",
+  "Länge {0} s": "Délka {0} s",
+  "Original": "Originál",
+  "kleiner": "menší",
+  "Start mit dem ersten Schuss": "Start prvním výstřelem"
 };

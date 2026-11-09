@@ -263,5 +263,17 @@
   "Übernehmen": "Zastosuj",
   "Marker hinzufügen": "Dodaj znacznik",
   "Schuss": "Strzał",
-  "Schuss {0}": "Strzał {0}"
+  "Schuss {0}": "Strzał {0}",
+  "Ausschnitt": "Fragment",
+  "Schneiden": "Przytnij",
+  "Auflösung": "Rozdzielczość",
+  "Signal": "Sygnał",
+  "Video schneiden": "Przytnij wideo",
+  "Anfang hier": "Początek tutaj",
+  "Ganzes Video": "Całe wideo",
+  "Ende hier": "Koniec tutaj",
+  "Länge {0} s": "Długość {0} s",
+  "Original": "Oryginał",
+  "kleiner": "mniejszy",
+  "Start mit dem ersten Schuss": "Start od pierwszego strzału"
 };

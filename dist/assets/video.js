@@ -24,9 +24,16 @@ window.FTVideo = function (api) {
     pcm: null, rate: 48000, env: null, envMax: 1,
     beep: null, beepEnd: null, shots: [], sel: null,
     zoom: 1, sens: 50, rateIdx: 0, busy: false, cancel: false, result: null,
-    corner: 'tl', pxs: 160, view: 0, muted: false
+    corner: 'tl', pxs: 160, view: 0, muted: false,
+    startMode: 'beep',   // 'beep': Startsignal · 'shot': der erste Schuss startet die Zeit (z. B. 1R1)
+    cut: null,           // eigener Ausschnitt {a, b} in s, sonst automatisch die Stage
+    res: 'orig'          // Export: 'orig', '1080' oder '720'
   };
-  try { const c = localStorage.getItem('ft-video-corner'); if (c) S.corner = c; } catch (e) {}
+  try {
+    const c = localStorage.getItem('ft-video-corner'); if (c) S.corner = c;
+    if (localStorage.getItem('ft-video-start') === 'shot') S.startMode = 'shot';
+    const r = localStorage.getItem('ft-video-res'); if (r === '1080' || r === '720') S.res = r;
+  } catch (e) {}
   const video = $('#vidEl'), over = $('#vidOver'), wave = $('#vidWave'), track = $('#vidTrack');
 
   /* ---------- Hilfen ---------- */
@@ -61,6 +68,7 @@ window.FTVideo = function (api) {
     $('#vidEdit').hidden = false;
     $('#vidNew').hidden = false;
     $('#vidExport').hidden = false;
+    $('#vidClose').hidden = false;
     $('#videoSub').textContent = file.name || '';
     S.busy = true;
     setBusy(t('Video wird geladen …'));
@@ -107,7 +115,7 @@ window.FTVideo = function (api) {
       S.view = 0;
       renderAll();
       fitStage();
-      if (S.beep == null) showToast(t('Kein Startsignal erkannt – setze den Start-Marker selbst.'));
+      if (S.beep == null && S.startMode === 'beep') showToast(t('Kein Startsignal erkannt – setze den Start-Marker selbst.'));
     } catch (err) {
       S.busy = false;
       setBusy(null);
@@ -294,8 +302,9 @@ window.FTVideo = function (api) {
   function unload(toEmpty) {
     video.pause();
     if (S.url) URL.revokeObjectURL(S.url);
-    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null, view: 0 });
+    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null, view: 0, cut: null });
     edit = null;
+    cutting = null;
     video.removeAttribute('src');
     video.load();
     if (toEmpty) {
@@ -303,7 +312,10 @@ window.FTVideo = function (api) {
       $('#vidEdit').hidden = true;
       $('#vidNew').hidden = true;
       $('#vidExport').hidden = true;
+      $('#vidClose').hidden = true;
       $('#vidSetSheet').hidden = true;
+      $('#vidExportSheet').hidden = true;
+      $('#vidDone').hidden = true;
       requestAnimationFrame(drawDemo);
       $('#videoSub').textContent = t('Timer und Splits im eigenen Stage-Video');
     }
@@ -419,7 +431,7 @@ window.FTVideo = function (api) {
 
   /* Schüsse: steiler Anstieg der Hüllkurve gegenüber den 20 ms davor.
      Empfindlichkeit 0–100 verschiebt Mindestlautstärke und Anstieg. */
-  function findShots(from) {
+  function findShots(from, firstMin) {
     const env = S.env, n = env.length, k = S.sens / 100;
     const rise = 4.2 - 2.6 * k;                         // 4,2 … 1,6-fach
     const rel = 0.7 * Math.pow(0.1, k);                 // 70 % … 7 % des lautesten Schusses
@@ -447,6 +459,8 @@ window.FTVideo = function (api) {
     const own = [], base = 0.6 * Math.pow(0.55, k), maxGap = 4000 + 3000 * k;
     for (const c of cands) {
       if (c.pk < ref * rel) continue;
+      // Start per Schuss: der erste muss ein kräftiger Schuss sein, kein Hantieren.
+      if (!own.length && firstMin && c.pk < ref * firstMin) continue;
       if (own.length) {
         const pause = (c.i - own[own.length - 1].i) / 1000;
         if (pause * 1000 > maxGap) break;
@@ -466,6 +480,15 @@ window.FTVideo = function (api) {
 
   async function detect(withBeep) {
     if (!S.pcm) return;
+    if (S.startMode === 'shot') {
+      // Nur ab dem Anfang des Ausschnitts suchen: Geräusche davor zählen nicht.
+      const all = findShots(S.cut ? S.cut.a : 0, 0.5);
+      S.beep = all.length ? all[0] : null;
+      S.beepEnd = null;
+      S.shots = all.slice(1);
+      S.sel = null;
+      return;
+    }
     if (withBeep) {
       const b = await findBeep();
       S.beep = b ? b.at : null;
@@ -530,6 +553,7 @@ window.FTVideo = function (api) {
     if (D.beep == null && !D.shots.length) return;
     const u = Math.min(W, H) / 100;
     const st = phaseAt(time, D), shots = D.shots, beep = D.beep ?? 0;
+    const off = D.startMode === 'shot' ? 1 : 0;   // erster Schuss = Start, zählt mit
     const acc = st.phase === 'ready' ? C.ready : C.live;
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'left';
@@ -537,13 +561,13 @@ window.FTVideo = function (api) {
     // --- Maße ---
     const pad = 2.4 * u, BIG = 11.5 * u, SMALL = 6 * u, ROW = 3.9 * u, RF = 2.7 * u;
     const K = Math.min(W > H ? 4 : 5, shots.length);          // sichtbare Zeilen
-    const label = st.phase === 'ready' ? t('BEREIT') : st.phase === 'go' ? (st.n ? t('SCHUSS {0}', st.n) : t('LÄUFT')) : t('ZEIT');
+    const label = st.phase === 'ready' ? t('BEREIT') : st.phase === 'go' ? (st.n ? t('SCHUSS {0}', st.n + off) : t('LÄUFT')) : t('ZEIT');
     const [whole, frac] = parts(sec(st.el));
     let best = Infinity;
     for (let i = 1; i < shots.length; i++) best = Math.min(best, shots[i] - shots[i - 1]);
     // Breite immer mit den Kennzahlen vom Ende rechnen, damit das Feld nicht springt.
     const statsAll = shots.length
-      ? [[t('Schüsse'), String(shots.length)], [t('Erster Schuss'), sec(shots[0] - beep)]].concat(best < Infinity ? [[t('Bester Split'), sec(best)]] : [])
+      ? [[t('Schüsse'), String(shots.length + off)]].concat(off ? [] : [[t('Erster Schuss'), sec(shots[0] - beep)]], best < Infinity || off ? [[t('Bester Split'), sec(off ? Math.min(best, shots[0] - beep) : best)]] : [])
       : [];
     const stats = st.phase === 'done' ? statsAll : [];
     ctx.font = font(800, BIG);
@@ -639,7 +663,7 @@ window.FTVideo = function (api) {
         ctx.globalAlpha = nw ? 0.25 + 0.75 * a : 1;
         ctx.font = font(700, RF);
         ctx.fillStyle = 'rgba(244,244,238,.55)';
-        ctx.fillText('#' + String(i + 1).padStart(2, '0'), L, ry);
+        ctx.fillText('#' + String(i + 1 + off).padStart(2, '0'), L, ry);
         ctx.fillStyle = nw ? C.live : C.ink;
         ctx.font = font(800, RF);
         ctx.textAlign = 'right';
@@ -833,11 +857,26 @@ window.FTVideo = function (api) {
       }
       ctx.globalAlpha = 1;
     }
+    // Ausschnitt: außerhalb abdunkeln, Grenzen als gelbe Klammern
+    if (cutting || S.cut) {
+      const r = range();
+      const xa = xAt(r.a), xb = xAt(r.b), top = RUL, bot = h - LAB;
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
+      if (xa > 0) ctx.fillRect(0, top, Math.min(w, xa), bot - top);
+      if (xb < w) ctx.fillRect(Math.max(0, xb), top, w - Math.max(0, xb), bot - top);
+      ctx.fillStyle = '#ffc83d';
+      for (const [x, d] of [[xa, 1], [xb, -1]]) {
+        if (x < -6 || x > w + 6) continue;
+        ctx.fillRect(Math.round(x) - (d > 0 ? 0 : 3), top, 3, bot - top);
+        ctx.fillRect(Math.round(x) - (d > 0 ? 0 : 9), top, 9, 3);
+        ctx.fillRect(Math.round(x) - (d > 0 ? 0 : 9), bot - 3, 9, 3);
+      }
+    }
     // Marker als Pillen mit Zeit darunter
     hits = [];
     const marks = [];
     if (S.beep != null) marks.push({ id: 'beep', time: S.beep, txt: 'S' });
-    S.shots.forEach((s, i) => marks.push({ id: i, time: s, txt: String(i + 1) }));
+    S.shots.forEach((s, i) => marks.push({ id: i, time: s, txt: String(i + 1 + (S.startMode === 'shot' ? 1 : 0)) }));
     const PW = 22, PH = 32;
     let lastX = -1e9, lastLab = -1e9, up = false;
     const draws = [];
@@ -1056,13 +1095,15 @@ window.FTVideo = function (api) {
   }
   function renderEditBar() {
     const id = S.sel;
-    $('#vidEditName').textContent = id === 'beep' ? t('Start') : t('Schuss {0}', id + 1) + ' · ' + sec(S.shots[id] - (S.beep ?? 0)) + ' s';
+    $('#vidEditName').textContent = id === 'beep' ? t('Start') : t('Schuss {0}', id + 1 + (S.startMode === 'shot' ? 1 : 0)) + ' · ' + sec(S.shots[id] - (S.beep ?? 0)) + ' s';
     $('#vidEditTime').textContent = clock(markTime(id));
   }
   function renderTools() {
     const on = !!edit;
     $('#vidEditBar').hidden = !on;
-    $('#vidInfo').hidden = $('#vidScrubRow').hidden = $('#vidTransport').hidden = on;
+    $('#vidCutBar').hidden = !cutting;
+    $('#vidInfo').hidden = $('#vidScrubRow').hidden = $('#vidTransport').hidden = on || !!cutting;
+    if (cutting) renderCutBar();
     $('#vidDel').disabled = !(typeof S.sel === 'number' || (S.sel === 'beep' && edit && edit.orig == null));
     if (on) renderEditBar();
     paint();
@@ -1159,9 +1200,95 @@ window.FTVideo = function (api) {
     b.querySelector('small').textContent = (d > 0 ? '+' : '−') + Math.abs(d).toFixed(2).replace('.', api.DEC);
   });
 
+  /* ---------- Schneiden ----------
+     Ohne eigenen Ausschnitt gilt die Stage (2 s vor dem Start bis 2,5 s nach
+     dem letzten Schuss). Anfang und Ende werden an der Mittellinie gesetzt. */
+  let cutting = null;
+  function autoRange() {
+    const last = S.shots.length ? S.shots[S.shots.length - 1] : null;
+    if (S.beep != null && last != null) return { a: Math.max(0, S.beep - 2), b: Math.min(S.dur, last + 2.5) };
+    return { a: 0, b: S.dur };
+  }
+  function range() { return cutting ? { a: cutting.a, b: cutting.b } : S.cut || autoRange(); }
+  function rangeText(r) { return clock(r.a) + ' – ' + clock(r.b) + ' · ' + sec(r.b - r.a) + ' s'; }
+  function startCut(fromExport) {
+    if (!S.dur || S.busy) return;
+    if (edit) commitEdit(true);
+    video.pause();
+    const r = range();
+    cutting = { a: r.a, b: r.b, fromExport: !!fromExport };
+    renderTools();
+    renderTrack();
+    seek(clamp(S.view, r.a, r.b), true);
+  }
+  function endCut(ok) {
+    if (!cutting) return;
+    const c = cutting;
+    cutting = null;
+    if (ok) {
+      const auto = autoRange();
+      const full = c.a <= 0.01 && c.b >= S.dur - 0.01;
+      S.cut = Math.abs(c.a - auto.a) < 0.005 && Math.abs(c.b - auto.b) < 0.005 ? null : full ? { a: 0, b: S.dur } : { a: c.a, b: c.b };
+    }
+    if (ok && S.startMode === 'shot' && S.pcm) { detect(true).then(() => { changed(); renderTrack(); }); }
+    renderTools();
+    renderTrack();
+    if (c.fromExport) openExport();
+  }
+  function renderCutBar() {
+    $('#vidCutTime').textContent = clock(cutting.a) + ' – ' + clock(cutting.b);
+    $('#vidCutLen').textContent = t('Länge {0} s', sec(cutting.b - cutting.a));
+  }
+  $('#vidCut').onclick = () => startCut(false);
+  $('#vidRangeEdit').onclick = () => { $('#vidExportSheet').hidden = true; startCut(true); };
+  $('#vidCutOk').onclick = () => endCut(true);
+  $('#vidCutCancel').onclick = () => endCut(false);
+  $('#vidCutA').onclick = () => { if (!cutting) return; cutting.a = clamp(S.view, 0, cutting.b - 0.3); renderCutBar(); renderTrack(); };
+  $('#vidCutB').onclick = () => { if (!cutting) return; cutting.b = clamp(S.view, cutting.a + 0.3, S.dur); renderCutBar(); renderTrack(); };
+  $('#vidCutAll').onclick = () => { if (!cutting) return; cutting.a = 0; cutting.b = S.dur; renderCutBar(); renderTrack(); };
+
+  // Start: Signal oder erster Schuss (z. B. 1R1 ohne Piep).
+  function renderStartMode() {
+    document.querySelectorAll('#vidStartMode button').forEach((b) => {
+      const on = b.dataset.mode === S.startMode;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
+  $('#vidStartMode').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-mode]');
+    if (!b || S.busy || b.dataset.mode === S.startMode) return;
+    S.startMode = b.dataset.mode === 'shot' ? 'shot' : 'beep';
+    try { localStorage.setItem('ft-video-start', S.startMode); } catch (err) {}
+    renderStartMode();
+    if (edit) commitEdit(true);
+    if (S.pcm) { await detect(true); changed(); fitStage(); }
+    else { renderSummary(); paint(); }
+  });
+  renderStartMode();
+
+  // Zurück: Video schließen und zur Auswahl.
+  $('#vidClose').onclick = () => {
+    if (S.busy) return;
+    if (edit) commitEdit(true);
+    cutting = null;
+    unload(true);
+    renderTools();
+  };
+
   function renderSummary() {
-    const shots = S.shots, beep = S.beep;
+    const shots = S.shots, beep = S.beep, off = S.startMode === 'shot' ? 1 : 0;
     const cnt = $('#vidCount'), box = $('#vidSum');
+    if (off) {
+      const n = shots.length + (beep != null ? 1 : 0);
+      cnt.textContent = t('{0} Schüsse erkannt', n) + (shots.length ? ' · ' + sec(shots[shots.length - 1] - beep) + ' s' : '');
+      let best = Infinity;
+      for (let i = 0; i < shots.length; i++) best = Math.min(best, shots[i] - (i ? shots[i - 1] : beep));
+      box.innerHTML = '<i style="background:#ffc83d"></i>' + t('Start mit dem ersten Schuss') +
+        (best < Infinity ? '<i style="background:var(--accent);margin-left:12px"></i>' + t('Bester Split') + ' <b>' + sec(best) + '</b>' : '');
+      if (!n) box.textContent = S.pcm ? t('Keine Schüsse erkannt – Empfindlichkeit erhöhen oder mit + Schuss setzen.') : t('Ohne Tonspur: Start und Schüsse von Hand setzen.');
+      return;
+    }
     if (beep == null || !shots.length) {
       cnt.textContent = t('{0} Schüsse erkannt', shots.length);
       box.textContent = beep == null && shots.length ? t('Kein Startsignal erkannt – setze den Start-Marker selbst.')
@@ -1213,18 +1340,33 @@ window.FTVideo = function (api) {
     return list.find((m) => { try { return MediaRecorder.isTypeSupported(m); } catch (e) { return false; } }) || '';
   }
   $('#vidExport').onclick = () => { if (!S.busy && S.dur) openExport(); };
+  function resOptions() {
+    const short = Math.min(S.w, S.h);
+    const list = [{ id: 'orig', label: t('Original'), sub: short + 'p' }];
+    if (short > 1080) list.push({ id: '1080', label: 'HD 1080p', sub: 'Full HD' });
+    if (short > 720) list.push({ id: '720', label: 'HD 720p', sub: t('kleiner') });
+    return list;
+  }
+  function renderRes() {
+    const list = resOptions();
+    if (!list.some((o) => o.id === S.res)) S.res = 'orig';
+    $('#vidRes').innerHTML = list.map((o) => '<button type="button" role="radio" data-res="' + o.id + '" class="' + (o.id === S.res ? 'on' : '') +
+      '" aria-checked="' + (o.id === S.res) + '">' + o.label + '<small>' + o.sub + '</small></button>').join('');
+  }
+  $('#vidRes').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-res]');
+    if (!b) return;
+    S.res = b.dataset.res;
+    try { localStorage.setItem('ft-video-res', S.res); } catch (err) {}
+    renderRes();
+  });
   function openExport() {
-    const last = S.shots.length ? S.shots[S.shots.length - 1] : null;
-    const canTrim = S.beep != null && last != null;
-    $('#vidTrimRow').hidden = !canTrim;
+    const r = range();
+    $('#vidRange').textContent = (S.cut ? '' : (S.beep != null && S.shots.length ? t('Stage') + ': ' : '')) + rangeText(r);
+    renderRes();
     $('#vidExportSheet').hidden = false;
   }
   $('#vidExportCancel').onclick = () => { $('#vidExportSheet').hidden = true; };
-  $('#vidTrim').onclick = (e) => {
-    const on = !e.currentTarget.classList.contains('on');
-    e.currentTarget.classList.toggle('on', on);
-    e.currentTarget.setAttribute('aria-pressed', String(on));
-  };
   $('#vidExportGo').onclick = () => {
     $('#vidExportSheet').hidden = true;
     // Noch innerhalb des Tippens: Ton und Wiedergabe freischalten. iOS
@@ -1240,11 +1382,10 @@ window.FTVideo = function (api) {
     const mime = pickMime();
     const canvas = document.createElement('canvas');
     if (mime == null || !canvas.captureStream) { showToast(t('Export wird auf diesem Gerät nicht unterstützt.')); return; }
-    const last = S.shots.length ? S.shots[S.shots.length - 1] : null;
-    const trim = !$('#vidTrimRow').hidden && $('#vidTrim').classList.contains('on');
-    const from = trim ? Math.max(0, S.beep - 2) : 0;
-    const to = trim ? Math.min(S.dur, last + 2.5) : S.dur;
-    const scale = Math.min(1, EXPORT_MAX / Math.max(S.w, S.h));
+    const rg = range();
+    const from = rg.a, to = rg.b;
+    const target = S.res === '720' ? 720 : S.res === '1080' ? 1080 : Infinity;
+    const scale = Math.min(1, EXPORT_MAX / Math.max(S.w, S.h), target / Math.min(S.w, S.h));
     const W = Math.round((S.w * scale) / 2) * 2, H = Math.round((S.h * scale) / 2) * 2;
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
@@ -1409,7 +1550,7 @@ window.FTVideo = function (api) {
   return {
     // Beim Wechsel in den Reiter: Maße neu bestimmen, beim Verlassen anhalten.
     shown() { requestAnimationFrame(() => { readColors(); layout(); renderTrack(); drawDemo(); }); },
-    hidden() { video.pause(); if (edit) commitEdit(); },
+    hidden() { video.pause(); if (edit) commitEdit(); if (cutting) endCut(false); },
     // Für Tests: Zustand und Zeichnen von außen.
     _state: S, _draw: drawOverlay
   };

@@ -263,5 +263,17 @@
   "Übernehmen": "Toepassen",
   "Marker hinzufügen": "Marker toevoegen",
   "Schuss": "Schot",
-  "Schuss {0}": "Schot {0}"
+  "Schuss {0}": "Schot {0}",
+  "Ausschnitt": "Fragment",
+  "Schneiden": "Knippen",
+  "Auflösung": "Resolutie",
+  "Signal": "Signaal",
+  "Video schneiden": "Video knippen",
+  "Anfang hier": "Begin hier",
+  "Ganzes Video": "Hele video",
+  "Ende hier": "Einde hier",
+  "Länge {0} s": "Lengte {0} s",
+  "Original": "Origineel",
+  "kleiner": "kleiner",
+  "Start mit dem ersten Schuss": "Start bij het eerste schot"
 };

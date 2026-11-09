@@ -263,5 +263,17 @@
   "Übernehmen": "Valider",
   "Marker hinzufügen": "Ajouter un repère",
   "Schuss": "Tir",
-  "Schuss {0}": "Tir {0}"
+  "Schuss {0}": "Tir {0}",
+  "Ausschnitt": "Extrait",
+  "Schneiden": "Couper",
+  "Auflösung": "Résolution",
+  "Signal": "Signal",
+  "Video schneiden": "Couper la vidéo",
+  "Anfang hier": "Début ici",
+  "Ganzes Video": "Vidéo entière",
+  "Ende hier": "Fin ici",
+  "Länge {0} s": "Durée {0} s",
+  "Original": "Original",
+  "kleiner": "plus léger",
+  "Start mit dem ersten Schuss": "Départ au premier tir"
 };

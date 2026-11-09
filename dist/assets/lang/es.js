@@ -263,5 +263,17 @@
   "Übernehmen": "Aplicar",
   "Marker hinzufügen": "Añadir marcador",
   "Schuss": "Disparo",
-  "Schuss {0}": "Disparo {0}"
+  "Schuss {0}": "Disparo {0}",
+  "Ausschnitt": "Fragmento",
+  "Schneiden": "Recortar",
+  "Auflösung": "Resolución",
+  "Signal": "Señal",
+  "Video schneiden": "Recortar vídeo",
+  "Anfang hier": "Inicio aquí",
+  "Ganzes Video": "Vídeo completo",
+  "Ende hier": "Fin aquí",
+  "Länge {0} s": "Duración {0} s",
+  "Original": "Original",
+  "kleiner": "más ligero",
+  "Start mit dem ersten Schuss": "Empieza con el primer disparo"
 };

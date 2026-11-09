@@ -263,5 +263,17 @@
   "Übernehmen": "Använd",
   "Marker hinzufügen": "Lägg till markör",
   "Schuss": "Skott",
-  "Schuss {0}": "Skott {0}"
+  "Schuss {0}": "Skott {0}",
+  "Ausschnitt": "Klipp",
+  "Schneiden": "Klipp",
+  "Auflösung": "Upplösning",
+  "Signal": "Signal",
+  "Video schneiden": "Klipp video",
+  "Anfang hier": "Början här",
+  "Ganzes Video": "Hela videon",
+  "Ende hier": "Slut här",
+  "Länge {0} s": "Längd {0} s",
+  "Original": "Original",
+  "kleiner": "mindre",
+  "Start mit dem ersten Schuss": "Startar med första skottet"
 };

@@ -263,5 +263,17 @@
   "Übernehmen": "Apply",
   "Marker hinzufügen": "Add marker",
   "Schuss": "Shot",
-  "Schuss {0}": "Shot {0}"
+  "Schuss {0}": "Shot {0}",
+  "Ausschnitt": "Clip",
+  "Schneiden": "Trim",
+  "Auflösung": "Resolution",
+  "Signal": "Signal",
+  "Video schneiden": "Trim video",
+  "Anfang hier": "Start here",
+  "Ganzes Video": "Whole video",
+  "Ende hier": "End here",
+  "Länge {0} s": "Length {0} s",
+  "Original": "Original",
+  "kleiner": "smaller",
+  "Start mit dem ersten Schuss": "Starts with the first shot"
 };

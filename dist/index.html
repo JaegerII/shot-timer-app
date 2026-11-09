@@ -200,7 +200,34 @@
     #videoView{background:rgba(23,26,24,.86);border:1px solid var(--line);border-radius:24px;padding:14px 14px 12px}
     :root[data-theme="light"] #videoView{background:rgba(255,255,255,.88)}
     #videoView .panel-head{margin-bottom:10px}
-    #videoView .title-text{min-width:0}
+    #videoView .title-text{min-width:0;flex:1}
+    .vid-back{flex:0 0 auto;width:38px;height:38px;margin:2px -2px 0 -6px;border:0;border-radius:12px;background:transparent;color:var(--text);display:grid;place-items:center;cursor:pointer}
+    .vid-back[hidden]{display:none}
+    .vid-back svg{width:24px;height:24px}
+    .vid-back:active{background:var(--surface-2)}
+    .vid-cutbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .vid-cutbtns button{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font:inherit;font-size:.74rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 6px}
+    .vid-cutbtns b{color:#ffc83d;font-size:1rem}
+    .vid-seg{display:flex;gap:4px;padding:3px;border-radius:12px;border:1px solid rgba(237,237,230,.14);background:rgba(237,237,230,.06)}
+    .vid-seg button{flex:1;min-height:36px;padding:4px 11px;border:0;border-radius:9px;background:transparent;color:#b8bcae;font:inherit;font-size:.74rem;font-weight:800;letter-spacing:0;text-transform:none;cursor:pointer;display:grid;align-content:center;gap:1px}
+    .vid-seg button small{font-size:.6rem;font-weight:700;opacity:.75}
+    .vid-seg button.on{background:rgba(24,229,255,.16);color:#18e5ff}
+    .vid-xrow{display:flex;align-items:center;gap:12px;text-align:left;padding:13px 14px;border-radius:13px;border:1px solid rgba(237,237,230,.14);background:rgba(237,237,230,.06);font-weight:750;font-size:.88rem}
+    .vid-xrow>span{flex:1;min-width:0}
+    .vid-xrow small{display:block;color:#949888;font-size:.72rem;font-weight:650;margin-top:3px;font-variant-numeric:tabular-nums}
+    .vid-xrow.col{flex-direction:column;align-items:stretch;gap:10px}
+    .vid-xbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:11px;border:1px solid rgba(237,237,230,.2);background:transparent;color:#edede6;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}
+    .vid-xbtn svg{width:16px;height:16px}
+    /* Fenster über dem ganzen Bildschirm statt nur über dem Video, mit Luft oben und unten */
+    .vid-stage .vid-sheet{position:fixed;inset:0;z-index:80;justify-content:center;gap:16px;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 36px) 22px calc(env(safe-area-inset-bottom) + 36px)}
+    .vid-stage .vid-sheet>*{width:100%;max-width:440px;align-self:center}
+    .vid-stage .vid-sheet h3{font-size:1.25rem;margin-bottom:4px}
+    .vid-stage .vid-sheet .vid-hint{font-size:.8rem;line-height:1.5}
+    .vid-stage .vid-sheet .vid-sheet-row{margin-top:6px}
+    .vid-stage .vid-sheet .vid-pos,.vid-stage .vid-sheet .vid-sens{text-align:left;gap:12px}
+    .vid-stage .vid-sheet .vid-pos>span,.vid-stage .vid-sheet .vid-sens>span{flex:0 0 112px}
+    .vid-stage .vid-sheet .vid-pos>div{flex:1;justify-content:space-between}
+    .vid-seg button{white-space:nowrap}
     #vidNew{flex:0 0 auto}
     #videoSub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .vid-empty{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px}
@@ -785,6 +812,7 @@
 
     <section id="videoView" class="view-panel" aria-labelledby="videoTitle">
       <div class="panel-head">
+        <button class="vid-back" id="vidClose" type="button" aria-label="Zurück" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
         <div class="title-text">
           <h1 id="videoTitle">Video</h1>
           <p id="videoSub">Timer und Splits im eigenen Stage-Video</p>
@@ -825,13 +853,15 @@
           </div>
           <div class="vid-sheet" id="vidExportSheet" hidden>
             <h3>Video exportieren</h3>
-            <div class="rand-row" id="vidTrimRow"><span>Nur die Stage<small>2 s vor dem Signal bis 2,5 s nach dem letzten Schuss</small></span><button class="toggle on" id="vidTrim" type="button" aria-label="Nur die Stage" aria-pressed="true"></button></div>
+            <div class="vid-xrow"><span>Ausschnitt<small id="vidRange"></small></span><button class="vid-xbtn" id="vidRangeEdit" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 7.6 20 18M8.6 16.4 20 6"/></svg><span>Schneiden</span></button></div>
+            <div class="vid-xrow col"><span>Auflösung</span><div class="vid-seg" id="vidRes" role="radiogroup" aria-label="Auflösung"></div></div>
             <p class="vid-hint">Der Export läuft in Echtzeit. Bildschirm anlassen und die App nicht verlassen.</p>
             <div class="vid-sheet-row"><button class="ghost-btn" id="vidExportCancel" type="button">Abbrechen</button><button class="sheet-action" id="vidExportGo" type="button">STARTEN</button></div>
           </div>
           <div class="vid-sheet" id="vidSetSheet" hidden>
             <h3>Einstellungen</h3>
             <div class="vid-pos"><span>Einblendung</span><div class="vid-corners" id="vidCorners" role="radiogroup" aria-label="Einblendung"><button type="button" role="radio" data-corner="tl" aria-label="Oben links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="tr" aria-label="Oben rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="bl" aria-label="Unten links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="br" aria-label="Unten rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button></div></div>
+            <div class="vid-pos"><span>Start</span><div class="vid-seg" id="vidStartMode" role="radiogroup" aria-label="Start"><button type="button" role="radio" data-mode="beep">Signal</button><button type="button" role="radio" data-mode="shot">Erster Schuss</button></div></div>
             <div class="vid-sens"><span>Empfindlichkeit</span><input type="range" id="vidSens" min="0" max="100" value="50" aria-label="Empfindlichkeit"></div>
             <div class="vid-sheet-row"><button class="ghost-btn" id="vidNew" type="button">Anderes Video</button><button class="sheet-action" id="vidSetClose" type="button">FERTIG</button></div>
           </div>
@@ -844,6 +874,7 @@
 
         <div class="vid-info" id="vidInfo">
           <div class="vid-info-text"><b id="vidCount"></b><span id="vidSum"></span></div>
+          <button class="vid-ico" id="vidCut" type="button" aria-label="Video schneiden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 7.6 20 18M8.6 16.4 20 6"/></svg></button>
           <button class="vid-ico" id="vidSettings" type="button" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
         </div>
         <div class="vid-scrub-row" id="vidScrubRow">
@@ -866,6 +897,14 @@
             <button class="vid-tr ok" id="vidOkEdit" type="button" aria-label="Übernehmen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
           </div>
           <div class="vid-nudges" id="vidNudges"><button type="button" data-nudge="-0.1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 6v12L3 12z"/><path d="M21 6v12l-8.5-6z"/></svg><small></small></button><button type="button" data-nudge="-0.01"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="6" width="2.6" height="12" rx="1"/><path d="M19 6v12l-9-6z"/></svg><small></small></button><button type="button" data-nudge="0.01"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="16.4" y="6" width="2.6" height="12" rx="1"/><path d="M5 6v12l9-6z"/></svg><small></small></button><button type="button" data-nudge="0.1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 6v12L21 12z"/><path d="M3 6v12l8.5-6z"/></svg><small></small></button></div>
+        </div>
+        <div class="vid-editbar" id="vidCutBar" hidden>
+          <div class="vid-edit-top">
+            <button class="vid-tr" id="vidCutCancel" type="button" aria-label="Abbrechen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+            <div class="vid-edit-time"><b id="vidCutTime">00:00,00</b><small id="vidCutLen"></small></div>
+            <button class="vid-tr ok" id="vidCutOk" type="button" aria-label="Übernehmen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
+          </div>
+          <div class="vid-cutbtns"><button type="button" id="vidCutA"><b>[</b>Anfang hier</button><button type="button" id="vidCutAll">Ganzes Video</button><button type="button" id="vidCutB">Ende hier<b>]</b></button></div>
         </div>
         <div class="vid-track" id="vidTrack">
           <canvas id="vidWave"></canvas>

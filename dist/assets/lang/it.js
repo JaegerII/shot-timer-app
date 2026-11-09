@@ -263,5 +263,17 @@
   "Übernehmen": "Applica",
   "Marker hinzufügen": "Aggiungi marcatore",
   "Schuss": "Colpo",
-  "Schuss {0}": "Colpo {0}"
+  "Schuss {0}": "Colpo {0}",
+  "Ausschnitt": "Spezzone",
+  "Schneiden": "Taglia",
+  "Auflösung": "Risoluzione",
+  "Signal": "Segnale",
+  "Video schneiden": "Taglia video",
+  "Anfang hier": "Inizio qui",
+  "Ganzes Video": "Video intero",
+  "Ende hier": "Fine qui",
+  "Länge {0} s": "Durata {0} s",
+  "Original": "Originale",
+  "kleiner": "più leggero",
+  "Start mit dem ersten Schuss": "Parte dal primo colpo"
 };
