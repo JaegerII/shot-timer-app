@@ -283,5 +283,6 @@
   "flüssiger": "mais fluido",
   "kleinere Datei": "ficheiro mais leve",
   "wie das Video": "como o vídeo",
-  "Kino-Look": "visual de cinema"
+  "Kino-Look": "visual de cinema",
+  "Außerhalb des Ausschnitts": "Fora do excerto"
 };

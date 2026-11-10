@@ -283,5 +283,6 @@
   "flüssiger": "vloeiender",
   "kleinere Datei": "kleiner bestand",
   "wie das Video": "zoals opgenomen",
-  "Kino-Look": "filmlook"
+  "Kino-Look": "filmlook",
+  "Außerhalb des Ausschnitts": "Buiten het fragment"
 };

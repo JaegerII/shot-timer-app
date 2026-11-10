@@ -283,5 +283,6 @@
   "flüssiger": "płynniej",
   "kleinere Datei": "mniejszy plik",
   "wie das Video": "jak w nagraniu",
-  "Kino-Look": "wygląd kinowy"
+  "Kino-Look": "wygląd kinowy",
+  "Außerhalb des Ausschnitts": "Poza fragmentem"
 };

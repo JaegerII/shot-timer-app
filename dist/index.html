@@ -2879,6 +2879,15 @@
         window.addEventListener('load',()=>{
           navigator.serviceWorker.register('sw.js').catch(()=>{});
         });
+        // Neue Version aktiv: einmal neu laden, damit Seite und Skripte zusammenpassen.
+        // Gleich nach dem Start sofort, sonst erst beim nächsten Zurückkehren in die App.
+        const hadController=!!navigator.serviceWorker.controller;let reloaded=false;
+        const reloadNow=()=>{if(!reloaded){reloaded=true;location.reload()}};
+        navigator.serviceWorker.addEventListener('controllerchange',()=>{
+          if(!hadController)return;
+          if(performance.now()<20000)reloadNow();
+          else document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reloadNow()});
+        });
       }
     })();
 

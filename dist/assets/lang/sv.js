@@ -283,5 +283,6 @@
   "flüssiger": "mjukare",
   "kleinere Datei": "mindre fil",
   "wie das Video": "som inspelat",
-  "Kino-Look": "filmkänsla"
+  "Kino-Look": "filmkänsla",
+  "Außerhalb des Ausschnitts": "Utanför klippet"
 };

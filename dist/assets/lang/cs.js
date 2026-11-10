@@ -283,5 +283,6 @@
   "flüssiger": "plynulejší",
   "kleinere Datei": "menší soubor",
   "wie das Video": "jako video",
-  "Kino-Look": "filmový vzhled"
+  "Kino-Look": "filmový vzhled",
+  "Außerhalb des Ausschnitts": "Mimo výřez"
 };

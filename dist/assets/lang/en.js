@@ -283,5 +283,6 @@
   "flüssiger": "smoother",
   "kleinere Datei": "smaller file",
   "wie das Video": "as recorded",
-  "Kino-Look": "film look"
+  "Kino-Look": "film look",
+  "Außerhalb des Ausschnitts": "Outside the clip"
 };

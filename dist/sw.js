@@ -1,5 +1,5 @@
 /* Erzeugt von tools/make-sw.mjs – nicht von Hand ändern. */
-const VERSION = 'shot-timer-c56e6c9d4f';
+const VERSION = 'shot-timer-c34f60da75';
 const ASSETS = [
   "./",
   "assets/apple-touch-icon.png",
@@ -33,7 +33,8 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(VERSION)
-      .then(cache => cache.addAll(ASSETS))
+      // cache: 'reload' umgeht den HTTP-Cache, damit nie alte und neue Dateien gemischt werden.
+      .then(cache => cache.addAll(ASSETS.map(url => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -51,18 +52,14 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   if (new URL(request.url).origin !== self.location.origin) return;
 
-  // Die Seite selbst zuerst aus dem Netz, damit Aktualisierungen ankommen;
-  // ohne Netz aus dem Cache. Alles andere zuerst aus dem Cache, das ist
-  // am Schießstand der Normalfall.
+  // Auch die Seite selbst kommt aus dem Cache dieser Version: Seite und
+  // Skripte passen so immer zusammen. Eine neue Version installiert sich im
+  // Hintergrund; die Seite lädt dann einmal neu (siehe index.html).
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(VERSION).then(cache => cache.put(request, copy));
-          return response;
-        })
-        .catch(() => caches.match(request).then(hit => hit || caches.match('./')))
+      caches.open(VERSION)
+        .then(cache => cache.match('./'))
+        .then(hit => hit || fetch(request))
     );
     return;
   }

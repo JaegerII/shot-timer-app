@@ -595,8 +595,32 @@ window.FTVideo = function (api) {
   const ease = (a) => 1 - Math.pow(1 - clamp(a, 0, 1), 3);
   const CORNERS = ['tl', 'tr', 'bl', 'br'];
 
+  /* Was im Video zählt: nur Marker im Ausschnitt. Beim Start per Schuss ist
+     der erste Schuss im Ausschnitt der Start (Nr. 1); beim Signal zählen die
+     Schüsse im Ausschnitt ab 1. Die Marker selbst bleiben unverändert. */
+  function live() {
+    const r = cutting || S.cut;
+    const inR = (v) => !r || (v >= r.a - 1e-3 && v <= r.b + 1e-3);
+    const lab = new Map();
+    const shots = [];
+    let beep = null;
+    if (S.startMode === 'shot') {
+      const act = (S.beep != null ? [{ id: 'beep', time: S.beep }] : [])
+        .concat(S.shots.map((v, i) => ({ id: i, time: v })))
+        .filter((m) => inR(m.time))
+        .sort((a, b) => a.time - b.time);
+      act.forEach((m, i) => { lab.set(m.id, { n: i + 1, start: i === 0 }); if (i) shots.push(m.time); });
+      beep = act.length ? act[0].time : null;
+    } else {
+      beep = S.beep;
+      if (S.beep != null) lab.set('beep', { n: 0, start: true });
+      S.shots.forEach((v, i) => { if (inR(v)) { shots.push(v); lab.set(i, { n: shots.length }); } });
+    }
+    return { beep, shots, startMode: S.startMode, lab };
+  }
+
   function drawOverlay(ctx, W, H, time, keep, D, corner) {
-    D = D || S;
+    D = D || live();
     corner = corner || S.corner;
     // Start per Schuss: der Start-Schuss ist Schuss 1 und steht als #01 in der Liste.
     const shotStart = D.startMode === 'shot' && D.beep != null;
@@ -925,9 +949,15 @@ window.FTVideo = function (api) {
     }
     // Marker als Pillen mit Zeit darunter
     hits = [];
+    const L = live();
     const marks = [];
-    if (S.beep != null) marks.push({ id: 'beep', time: S.beep, txt: S.startMode === 'shot' ? '1' : 'S' });
-    S.shots.forEach((s, i) => marks.push({ id: i, time: s, txt: String(i + 1 + (S.startMode === 'shot' ? 1 : 0)) }));
+    const mk = (id, time) => {
+      const l = L.lab.get(id);
+      const txt = !l ? '·' : l.start ? (S.startMode === 'shot' ? '1' : 'S') : String(l.n);
+      marks.push({ id, time, txt, start: !!(l && l.start), out: !l });
+    };
+    if (S.beep != null) mk('beep', S.beep);
+    S.shots.forEach((v, i) => mk(i, v));
     const PW = 22, PH = 32;
     let lastX = -1e9, lastLab = -1e9, up = false;
     const draws = [];
@@ -944,9 +974,9 @@ window.FTVideo = function (api) {
     // Ausgewählter Marker zuletzt, damit er oben liegt.
     draws.sort((a, b) => (a.sel ? 1 : 0) - (b.sel ? 1 : 0));
     draws.forEach(({ m, x, y, sel, lab }) => {
-      const beep = m.id === 'beep';
+      const beep = m.start;
       const fill = beep ? '#ffc83d' : col.accent;
-      ctx.globalAlpha = edit && !sel ? 0.4 : 1;
+      ctx.globalAlpha = (edit && !sel) || (m.out && !sel) ? 0.35 : 1;
       rrect(ctx, x - PW / 2, y - PH / 2, PW, PH, PW / 2);
       if (sel) {
         ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
@@ -959,7 +989,7 @@ window.FTVideo = function (api) {
       ctx.textBaseline = 'alphabetic';
       hits.push({ id: m.id, x0: x - PW / 2 - 4, x1: x + PW / 2 + 4, y0: y - PH / 2 - 6, y1: y + PH / 2 + 6, sel });
       // Zeit: Schuss ab Signal, Start als „Start“
-      const label = beep ? t('Start') : sec(m.time - (S.beep ?? 0)) + 's';
+      const label = beep ? t('Start') : m.out ? '–' : sec(m.time - (L.beep ?? 0)) + 's';
       if (lab) {
         ctx.font = '700 10px Montserrat, system-ui, sans-serif';
         const lw = ctx.measureText(label).width + 10;
@@ -1146,7 +1176,8 @@ window.FTVideo = function (api) {
   }
   function renderEditBar() {
     const id = S.sel;
-    $('#vidEditName').textContent = id === 'beep' ? t('Start') : t('Schuss {0}', id + 1 + (S.startMode === 'shot' ? 1 : 0)) + ' · ' + sec(S.shots[id] - (S.beep ?? 0)) + ' s';
+    const L = live(), l = L.lab.get(id);
+    $('#vidEditName').textContent = !l ? t('Außerhalb des Ausschnitts') : l.start ? t('Start') : t('Schuss {0}', l.n) + ' · ' + sec(markTime(id) - (L.beep ?? 0)) + ' s';
     $('#vidEditTime').textContent = clock(markTime(id));
   }
   function renderTools() {
@@ -1284,6 +1315,8 @@ window.FTVideo = function (api) {
       S.cut = Math.abs(c.a - auto.a) < 0.005 && Math.abs(c.b - auto.b) < 0.005 ? null : full ? { a: 0, b: S.dur } : { a: c.a, b: c.b };
     }
     // Schneiden ändert nie die Marker: gesetzte, verschobene und gelöschte Schüsse bleiben so.
+    // Gezählt wird aber nur, was im Ausschnitt liegt.
+    renderSummary();
     renderTools();
     renderTrack();
     if (c.fromExport) openExport();
@@ -1331,7 +1364,7 @@ window.FTVideo = function (api) {
   };
 
   function renderSummary() {
-    const shots = S.shots, beep = S.beep, off = S.startMode === 'shot' ? 1 : 0;
+    const L = live(), shots = L.shots, beep = L.beep, off = S.startMode === 'shot' ? 1 : 0;
     const cnt = $('#vidCount'), box = $('#vidSum');
     if (off) {
       const n = shots.length + (beep != null ? 1 : 0);

@@ -283,5 +283,6 @@
   "flüssiger": "più fluido",
   "kleinere Datei": "file più leggero",
   "wie das Video": "come il video",
-  "Kino-Look": "look cinema"
+  "Kino-Look": "look cinema",
+  "Außerhalb des Ausschnitts": "Fuori dallo spezzone"
 };
