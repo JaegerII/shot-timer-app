@@ -284,5 +284,13 @@
   "kleinere Datei": "kleiner bestand",
   "wie das Video": "zoals opgenomen",
   "Kino-Look": "filmlook",
-  "Außerhalb des Ausschnitts": "Buiten het fragment"
+  "Außerhalb des Ausschnitts": "Buiten het fragment",
+  "Endkarte": "Eindkaart",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Samenvatting met tijd, cijfers en alle splits",
+  "Schwarz": "Zwart",
+  "3 s angehängt": "3 s erachter",
+  "Über dem Video": "Over de video",
+  "am Ende": "aan het einde",
+  "Ergebnis": "Resultaat",
+  "Ø Split": "Gem. split"
 };

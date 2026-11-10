@@ -284,5 +284,13 @@
   "kleinere Datei": "file più leggero",
   "wie das Video": "come il video",
   "Kino-Look": "look cinema",
-  "Außerhalb des Ausschnitts": "Fuori dallo spezzone"
+  "Außerhalb des Ausschnitts": "Fuori dallo spezzone",
+  "Endkarte": "Scheda finale",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Riepilogo con tempo, dati e tutti gli split",
+  "Schwarz": "Nero",
+  "3 s angehängt": "3 s in coda",
+  "Über dem Video": "Sul video",
+  "am Ende": "alla fine",
+  "Ergebnis": "Risultato",
+  "Ø Split": "Split medio"
 };

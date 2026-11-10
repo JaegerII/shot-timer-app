@@ -284,5 +284,13 @@
   "kleinere Datei": "ficheiro mais leve",
   "wie das Video": "como o vídeo",
   "Kino-Look": "visual de cinema",
-  "Außerhalb des Ausschnitts": "Fora do excerto"
+  "Außerhalb des Ausschnitts": "Fora do excerto",
+  "Endkarte": "Cartão final",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Resumo com tempo, dados e todos os splits",
+  "Schwarz": "Preto",
+  "3 s angehängt": "3 s no fim",
+  "Über dem Video": "Sobre o vídeo",
+  "am Ende": "no fim",
+  "Ergebnis": "Resultado",
+  "Ø Split": "Split médio"
 };

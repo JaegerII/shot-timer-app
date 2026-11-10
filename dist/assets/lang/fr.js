@@ -284,5 +284,13 @@
   "kleinere Datei": "fichier plus léger",
   "wie das Video": "comme la vidéo",
   "Kino-Look": "look cinéma",
-  "Außerhalb des Ausschnitts": "Hors de l’extrait"
+  "Außerhalb des Ausschnitts": "Hors de l’extrait",
+  "Endkarte": "Carte de fin",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Résumé avec temps, stats et tous les splits",
+  "Schwarz": "Noir",
+  "3 s angehängt": "3 s ajoutées",
+  "Über dem Video": "Sur la vidéo",
+  "am Ende": "à la fin",
+  "Ergebnis": "Résultat",
+  "Ø Split": "Split moyen"
 };

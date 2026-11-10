@@ -284,5 +284,13 @@
   "kleinere Datei": "mindre fil",
   "wie das Video": "som inspelat",
   "Kino-Look": "filmkänsla",
-  "Außerhalb des Ausschnitts": "Utanför klippet"
+  "Außerhalb des Ausschnitts": "Utanför klippet",
+  "Endkarte": "Slutkort",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Sammanfattning med tid, siffror och alla splittider",
+  "Schwarz": "Svart",
+  "3 s angehängt": "3 s efteråt",
+  "Über dem Video": "Över videon",
+  "am Ende": "i slutet",
+  "Ergebnis": "Resultat",
+  "Ø Split": "Snittsplit"
 };

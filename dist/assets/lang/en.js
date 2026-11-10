@@ -284,5 +284,13 @@
   "kleinere Datei": "smaller file",
   "wie das Video": "as recorded",
   "Kino-Look": "film look",
-  "Außerhalb des Ausschnitts": "Outside the clip"
+  "Außerhalb des Ausschnitts": "Outside the clip",
+  "Endkarte": "End card",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Summary with time, stats and every split",
+  "Schwarz": "Black",
+  "3 s angehängt": "3 s added",
+  "Über dem Video": "Over the video",
+  "am Ende": "at the end",
+  "Ergebnis": "Result",
+  "Ø Split": "Avg split"
 };

@@ -284,5 +284,13 @@
   "kleinere Datei": "menší soubor",
   "wie das Video": "jako video",
   "Kino-Look": "filmový vzhled",
-  "Außerhalb des Ausschnitts": "Mimo výřez"
+  "Außerhalb des Ausschnitts": "Mimo výřez",
+  "Endkarte": "Závěrečná karta",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Souhrn s časem, údaji a všemi splity",
+  "Schwarz": "Černá",
+  "3 s angehängt": "3 s navíc",
+  "Über dem Video": "Přes video",
+  "am Ende": "na konci",
+  "Ergebnis": "Výsledek",
+  "Ø Split": "Prům. split"
 };

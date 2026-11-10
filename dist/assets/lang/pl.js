@@ -284,5 +284,13 @@
   "kleinere Datei": "mniejszy plik",
   "wie das Video": "jak w nagraniu",
   "Kino-Look": "wygląd kinowy",
-  "Außerhalb des Ausschnitts": "Poza fragmentem"
+  "Außerhalb des Ausschnitts": "Poza fragmentem",
+  "Endkarte": "Plansza końcowa",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Podsumowanie z czasem, statystykami i wszystkimi splitami",
+  "Schwarz": "Czarna",
+  "3 s angehängt": "3 s na końcu",
+  "Über dem Video": "Na wideo",
+  "am Ende": "na końcu",
+  "Ergebnis": "Wynik",
+  "Ø Split": "Śr. split"
 };

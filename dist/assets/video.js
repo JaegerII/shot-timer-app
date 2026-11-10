@@ -29,13 +29,15 @@ window.FTVideo = function (api) {
     cut: null,           // eigener Ausschnitt {a, b} in s, sonst automatisch die Stage
     res: 'orig',         // Export: 'orig', '2160', '1440', '1080' oder '720'
     fps: 0,              // erkannte Bildrate der Quelle (0 = unbekannt)
-    fpsOut: 0            // gewünschte Export-Bildrate: 60, 30 oder 24 (0 = wie das Video)
+    fpsOut: 0,           // gewünschte Export-Bildrate: 60, 30 oder 24 (0 = wie das Video)
+    endCard: 'black'     // Endkarte: 'off', 'black' (angehängt) oder 'over' (über dem Video)
   };
   try {
     const c = localStorage.getItem('ft-video-corner'); if (c) S.corner = c;
     if (localStorage.getItem('ft-video-start') === 'shot') S.startMode = 'shot';
     const r = localStorage.getItem('ft-video-res'); if (['2160', '1440', '1080', '720'].includes(r)) S.res = r;
     const f = Number(localStorage.getItem('ft-video-fps')); if ([60, 30, 24].includes(f)) S.fpsOut = f;
+    const ec = localStorage.getItem('ft-video-endcard'); if (['off', 'black', 'over'].includes(ec)) S.endCard = ec;
   } catch (e) {}
   const video = $('#vidEl'), over = $('#vidOver'), wave = $('#vidWave'), track = $('#vidTrack');
 
@@ -619,6 +621,153 @@ window.FTVideo = function (api) {
     return { beep, shots, startMode: S.startMode, lab };
   }
 
+  /* ---------- Endkarte ----------
+     Zusammenfassung am Schluss: Gesamtzeit, Kennzahlen und alle Splits.
+     'black' wird als eigener Abspann angehängt, 'over' legt sich nach dem
+     letzten Schuss abgedunkelt über das Video. */
+  const CARD_SEC = 3;          // so lange ist die Karte mindestens zu sehen
+  const CARD_DELAY = 0.8;      // 'over': Abstand nach dem letzten Schuss
+  function endStats(D) {
+    D = D || live();
+    if (D.beep == null) return null;
+    const shotStart = D.startMode === 'shot';
+    const all = shotStart ? [D.beep].concat(D.shots) : D.shots.slice();
+    if (!all.length || (shotStart && all.length < 2)) return null;
+    const rows = all.map((v, i) => ({ n: i + 1, at: v - D.beep, sp: i ? v - all[i - 1] : null }));
+    const sp = rows.filter((r) => r.sp != null).map((r) => r.sp);
+    return {
+      total: all[all.length - 1] - D.beep,
+      last: all[all.length - 1],
+      n: all.length,
+      first: shotStart ? null : all[0] - D.beep,
+      best: sp.length ? Math.min.apply(null, sp) : null,
+      avg: sp.length ? sp.reduce((a, b) => a + b, 0) / sp.length : null,
+      rows
+    };
+  }
+  function drawEndCard(ctx, W, H, a, mode, D) {
+    const st = endStats(D);
+    if (!st || a <= 0) return;
+    const u = Math.min(W, H) / 100, land = W > H, cx = W / 2;
+    ctx.save();
+    ctx.globalAlpha = a;
+    if (mode === 'black') {
+      ctx.fillStyle = '#0b0c0c';
+      ctx.fillRect(0, 0, W, H);
+      const g = ctx.createRadialGradient(cx, H * 0.4, 0, cx, H * 0.4, Math.max(W, H) * 0.65);
+      g.addColorStop(0, 'rgba(24,229,255,.09)');
+      g.addColorStop(1, 'rgba(24,229,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      ctx.fillStyle = 'rgba(5,6,6,.68)';
+      ctx.fillRect(0, 0, W, H);
+    }
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.shadowColor = 'rgba(0,0,0,.5)';
+    ctx.shadowOffsetY = Math.max(1, 0.18 * u);
+
+    // Maße
+    const KF = 2.1 * u, BIG = land ? 19 * u : 17 * u, FR = BIG * 0.5, LF = 1.6 * u, VF = 4 * u, GF = 2.4 * u, BF = 1.5 * u;
+    const stats = [[t('Schüsse'), String(st.n)]];
+    if (st.first != null) stats.push([t('Erster Schuss'), sec(st.first)]);
+    if (st.avg != null) stats.push([t('Ø Split'), sec(st.avg)]);
+    if (st.best != null) stats.push([t('Bester Split'), sec(st.best), C.ready]);
+    const cols = land ? 5 : 3, maxRows = land ? 4 : 7;
+    let rows = st.rows;
+    const cap = cols * maxRows;
+    const more = rows.length > cap;
+    if (more) rows = rows.slice(rows.length - (cap - 1));
+    const gridRows = Math.ceil((rows.length + (more ? 1 : 0)) / cols);
+    const ROW = 4.1 * u;
+    const hBlock = KF + 3 * u + BIG * 0.74 + 5 * u + LF + 1.4 * u + VF + 5 * u + gridRows * ROW + 3 * u + BF;
+    let y = (H - hBlock) / 2 + (1 - a) * 3 * u;
+
+    // Überschrift
+    ctx.font = font(800, KF);
+    ctx.fillStyle = C.live;
+    const kick = t('Ergebnis').toUpperCase();
+    const kw = spaced(ctx, kick, 0, 0, 0.32 * KF, false);
+    y += KF;
+    spaced(ctx, kick, cx - kw / 2, y, 0.32 * KF, true);
+
+    // Gesamtzeit
+    const [whole, frac] = parts(sec(st.total));
+    ctx.font = font(800, BIG);
+    const ww = tab(ctx, whole, 0, 0, false);
+    ctx.font = font(800, FR);
+    const fw = tab(ctx, frac + ' s', 0, 0, false);
+    y += 3 * u + BIG * 0.74;
+    let x = cx - (ww + fw) / 2;
+    ctx.fillStyle = C.ink;
+    ctx.font = font(800, BIG);
+    tab(ctx, whole, x, y, true);
+    ctx.font = font(800, FR);
+    ctx.fillStyle = C.live;
+    tab(ctx, frac, x + ww, y, true);
+    ctx.fillStyle = 'rgba(244,244,238,.55)';
+    ctx.fillText(' s', x + ww + tab(ctx, frac, 0, 0, false), y);
+
+    // Kennzahlen
+    y += 5 * u;
+    const colW = stats.map((s) => {
+      ctx.font = font(700, LF);
+      const l = spaced(ctx, s[0].toUpperCase(), 0, 0, 0.14 * LF, false);
+      ctx.font = font(800, VF);
+      return Math.max(l, tab(ctx, s[1], 0, 0, false));
+    });
+    const GAP = 5 * u;
+    const sw = colW.reduce((p, c) => p + c, 0) + GAP * (stats.length - 1);
+    x = cx - sw / 2;
+    stats.forEach((s, i) => {
+      ctx.font = font(700, LF);
+      ctx.fillStyle = 'rgba(244,244,238,.55)';
+      spaced(ctx, s[0].toUpperCase(), x, y + LF, 0.14 * LF, true);
+      ctx.font = font(800, VF);
+      ctx.fillStyle = s[2] || C.ink;
+      tab(ctx, s[1], x, y + LF + 1.4 * u + VF * 0.78, true);
+      x += colW[i] + GAP;
+    });
+    y += LF + 1.4 * u + VF + 5 * u;
+
+    // Alle Splits als Raster
+    ctx.font = font(700, GF);
+    const cellW = (land ? 17 : 16) * u, gw = cellW * cols;
+    const gx = cx - gw / 2;
+    ctx.fillStyle = 'rgba(244,244,238,.14)';
+    ctx.fillRect(gx, y - 2.2 * u, gw, Math.max(1, 0.12 * u));
+    const cells = (more ? [null] : []).concat(rows);
+    cells.forEach((r, i) => {
+      const cxl = gx + (i % cols) * cellW, cy = y + Math.floor(i / cols) * ROW + GF;
+      if (!r) { ctx.fillStyle = 'rgba(244,244,238,.45)'; ctx.fillText('…', cxl, cy); return; }
+      ctx.fillStyle = 'rgba(244,244,238,.45)';
+      ctx.font = font(700, GF * 0.9);
+      ctx.fillText('#' + String(r.n).padStart(2, '0'), cxl, cy);
+      ctx.font = font(800, GF);
+      const best = st.best != null && r.sp != null && Math.abs(r.sp - st.best) < 1e-6;
+      ctx.fillStyle = r.sp == null ? (st.first != null ? C.ink : 'rgba(244,244,238,.55)') : best ? C.ready : C.ink;
+      const txt = r.sp == null ? (st.first != null ? sec(r.at) : sec(0)) : '+' + sec(r.sp);
+      ctx.textAlign = 'right';
+      tabRight(ctx, txt, cxl + cellW - 2.5 * u, cy);
+      ctx.textAlign = 'left';
+    });
+    y += gridRows * ROW + 3 * u;
+
+    // Marke
+    ctx.font = font(700, BF);
+    ctx.fillStyle = 'rgba(244,244,238,.42)';
+    const brand = 'FORTH TRACE SHOT TIMER';
+    const bw = spaced(ctx, brand, 0, 0, 0.3 * BF, false);
+    spaced(ctx, brand, cx - bw / 2, y + BF, 0.3 * BF, true);
+    ctx.restore();
+  }
+  // Ab wann die Karte im Modus 'over' über dem Video liegt (null = keine Karte).
+  function cardStart(D) {
+    const st = endStats(D);
+    return st ? st.last + CARD_DELAY : null;
+  }
+
   function drawOverlay(ctx, W, H, time, keep, D, corner) {
     D = D || live();
     corner = corner || S.corner;
@@ -819,7 +968,12 @@ window.FTVideo = function (api) {
   function paint() {
     if (!S.w) return;
     const tm = nowT();
-    drawOverlay(over.getContext('2d'), over.width, over.height, tm);
+    const oc = over.getContext('2d');
+    drawOverlay(oc, over.width, over.height, tm);
+    if (S.endCard === 'over') {
+      const cs = cardStart();
+      if (cs != null && tm >= cs) drawEndCard(oc, over.width, over.height, ease((tm - cs) / 0.45), 'over');
+    }
     $('#vidClock').textContent = clock(tm);
     $('#vidRemain').textContent = '-' + clock(S.dur - tm);
     $('#vidScrubKnob').style.left = (S.dur ? (tm / S.dur) * 100 : 0).toFixed(3) + '%';
@@ -1479,11 +1633,26 @@ window.FTVideo = function (api) {
     try { localStorage.setItem('ft-video-res', S.res); } catch (err) {}
     renderRes();
   });
+  function renderCardOpt() {
+    const opts = [['off', t('Aus'), '–'], ['black', t('Schwarz'), t('3 s angehängt')], ['over', t('Über dem Video'), t('am Ende')]];
+    $('#vidCard').innerHTML = opts.map(([id, l, sub]) => '<button type="button" role="radio" data-card="' + id + '" class="' + (id === S.endCard ? 'on' : '') +
+      '" aria-checked="' + (id === S.endCard) + '">' + l + '<small>' + sub + '</small></button>').join('');
+  }
+  $('#vidCard').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-card]');
+    if (!b) return;
+    S.endCard = b.dataset.card;
+    try { localStorage.setItem('ft-video-endcard', S.endCard); } catch (err) {}
+    renderCardOpt();
+    paint();
+  });
   function openExport() {
     const r = range();
     $('#vidRange').textContent = (S.cut ? '' : (S.beep != null && S.shots.length ? t('Stage') + ': ' : '')) + rangeText(r);
     renderRes();
     renderFps();
+    renderCardOpt();
+    $('#vidCardRow').hidden = !endStats();
     $('#vidExportSheet').hidden = false;
   }
   $('#vidExportCancel').onclick = () => { $('#vidExportSheet').hidden = true; };
@@ -1514,9 +1683,21 @@ window.FTVideo = function (api) {
     // Ergebnis optisch nicht vom Original zu unterscheiden ist.
     const fps = exportFps();
     const vbr = Math.round(clamp(W * H * fps * 0.3, 12e6, 80e6));
-    const drawFrame = () => {
+    // Endkarte: 'over' ab kurz nach dem letzten Schuss über dem Video (bei
+    // Bedarf mit stehendem letztem Bild verlängert), 'black' als Abspann.
+    const card = S.endCard !== 'off' && endStats() ? S.endCard : 'off';
+    const cs = card === 'over' ? Math.min(cardStart(), to) : null;
+    const tailSec = card === 'black' ? CARD_SEC : card === 'over' ? Math.max(0, CARD_SEC - (to - cs)) : 0;
+    const total = (to - from) + tailSec;
+    const drawFrame = (extra) => {
+      const ct = Math.min(video.currentTime, to) + (extra || 0);
       ctx.drawImage(video, 0, 0, W, H);
-      drawOverlay(ctx, W, H, video.currentTime, true);
+      if (card === 'over' && ct >= cs) {
+        const a = ease((ct - cs) / 0.45);
+        if (a < 1) drawOverlay(ctx, W, H, Math.min(ct, to), true);
+        drawEndCard(ctx, W, H, a, 'over');
+      } else drawOverlay(ctx, W, H, Math.min(ct, to), true);
+      if (card === 'black' && extra) drawEndCard(ctx, W, H, ease(extra / 0.4), 'black');
     };
 
     S.busy = true; S.cancel = false;
@@ -1566,7 +1747,7 @@ window.FTVideo = function (api) {
         const step = () => {
           if (S.cancel || video.ended || video.currentTime >= to) { resolve(); return; }
           drawFrame();
-          setBusy(t('Video wird erstellt …'), (video.currentTime - from) / (to - from || 1));
+          setBusy(t('Video wird erstellt …'), (video.currentTime - from) / (total || 1));
           if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(step);
           else requestAnimationFrame(step);
         };
@@ -1575,6 +1756,18 @@ window.FTVideo = function (api) {
       });
       video.pause();
       drawFrame();
+      // Abspann bzw. verlängerte Karte: weiterzeichnen, die Aufnahme läuft mit.
+      if (tailSec > 0 && !S.cancel) {
+        const t0 = performance.now();
+        for (;;) {
+          const e = (performance.now() - t0) / 1000;
+          if (S.cancel || e >= tailSec) break;
+          drawFrame(e);
+          setBusy(t('Video wird erstellt …'), (to - from + e) / (total || 1));
+          await new Promise((r) => setTimeout(r, 1000 / 30));
+        }
+        drawFrame(tailSec);
+      }
       rec.stop();
       await stopped;
       ok = !S.cancel && chunks.length > 0;

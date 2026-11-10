@@ -284,5 +284,13 @@
   "kleinere Datei": "archivo más ligero",
   "wie das Video": "como el vídeo",
   "Kino-Look": "look de cine",
-  "Außerhalb des Ausschnitts": "Fuera del fragmento"
+  "Außerhalb des Ausschnitts": "Fuera del fragmento",
+  "Endkarte": "Tarjeta final",
+  "Zusammenfassung mit Zeit, Kennzahlen und allen Splits": "Resumen con tiempo, datos y todos los splits",
+  "Schwarz": "Negro",
+  "3 s angehängt": "3 s añadidos",
+  "Über dem Video": "Sobre el vídeo",
+  "am Ende": "al final",
+  "Ergebnis": "Resultado",
+  "Ø Split": "Split medio"
 };
