@@ -1,8 +1,8 @@
-// Erzeugt die App-Store-Screenshots aus store/shots.html: sechs Motive in zwei
+// Erzeugt die App-Store-Screenshots aus store/shots.html: sieben Motive in zwei
 // iPhone-Größen, die App Store Connect verlangt:
 //   6.9  → 1320 x 2868 px (großes Display)
 //   6.3  → 1206 x 2622 px (mittleres Display)
-// Start: node tools/store-shots.mjs [en]
+// Start: node tools/store-shots.mjs [en] [nummern, z. B. 7 oder 1,2,7]
 // Standard ist ein englischer Satz; Apple nutzt ihn für alle Store-Sprachen.
 // Ausgabe: store/screenshots/<sprache>-<größe>/<nr>.png
 import { spawn } from 'node:child_process';
@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer-core';
 
 const LANGS = (process.argv[2] || 'en').split(',');
+const SHOTS = process.argv[3] ? process.argv[3].split(',').map(Number) : [1, 2, 3, 4, 5, 6, 7];
 // Die Vorlage ist 440 x 956 gebaut; kleinere Größen werden per Zoom verkleinert.
 const SIZES = [{ name: '6.9', w: 440, h: 956 }, { name: '6.3', w: 402, h: 874 }];
 const PORT = 8139;
@@ -33,11 +34,11 @@ try {
     for (const size of SIZES) {
       const out = fileURLToPath(new URL(`../store/screenshots/${lang}-${size.name}/`, import.meta.url));
       mkdirSync(out, { recursive: true });
-      for (let shot = 1; shot <= 6; shot++) {
+      for (const shot of SHOTS) {
         const page = await browser.newPage();
         await page.setViewport({ width: size.w, height: size.h, deviceScaleFactor: 3 });
         await page.goto(`http://localhost:${PORT}/store/shots.html?shot=${shot}&lang=${lang}`, { waitUntil: 'networkidle0' });
-        await page.waitForFunction('window.READY === true', { timeout: 15000 });
+        await page.waitForFunction('window.READY === true', { timeout: 40000 });
         if (size.w !== 440) {
           await page.evaluate((z) => { document.documentElement.style.zoom = z; document.documentElement.style.background = '#0b0c0c'; }, size.w / 440);
           await new Promise((r) => setTimeout(r, 200));

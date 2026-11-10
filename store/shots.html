@@ -56,7 +56,8 @@
     ['par', 'Par time<br>you can <em>see</em>', 'Double beep and a red edge as soon as you are over time.'],
     ['match', 'Matches with<br><em>overall results</em>', 'As many stages as you like, Hit Factor and match points for every shooter.'],
     ['stage', 'Hit Factor<br><em>live</em> at the range', 'Enter time and hit zones – the results update instantly.'],
-    ['history', 'Your training<br><em>history</em>', 'Every run is saved. No account, everything stays on your iPhone.']
+    ['history', 'Your training<br><em>history</em>', 'Every run is saved. No account, everything stays on your iPhone.'],
+    ['video', 'Your stage video<br>with <em>splits</em>', 'Shots are found in the audio. Trim, fine-tune and export with the timer in a corner.']
   ];
   const [KEY, TITLE, SUB] = MOTIFS[SHOT - 1];
   document.getElementById('title').innerHTML = TITLE;
@@ -148,6 +149,26 @@
     }
     if (KEY === 'stage') { $('#scoreBtn').click(); await wait(150); $('[data-match="m1"]').click(); await wait(150); $('[data-stage="st2"]').click(); }
     if (KEY === 'history') $('#historyBtn').click();
+    if (KEY === 'video') {
+      // Eigenes Stage-Video (nicht im Repo): store/media/stage.mov. Ohne Datei bleibt die Startseite des Reiters.
+      $('#videoBtn').click();
+      await wait(150);
+      const r = await fetch('media/stage.mov').catch(() => null);
+      if (r && r.ok) {
+        const blob = await r.blob();
+        const dt = new w.DataTransfer();
+        dt.items.add(new w.File([blob], 'Stage.mov', { type: 'video/quicktime' }));
+        const inp = $('#vidFile');
+        inp.files = dt.files;
+        inp.dispatchEvent(new w.Event('change'));
+        for (let i = 0; i < 100 && !/\d/.test($('#vidCount').textContent); i++) await wait(100);
+        // Zum letzten Schuss springen: die Einblendung zeigt dann Zeit, Splits und Kennzahlen.
+        for (let i = 0; i < 40; i++) { $('#vidNext').click(); await wait(20); }
+        $('#vidPrev').click(); await wait(100);
+        await new Promise((res) => { const v = $('#vidEl'); if (v.readyState >= 2 && !v.seeking) res(); else v.addEventListener('seeked', res, { once: true }); setTimeout(res, 3000); });
+        await wait(600);
+      }
+    }
     await wait(500);
     await d.fonts.ready;
     window.READY = true;

@@ -22,7 +22,7 @@ wiederholt; der Platz geht an weitere Suchbegriffe.
 | Kopfzeile (optional) | `store/header/header-3840x1646.mp4` (Animation) oder `.png` |
 | Marketing-URL | https://www.instagram.com/wax_meils/ *(optional)* |
 | Copyright | © 2026 Maximilian Weil |
-| Screenshots | In der Hauptsprache hochladen, Apple verwendet sie für alle Sprachen. Großes Display (6,9"): `store/screenshots/en-6.9/1–6.png` (1320 × 2868). Mittleres Display (6,1"/6,3"): `store/screenshots/en-6.3/1–6.png` (1206 × 2622) |
+| Screenshots | In der Hauptsprache hochladen, Apple verwendet sie für alle Sprachen. Großes Display (6,9"): `store/screenshots/en-6.9/1–7.png` (1320 × 2868). Mittleres Display (6,1"/6,3"): `store/screenshots/en-6.3/1–7.png` (1206 × 2622). Nr. 7 ist der Video-Editor; im Store gern an Position 2 ziehen |
 | App-Datenschutz | Keine Daten erfasst („Data Not Collected“) |
 
 ---
@@ -36,12 +36,12 @@ Dry Fire, Par Time, Hit Factor
 
 **Promotional text (170)**
 ```
-Your phone is the shot timer. Hear the beep, run your draw and see every split – live fire or dry fire. Par time, Hit Factor and full match results. Free, no account.
+Your phone is the shot timer: beep, draw, every split – live or dry fire. Plus Hit Factor, match results and your stage video with the splits in the corner. Free.
 ```
 
 **Keywords (100)**
 ```
-ipsc,uspsa,idpa,splits,draw,pistol,practical,shooting,range,practice,stopwatch,match,competition
+ipsc,uspsa,idpa,splits,draw,pistol,practical,shooting,range,practice,video,match,competition
 ```
 
 **Description (4000)**
@@ -63,11 +63,18 @@ MATCHES & HIT FACTOR
 • Pull the time straight from the timer with one tap
 • Track each shooter's progress across all matches
 
+STAGE VIDEO
+• Pick a video of your run – the start beep and every shot are found in the audio
+• Fine-tune markers on the waveform, add or delete shots, start on the beep or on the first shot
+• Trim the clip and export it with running time and splits in the corner of your choice
+• Export in original quality, 1080p or 720p and save or share it right away
+
 HISTORY
 • Every run is saved automatically with all times and splits
 
 PRIVATE BY DESIGN
 • The microphone is analysed live and never recorded
+• Videos are processed on your iPhone and never uploaded
 • No account, no tracking, no ads – your data stays on your iPhone
 
 10 languages: English, German, French, Spanish, Italian, Dutch, Polish, Czech, Portuguese and Swedish.
@@ -88,12 +95,12 @@ Dry Fire, Par Time, Hit Factor
 
 **Werbetext (170)**
 ```
-Dein iPhone ist der Shot Timer: Piep, Draw, jeder Split – Live und Dry Fire. Dazu Par Time, Hit Factor und komplette Match-Wertung. Kostenlos, ohne Konto.
+Dein iPhone ist der Shot Timer: Piep, Draw, jeder Split – Live und Dry Fire. Dazu Hit Factor, Match-Wertung und dein Stage-Video mit Splits. Kostenlos, ohne Konto.
 ```
 
 **Schlüsselwörter (100, durch Kommas getrennt, ohne Leerzeichen)**
 ```
-schießen,ipsc,uspsa,splits,draw,pistole,sportschießen,trockentraining,stand,stoppuhr,wettkampf
+schießen,ipsc,uspsa,splits,draw,pistole,sportschießen,trockentraining,stand,video,wettkampf
 ```
 
 **Beschreibung (4000)**
@@ -115,11 +122,18 @@ MATCHES & HIT FACTOR
 • Zeit mit einem Tipp aus dem Timer übernehmen
 • Fortschritt jedes Schützen über alle Matches
 
+STAGE-VIDEO
+• Video deines Durchgangs wählen – Startpiep und jeder Schuss werden aus der Tonspur erkannt
+• Marker auf der Tonspur verschieben, Schüsse ergänzen oder löschen, Start per Piep oder erstem Schuss
+• Video zuschneiden und mit laufender Zeit und Splits in der Ecke deiner Wahl exportieren
+• Export in Originalqualität, 1080p oder 720p, direkt sichern oder teilen
+
 VERLAUF
 • Jeder Durchgang wird automatisch gespeichert – mit allen Zeiten und Splits
 
 DATENSCHUTZ
 • Das Mikrofon wird nur live ausgewertet, nie aufgenommen
+• Videos werden auf deinem iPhone verarbeitet und nirgends hochgeladen
 • Kein Konto, kein Tracking, keine Werbung – deine Daten bleiben auf deinem iPhone
 
 10 Sprachen: Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch, Polnisch, Tschechisch, Portugiesisch und Schwedisch.
@@ -134,7 +148,30 @@ Mehr Training und Tipps: @wax_meils auf Instagram und YouTube.
 ## Hinweise für die Prüfung (App Review → Notizen)
 
 ```
-The app is a shot timer for practical shooting training. It uses the microphone only to detect the loudness of shots or trigger clicks in real time; nothing is recorded or transmitted. No login is required. To test without firearms: allow microphone access, tap START, wait for the beep and clap loudly – each clap is recorded as a shot. Dry Fire mode reacts to quieter clicks (e.g. tapping the table). Matches and Hit Factor scoring are under "Score".
+The app is a shot timer for practical shooting training. No login is required, and all features are visible in the tab bar: Timer, Score, Video and History, plus Settings (gear icon, top right). Nothing is downloaded from a server and there are no feature flags or hidden menus.
+
+Timer: the microphone is only used to detect the loudness of shots or trigger clicks in real time; nothing is recorded or transmitted. To test without firearms: allow microphone access, tap START, wait for the beep and clap loudly – each clap is recorded as a shot. Dry Fire mode reacts to quieter clicks (e.g. tapping the table).
+
+Score: matches, stages and Hit Factor scoring.
+
+Video: tap "Choose video" and pick any video with a few loud sounds (or record one in the picker and clap a few times). The app finds the sounds in the audio track and shows them as markers. If the video has no start beep, open the settings (slider icon next to the scissors) and set Start to "First shot". Tap Export, then Start: the video is rendered in real time on the device with the timer overlay and can be saved or shared. Videos never leave the device.
+```
+
+## Antwort an App Review (Ablehnung 5.6 vom November 2026)
+
+In App Store Connect → App Review → Antworten. Zusammen mit dem neuen Build einreichen.
+
+```
+Hello App Review team,
+
+Thank you for your feedback. FORTH TRACE Shot Timer does not contain any hidden, locked or remotely activated features. All functionality ships in the binary; the app does not download code or configuration, has no feature flags, no hidden menus or gestures and no region or review detection.
+
+We believe the issue came from TestFlight: after submitting version 1.0 we uploaded further 1.0 builds that already contained a new Video tab, while the build in review did not have it yet. To keep everything consistent we have now selected the latest build for version 1.0. It contains every feature of the app, all reachable from the tab bar: Timer, Score, Video and History, plus Settings (gear icon, top right). The review notes explain how to test each of them, including the video feature.
+
+If anything is still unclear, please tell us which feature or screen led to this assessment. We are happy to explain or change it, and a phone call is welcome.
+
+Kind regards,
+Maximilian Weil
 ```
 
 ## Altersfreigabe – Hinweis
