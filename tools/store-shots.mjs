@@ -1,4 +1,4 @@
-// Erzeugt die App-Store-Screenshots aus store/shots.html: sieben Motive in zwei
+// Erzeugt die App-Store-Screenshots aus store/shots.html: acht Motive in zwei
 // iPhone-Größen, die App Store Connect verlangt:
 //   6.9  → 1320 x 2868 px (großes Display)
 //   6.3  → 1206 x 2622 px (mittleres Display)
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer-core';
 
 const LANGS = (process.argv[2] || 'en').split(',');
-const SHOTS = process.argv[3] ? process.argv[3].split(',').map(Number) : [1, 2, 3, 4, 5, 6, 7];
+const SHOTS = process.argv[3] ? process.argv[3].split(',').map(Number) : [1, 2, 3, 4, 5, 6, 7, 8];
 // Die Vorlage ist 440 x 956 gebaut; kleinere Größen werden per Zoom verkleinert.
 const SIZES = [{ name: '6.9', w: 440, h: 956 }, { name: '6.3', w: 402, h: 874 }];
 const PORT = 8139;

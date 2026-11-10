@@ -30,6 +30,13 @@
   .status i{display:inline-flex;gap:5px;align-items:center;font-style:normal}
   .bat{width:22px;height:11px;border:1.5px solid #fff;border-radius:3px;position:relative;opacity:.95}
   .bat::after{content:"";position:absolute;inset:1.5px;right:4px;background:#fff;border-radius:1px}
+  /* Motiv „result“: quer liegendes iPhone mit dem fertigen Video vor dem Editor. */
+  .phone2{display:none;position:absolute;left:50%;top:664px;width:380px;height:196px;margin-left:-190px;border-radius:40px;background:#1d2120;padding:8px;box-shadow:0 0 0 2px #2f3533,0 30px 80px #000e,0 0 100px #18e5ff1f;transform:rotate(-5deg);z-index:6}
+  .phone2 .scr{position:relative;width:100%;height:100%;border-radius:33px;overflow:hidden;background:#000}
+  .phone2 img{width:100%;height:100%;object-fit:cover;display:block}
+  .phone2 .isl{position:absolute;right:9px;top:50%;width:24px;height:76px;margin-top:-38px;border-radius:14px;background:#000;z-index:2}
+  body.result .phone{top:250px}
+  body.result .phone2{display:block}
 </style>
 </head>
 <body>
@@ -39,6 +46,7 @@
     <p class="sub" id="sub"></p>
   </div>
   <div class="phone"><div class="screen"><div class="island"></div><div class="status"><span>9:41</span><i><svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg><span class="bat"></span></i></div><iframe id="app" title="App" scrolling="no"></iframe></div></div>
+  <div class="phone2"><div class="scr"><div class="isl"></div><img id="resultImg" alt=""></div></div>
 
 <script>
   const q = new URLSearchParams(location.search);
@@ -57,7 +65,8 @@
     ['match', 'Matches with<br><em>overall results</em>', 'As many stages as you like, Hit Factor and match points for every shooter.'],
     ['stage', 'Hit Factor<br><em>live</em> at the range', 'Enter time and hit zones – the results update instantly.'],
     ['history', 'Your training<br><em>history</em>', 'Every run is saved. No account, everything stays on your iPhone.'],
-    ['video', 'Your stage video<br>with <em>splits</em>', 'Shots are found in the audio. Trim, fine-tune and export with the timer in a corner.']
+    ['video', 'Your stage video<br>with <em>splits</em>', 'Shots are found in the audio. Trim, fine-tune and export with the timer in a corner.'],
+    ['result', 'The shot timer<br>for your <em>videos</em>', 'Pick a clip – the app hears every shot and burns time and splits right into the video.']
   ];
   const [KEY, TITLE, SUB] = MOTIFS[SHOT - 1];
   document.getElementById('title').innerHTML = TITLE;
@@ -84,6 +93,12 @@
   localStorage.setItem('shot-timer-history-v2', JSON.stringify(runs));
   localStorage.setItem('shot-timer-shooters-v1', JSON.stringify(NAMES.map(n => ({ id: 's-' + n, name: n, pf: n === 'Jonas' ? 'major' : 'minor' }))));
   sessionStorage.setItem('introDone', '1');
+  if (KEY === 'result') {
+    // 1R1 ohne Piep: der erste Schuss startet die Zeit.
+    localStorage.setItem('ft-video-start', 'shot');
+    document.body.classList.add('result');
+    document.getElementById('resultImg').src = 'media/result.jpg';
+  } else localStorage.removeItem('ft-video-start');
 
   /* ---------- Motiv in der App einstellen ---------- */
   const frame = document.getElementById('app');
@@ -149,11 +164,13 @@
     }
     if (KEY === 'stage') { $('#scoreBtn').click(); await wait(150); $('[data-match="m1"]').click(); await wait(150); $('[data-stage="st2"]').click(); }
     if (KEY === 'history') $('#historyBtn').click();
-    if (KEY === 'video') {
-      // Eigenes Stage-Video (nicht im Repo): store/media/stage.mov. Ohne Datei bleibt die Startseite des Reiters.
+    if (KEY === 'video' || KEY === 'result') {
+      // Eigene Videos (nicht im Repo): store/media/stage.mov bzw. result.mp4. Ohne Datei bleibt die Startseite des Reiters.
       $('#videoBtn').click();
       await wait(150);
-      const r = await fetch('media/stage.mov').catch(() => null);
+      // Beim fertigen Video ist die Einblendung schon eingebrannt: die der App ausblenden.
+      if (KEY === 'result') { const s3 = d.createElement('style'); s3.textContent = '#vidOver{opacity:0!important}'; d.head.appendChild(s3); }
+      const r = await fetch(KEY === 'result' ? 'media/result.mp4' : 'media/stage.mov').catch(() => null);
       if (r && r.ok) {
         const blob = await r.blob();
         const dt = new w.DataTransfer();

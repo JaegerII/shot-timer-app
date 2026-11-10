@@ -22,7 +22,7 @@ wiederholt; der Platz geht an weitere Suchbegriffe.
 | Kopfzeile (optional) | `store/header/header-3840x1646.mp4` (Animation) oder `.png` |
 | Marketing-URL | https://www.instagram.com/wax_meils/ *(optional)* |
 | Copyright | © 2026 Maximilian Weil |
-| Screenshots | In der Hauptsprache hochladen, Apple verwendet sie für alle Sprachen. Großes Display (6,9"): `store/screenshots/en-6.9/1–7.png` (1320 × 2868). Mittleres Display (6,1"/6,3"): `store/screenshots/en-6.3/1–7.png` (1206 × 2622). Nr. 7 ist der Video-Editor; im Store gern an Position 2 ziehen |
+| Screenshots | In der Hauptsprache hochladen, Apple verwendet sie für alle Sprachen. Großes Display (6,9"): `store/screenshots/en-6.9/1–8.png` (1320 × 2868). Mittleres Display (6,1"/6,3"): `store/screenshots/en-6.3/1–8.png` (1206 × 2622). Nr. 7 ist der Video-Editor, Nr. 8 das fertige Video; beide im Store gern an Position 2 und 3 ziehen. Quellvideos liegen nur lokal in `store/media/` |
 | App-Datenschutz | Keine Daten erfasst („Data Not Collected“) |
 
 ---
