@@ -23,11 +23,12 @@ wiederholt; der Platz geht an weitere Suchbegriffe.
 7. **Sichern** (oben rechts).
 
 **App-Informationen und Datenschutz (links im Menü)**
-8. App-Datenschutz bleibt „Keine Daten erfasst“ – Videos werden nur auf dem Gerät verarbeitet. Altersfreigabe bleibt.
+8. App-Datenschutz bleibt „Keine Daten erfasst“ – Videos werden nur auf dem Gerät verarbeitet.
+9. **Altersfreigabe** (App-Informationen → Altersfreigabe → Bearbeiten): Seit September 2026 fragt Apple zusätzlich nach Social-Media-Funktionen. Antwort: **Nein** – die App hat keinen Feed, keine Profile, keine Kommentare und zeigt keine Inhalte anderer Nutzer. Das Teilen eines Videos über das iOS-Teilen-Menü gehört nicht dazu. Die übrigen Antworten bleiben wie beim ersten Mal.
 
 **Einreichen**
-9. Unter „App Review“ (bzw. Link in Apples Mail) auf die Ablehnung antworten: Abschnitt „Antwort an App Review“. Den Absatz zu den TestFlight-Builds nur stehen lassen, wenn es wirklich weitere 1.0-Builds mit Video gab.
-10. „Zur Prüfung hinzufügen“ → „An App Review senden“. Antwort meist nach 24–48 h.
+10. Unter „App Review“ (bzw. Link in Apples Mail) auf die Ablehnung antworten: Abschnitt „Antwort an App Review“. Den Absatz zu den TestFlight-Builds nur stehen lassen, wenn es wirklich weitere 1.0-Builds mit Video gab.
+11. „Zur Prüfung hinzufügen“ → „An App Review senden“. Antwort meist nach 24–48 h.
 
 ---
 
