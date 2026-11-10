@@ -93,8 +93,10 @@ window.FTVideo = function (api) {
       await tick();
       stage = 'audio';
       let audio, trim = 0;
+      const raw = await file.arrayBuffer();
+      await toMemory(file, raw);
       try {
-        audio = await decodeAudio(await file.arrayBuffer());
+        audio = await decodeAudio(raw);
       } catch (e1) {
         // Safari dekodiert den Ton aus iPhone-.mov nicht direkt. Dann die
         // AAC-Spur selbst aus dem Container holen und als ADTS dekodieren.
@@ -110,6 +112,7 @@ window.FTVideo = function (api) {
       S.env = envelope(S.pcm, S.rate);
       S.envMax = S.env.reduce((m, v) => (v > m ? v : m), 1e-6);
       await detect(true);
+      await warmUp();
       S.busy = false;
       setBusy(null);
       S.view = 0;
@@ -127,6 +130,38 @@ window.FTVideo = function (api) {
       if (!keinTon) unload(true);
       else { S.pcm = null; renderAll(); }
     }
+  }
+
+  /* Flüssige Wiedergabe auf dem iPhone: Safari liest ein Video aus der
+     gewählten Datei stückweise nach und bleibt dabei kurz nach dem Start
+     hängen. Bis 500 MB spielt die App deshalb aus dem Arbeitsspeicher
+     (die Datei wird für den Ton ohnehin ganz gelesen) und lässt das Video
+     einmal stumm anlaufen, damit Decoder und Puffer schon bereit sind. */
+  async function toMemory(file, raw) {
+    if (!S.url || S.url.slice(0, 5) !== 'blob:' || file.size > 500e6) return;
+    const at = video.currentTime;
+    const mem = URL.createObjectURL(new Blob([raw], { type: file.type || 'video/mp4' }));
+    try {
+      await openSrc(mem, 8000);
+      URL.revokeObjectURL(S.url);
+      S.url = mem;
+    } catch (e) {
+      URL.revokeObjectURL(mem);
+      await openSrc(S.url, 8000).catch(() => {});
+    }
+    video.currentTime = at;
+  }
+  async function warmUp() {
+    const was = video.muted, at = video.currentTime;
+    video.muted = true;
+    try {
+      await video.play();
+      await new Promise((r) => setTimeout(r, 350));
+    } catch (e) {}
+    video.pause();
+    video.currentTime = at;
+    video.muted = was;
+    await new Promise((r) => { video.addEventListener('seeked', r, { once: true }); setTimeout(r, 1500); });
   }
 
   function openSrc(src, ms) {
