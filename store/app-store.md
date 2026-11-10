@@ -9,6 +9,28 @@ wiederholt; der Platz geht an weitere Suchbegriffe.
 
 ---
 
+## Neueinreichung 1.0 mit Video – Checkliste
+
+**Vorher**
+1. Codemagic: Workflow „FORTH TRACE Timer iOS“ starten. Warten, bis der Build in App Store Connect unter TestFlight auf „Bereit zum Testen“ steht (E-Mail von Apple, ca. 10–30 min).
+2. In TestFlight auf dem iPhone testen: Video aus Fotos wählen (Schüsse erkannt?), abspielen (flüssig?), Marker verschieben, schneiden, Endkarte ansehen, in Full HD exportieren, über das Teilen-Menü „Video sichern“. Kurz auch Timer, Score, Verlauf.
+
+**App Store Connect → Apps → FORTH TRACE Shot Timer → iOS-App 1.0**
+3. **Build:** im Abschnitt „Build“ den alten mit „–“ entfernen, mit „+“ den neuen wählen. Fragen zu Verschlüsselung/Exportbestimmungen wie beim ersten Mal beantworten.
+4. **Screenshots** (Abschnitt „App-Vorschau und Screenshots“): bei 6,9" `store/screenshots/en-6.9/7.png` und `8.png` hochladen, bei 6,5"/6,3" `en-6.3/7.png` und `8.png`. Reihenfolge: 1, 7, 8, 2, 3, 4, 5, 6. Gibt es eigene deutsche Screenshots, dort genauso.
+5. **Texte**, je Sprache (Englisch und Deutsch, oben rechts umschalten): Werbetext, Beschreibung und Schlüsselwörter aus den Abschnitten unten ersetzen. Name und Untertitel bleiben.
+6. **App-Review-Informationen:** Feld „Notizen“ durch den Abschnitt „Hinweise für die Prüfung“ ersetzen. Kontaktdaten prüfen.
+7. **Sichern** (oben rechts).
+
+**App-Informationen und Datenschutz (links im Menü)**
+8. App-Datenschutz bleibt „Keine Daten erfasst“ – Videos werden nur auf dem Gerät verarbeitet. Altersfreigabe bleibt.
+
+**Einreichen**
+9. Unter „App Review“ (bzw. Link in Apples Mail) auf die Ablehnung antworten: Abschnitt „Antwort an App Review“. Den Absatz zu den TestFlight-Builds nur stehen lassen, wenn es wirklich weitere 1.0-Builds mit Video gab.
+10. „Zur Prüfung hinzufügen“ → „An App Review senden“. Antwort meist nach 24–48 h.
+
+---
+
 ## Allgemein (für beide Sprachen gleich)
 
 | Feld | Wert |
