@@ -277,5 +277,11 @@
   "kleiner": "menší",
   "Start mit dem ersten Schuss": "Start prvním výstřelem",
   "Ecke für Timer und Splits": "Roh pro timer a splity",
-  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startovní signál nebo první výstřel, např. u 1R1"
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startovní signál nebo první výstřel, např. u 1R1",
+  "hochgerechnet": "zvětšeno",
+  "Bildrate": "Snímková frekvence",
+  "flüssiger": "plynulejší",
+  "kleinere Datei": "menší soubor",
+  "wie das Video": "jako video",
+  "Kino-Look": "filmový vzhled"
 };

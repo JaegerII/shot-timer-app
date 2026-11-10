@@ -277,5 +277,11 @@
   "kleiner": "kleiner",
   "Start mit dem ersten Schuss": "Start bij het eerste schot",
   "Ecke für Timer und Splits": "Hoek voor timer en splits",
-  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startsignaal of eerste schot, bijv. bij 1R1"
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startsignaal of eerste schot, bijv. bij 1R1",
+  "hochgerechnet": "opgeschaald",
+  "Bildrate": "Framerate",
+  "flüssiger": "vloeiender",
+  "kleinere Datei": "kleiner bestand",
+  "wie das Video": "zoals opgenomen",
+  "Kino-Look": "filmlook"
 };

@@ -277,5 +277,11 @@
   "kleiner": "plus léger",
   "Start mit dem ersten Schuss": "Départ au premier tir",
   "Ecke für Timer und Splits": "Coin pour le timer et les splits",
-  "Startsignal oder erster Schuss, z. B. bei 1R1": "Signal de départ ou premier tir, p. ex. en 1R1"
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Signal de départ ou premier tir, p. ex. en 1R1",
+  "hochgerechnet": "agrandie",
+  "Bildrate": "Fréquence d’images",
+  "flüssiger": "plus fluide",
+  "kleinere Datei": "fichier plus léger",
+  "wie das Video": "comme la vidéo",
+  "Kino-Look": "look cinéma"
 };

@@ -277,5 +277,11 @@
   "kleiner": "mindre",
   "Start mit dem ersten Schuss": "Startar med första skottet",
   "Ecke für Timer und Splits": "Hörn för timer och splittider",
-  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startsignal eller första skottet, t.ex. vid 1R1"
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startsignal eller första skottet, t.ex. vid 1R1",
+  "hochgerechnet": "uppskalad",
+  "Bildrate": "Bildfrekvens",
+  "flüssiger": "mjukare",
+  "kleinere Datei": "mindre fil",
+  "wie das Video": "som inspelat",
+  "Kino-Look": "filmkänsla"
 };

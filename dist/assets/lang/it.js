@@ -277,5 +277,11 @@
   "kleiner": "più leggero",
   "Start mit dem ersten Schuss": "Parte dal primo colpo",
   "Ecke für Timer und Splits": "Angolo per timer e split",
-  "Startsignal oder erster Schuss, z. B. bei 1R1": "Segnale di partenza o primo colpo, ad es. in 1R1"
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Segnale di partenza o primo colpo, ad es. in 1R1",
+  "hochgerechnet": "scalato",
+  "Bildrate": "Frame rate",
+  "flüssiger": "più fluido",
+  "kleinere Datei": "file più leggero",
+  "wie das Video": "come il video",
+  "Kino-Look": "look cinema"
 };

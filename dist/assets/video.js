@@ -27,12 +27,15 @@ window.FTVideo = function (api) {
     corner: 'tl', pxs: 160, view: 0, muted: false,
     startMode: 'beep',   // 'beep': Startsignal · 'shot': der erste Schuss startet die Zeit (z. B. 1R1)
     cut: null,           // eigener Ausschnitt {a, b} in s, sonst automatisch die Stage
-    res: 'orig'          // Export: 'orig', '1080' oder '720'
+    res: 'orig',         // Export: 'orig', '2160', '1440', '1080' oder '720'
+    fps: 0,              // erkannte Bildrate der Quelle (0 = unbekannt)
+    fpsOut: 0            // gewünschte Export-Bildrate: 60, 30 oder 24 (0 = wie das Video)
   };
   try {
     const c = localStorage.getItem('ft-video-corner'); if (c) S.corner = c;
     if (localStorage.getItem('ft-video-start') === 'shot') S.startMode = 'shot';
-    const r = localStorage.getItem('ft-video-res'); if (r === '1080' || r === '720') S.res = r;
+    const r = localStorage.getItem('ft-video-res'); if (['2160', '1440', '1080', '720'].includes(r)) S.res = r;
+    const f = Number(localStorage.getItem('ft-video-fps')); if ([60, 30, 24].includes(f)) S.fpsOut = f;
   } catch (e) {}
   const video = $('#vidEl'), over = $('#vidOver'), wave = $('#vidWave'), track = $('#vidTrack');
 
@@ -154,10 +157,21 @@ window.FTVideo = function (api) {
   async function warmUp() {
     const was = video.muted, at = video.currentTime;
     video.muted = true;
+    // Nebenbei die Bildrate messen: kleinster Abstand zwischen zwei Videobildern.
+    const times = [];
+    let fid = 0;
+    const onFrame = (n, m) => { times.push(m.mediaTime); fid = video.requestVideoFrameCallback(onFrame); };
+    if (video.requestVideoFrameCallback) fid = video.requestVideoFrameCallback(onFrame);
     try {
       await video.play();
-      await new Promise((r) => setTimeout(r, 350));
+      await new Promise((r) => setTimeout(r, 450));
     } catch (e) {}
+    if (fid && video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(fid);
+    let dmin = Infinity;
+    for (let i = 1; i < times.length; i++) { const d = times[i] - times[i - 1]; if (d > 0.004 && d < dmin) dmin = d; }
+    // Auf übliche Bildraten runden (iPhone: 24, 25, 30, 60; Zeitlupe 120/240).
+    const raw = dmin < Infinity ? 1 / dmin : 0;
+    S.fps = raw ? [24, 25, 30, 50, 60, 120, 240].reduce((a, b) => (Math.abs(b - raw) < Math.abs(a - raw) ? b : a)) : 0;
     video.pause();
     video.currentTime = at;
     video.muted = was;
@@ -337,7 +351,7 @@ window.FTVideo = function (api) {
   function unload(toEmpty) {
     video.pause();
     if (S.url) URL.revokeObjectURL(S.url);
-    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null, view: 0, cut: null });
+    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null, view: 0, cut: null, fps: 0 });
     edit = null;
     cutting = null;
     video.removeAttribute('src');
@@ -1381,13 +1395,44 @@ window.FTVideo = function (api) {
     return list.find((m) => { try { return MediaRecorder.isTypeSupported(m); } catch (e) { return false; } }) || '';
   }
   $('#vidExport').onclick = () => { if (!S.busy && S.dur) openExport(); };
+  // HD und Full HD gibt es immer (kleinere Quellen werden hochgerechnet),
+  // 2K und 4K nur, wenn das Video mindestens so groß ist – größer rechnen
+  // bringt keine Schärfe, nur eine größere Datei.
+  const RES = [[2160, '4K'], [1440, '2K'], [1080, 'Full HD'], [720, 'HD']];
   function resOptions() {
     const short = Math.min(S.w, S.h);
     const list = [{ id: 'orig', label: t('Original'), sub: short + 'p' }];
-    if (short > 1080) list.push({ id: '1080', label: 'HD 1080p', sub: 'Full HD' });
-    if (short > 720) list.push({ id: '720', label: 'HD 720p', sub: t('kleiner') });
+    for (const [px, name] of RES) {
+      if (Math.abs(px - short) <= 8) continue;               // entspricht dem Original
+      if (px > short && px > 1080) continue;                 // kein 2K/4K aus kleineren Videos
+      list.push({ id: String(px), label: name, sub: px + 'p' + (px > short ? '<br>' + t('hochgerechnet') : '') });
+    }
     return list;
   }
+  // Bildrate: nur die üblichen Werte 60, 30 und 24 fps – und nie mehr, als
+  // das Video hat (mehr Bilder als aufgenommen bringen nichts).
+  const FPS = [60, 30, 24];
+  function fpsOptions() {
+    const src = S.fps || 30;
+    return FPS.filter((f) => f <= Math.max(src, 30) + 0.5);
+  }
+  function exportFps() {
+    const list = fpsOptions();
+    return list.includes(S.fpsOut) ? S.fpsOut : list[0];
+  }
+  function renderFps() {
+    const list = fpsOptions(), cur = exportFps();
+    $('#vidFpsRow').hidden = false;
+    $('#vidFps').innerHTML = list.map((f) => '<button type="button" role="radio" data-fps="' + f + '" class="' + (f === cur ? 'on' : '') +
+      '" aria-checked="' + (f === cur) + '">' + f + ' fps<small>' + (f === list[0] ? t('wie das Video') : f === 24 ? t('Kino-Look') : t('kleinere Datei')) + '</small></button>').join('');
+  }
+  $('#vidFps').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-fps]');
+    if (!b) return;
+    S.fpsOut = Number(b.dataset.fps);
+    try { localStorage.setItem('ft-video-fps', String(S.fpsOut)); } catch (err) {}
+    renderFps();
+  });
   function renderRes() {
     const list = resOptions();
     if (!list.some((o) => o.id === S.res)) S.res = 'orig';
@@ -1405,6 +1450,7 @@ window.FTVideo = function (api) {
     const r = range();
     $('#vidRange').textContent = (S.cut ? '' : (S.beep != null && S.shots.length ? t('Stage') + ': ' : '')) + rangeText(r);
     renderRes();
+    renderFps();
     $('#vidExportSheet').hidden = false;
   }
   $('#vidExportCancel').onclick = () => { $('#vidExportSheet').hidden = true; };
@@ -1425,15 +1471,16 @@ window.FTVideo = function (api) {
     if (mime == null || !canvas.captureStream) { showToast(t('Export wird auf diesem Gerät nicht unterstützt.')); return; }
     const rg = range();
     const from = rg.a, to = rg.b;
-    const target = S.res === '720' ? 720 : S.res === '1080' ? 1080 : Infinity;
-    const scale = Math.min(1, EXPORT_MAX / Math.max(S.w, S.h), target / Math.min(S.w, S.h));
+    const target = S.res === 'orig' ? 0 : Number(S.res);
+    const scale = Math.min(target ? target / Math.min(S.w, S.h) : 1, EXPORT_MAX / Math.max(S.w, S.h));
     const W = Math.round((S.w * scale) / 2) * 2, H = Math.round((S.h * scale) / 2) * 2;
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingQuality = 'high';
     // Hohe Datenrate (≈ 0,3 Bit je Bildpunkt bei 30 Bildern/s), damit das
     // Ergebnis optisch nicht vom Original zu unterscheiden ist.
-    const vbr = Math.round(clamp(W * H * 30 * 0.3, 12e6, 80e6));
+    const fps = exportFps();
+    const vbr = Math.round(clamp(W * H * fps * 0.3, 12e6, 80e6));
     const drawFrame = () => {
       ctx.drawImage(video, 0, 0, W, H);
       drawOverlay(ctx, W, H, video.currentTime, true);
@@ -1448,7 +1495,8 @@ window.FTVideo = function (api) {
     video.playbackRate = 1;
 
     // Bis 60 Bilder/s: gezeichnet wird je Videobild, also mit der Bildrate des Originals.
-    const stream = canvas.captureStream(60);
+    // Gezeichnet wird je Videobild; der Stream nimmt höchstens die gewählte Bildrate ab.
+    const stream = canvas.captureStream(fps);
     let dest = null;
     if (audioGraph()) {
       await ac.resume().catch(() => {});
@@ -1477,7 +1525,8 @@ window.FTVideo = function (api) {
       const playing = new Promise((r) => video.addEventListener('playing', r, { once: true }));
       await video.play();
       await playing;
-      if (video.requestVideoFrameCallback) await new Promise((r) => video.requestVideoFrameCallback(r));
+      // Auf das erste echte Videobild warten, aber nie länger als 0,3 s (manche Browser melden keine Bilder, solange sie im Hintergrund sind).
+      if (video.requestVideoFrameCallback) await new Promise((r) => { video.requestVideoFrameCallback(r); setTimeout(r, 300); });
       drawFrame();
       rec.start(1000);
       await new Promise((resolve) => {

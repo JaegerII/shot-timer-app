@@ -277,5 +277,11 @@
   "kleiner": "mniejszy",
   "Start mit dem ersten Schuss": "Start od pierwszego strzału",
   "Ecke für Timer und Splits": "Róg dla timera i splitów",
-  "Startsignal oder erster Schuss, z. B. bei 1R1": "Sygnał startu lub pierwszy strzał, np. przy 1R1"
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Sygnał startu lub pierwszy strzał, np. przy 1R1",
+  "hochgerechnet": "przeskalowane",
+  "Bildrate": "Liczba klatek",
+  "flüssiger": "płynniej",
+  "kleinere Datei": "mniejszy plik",
+  "wie das Video": "jak w nagraniu",
+  "Kino-Look": "wygląd kinowy"
 };
