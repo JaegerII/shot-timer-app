@@ -1234,7 +1234,7 @@ window.FTVideo = function (api) {
       const full = c.a <= 0.01 && c.b >= S.dur - 0.01;
       S.cut = Math.abs(c.a - auto.a) < 0.005 && Math.abs(c.b - auto.b) < 0.005 ? null : full ? { a: 0, b: S.dur } : { a: c.a, b: c.b };
     }
-    if (ok && S.startMode === 'shot' && S.pcm) { detect(true).then(() => { changed(); renderTrack(); }); }
+    // Schneiden ändert nie die Marker: gesetzte, verschobene und gelöschte Schüsse bleiben so.
     renderTools();
     renderTrack();
     if (c.fromExport) openExport();
