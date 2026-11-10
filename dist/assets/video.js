@@ -1203,6 +1203,10 @@ window.FTVideo = function (api) {
   wave.addEventListener('pointerdown', (e) => {
     if (!S.dur || S.busy) return;
     e.preventDefault();
+    // Erster Finger einer neuen Berührung: alte, nie abgemeldete Finger
+    // verwerfen. Sonst zählt ein hängengebliebener Finger mit, und ein
+    // einzelner Finger zoomt nur noch statt zu scrollen.
+    if (e.isPrimary) ptrs.clear();
     try { wave.setPointerCapture(e.pointerId); } catch (err) {}
     ptrs.set(e.pointerId, e.clientX);
     if (ptrs.size === 2) {
@@ -1232,9 +1236,15 @@ window.FTVideo = function (api) {
     if (gest.moved) seek(gest.v0 - dx / S.pxs);
   });
   const endPtr = (e) => {
+    if (!ptrs.has(e.pointerId)) return;
     ptrs.delete(e.pointerId);
     if (!gest) return;
-    if (gest.pinch) { if (!ptrs.size) gest = null; return; }
+    if (gest.pinch) {
+      // Ein Finger bleibt liegen: nahtlos weiter scrollen statt zoomen.
+      if (ptrs.size === 1) { const x = [...ptrs.values()][0]; gest = { x0: x, v0: S.view, moved: true, hit: null, lx: 0 }; }
+      else if (!ptrs.size) gest = null;
+      return;
+    }
     const g = gest;
     gest = null;
     if (g.moved) { seek(S.view, true); return; }
@@ -1243,6 +1253,10 @@ window.FTVideo = function (api) {
   };
   wave.addEventListener('pointerup', endPtr);
   wave.addEventListener('pointercancel', endPtr);
+  wave.addEventListener('lostpointercapture', endPtr);
+  // Falls das Loslassen woanders ankommt (Fenster, Sheet, Systemgeste).
+  window.addEventListener('pointerup', endPtr);
+  window.addEventListener('pointercancel', endPtr);
   wave.addEventListener('wheel', (e) => {
     if (!S.dur) return;
     e.preventDefault();
