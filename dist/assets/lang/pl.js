@@ -292,5 +292,6 @@
   "Über dem Video": "Na wideo",
   "am Ende": "na końcu",
   "Ergebnis": "Wynik",
-  "Ø Split": "Śr. split"
+  "Ø Split": "Śr. split",
+  "Ansehen": "Podgląd"
 };

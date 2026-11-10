@@ -235,6 +235,10 @@
     #vidRes{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr))}
     .vid-xrow[hidden]{display:none}
     .vid-seg button small{line-height:1.3}
+    .vid-xhead{display:flex;align-items:center;gap:12px}
+    .vid-xhead>span{flex:1;min-width:0}
+    /* Startseite: Knopf auf die Seite gegenüber der Demo-Einblendung */
+    .vid-pick[data-corner="tr"] .vid-pick-cta,.vid-pick[data-corner="br"] .vid-pick-cta{right:auto;left:14px}
     #vidNew{flex:0 0 auto}
     #videoSub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .vid-empty{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px}
@@ -863,7 +867,7 @@
             <div class="vid-xrow"><span>Ausschnitt<small id="vidRange"></small></span><button class="vid-xbtn" id="vidRangeEdit" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 7.6 20 18M8.6 16.4 20 6"/></svg><span>Schneiden</span></button></div>
             <div class="vid-xrow col"><span>Auflösung</span><div class="vid-seg" id="vidRes" role="radiogroup" aria-label="Auflösung"></div></div>
             <div class="vid-xrow col" id="vidFpsRow" hidden><span>Bildrate</span><div class="vid-seg" id="vidFps" role="radiogroup" aria-label="Bildrate"></div></div>
-            <div class="vid-xrow col" id="vidCardRow"><span>Endkarte<small>Zusammenfassung mit Zeit, Kennzahlen und allen Splits</small></span><div class="vid-seg" id="vidCard" role="radiogroup" aria-label="Endkarte"></div></div>
+            <div class="vid-xrow col" id="vidCardRow"><div class="vid-xhead"><span>Endkarte<small>Zusammenfassung mit Zeit, Kennzahlen und allen Splits</small></span><button class="vid-xbtn" id="vidCardPreview" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span>Ansehen</span></button></div><div class="vid-seg" id="vidCard" role="radiogroup" aria-label="Endkarte"></div></div>
             <p class="vid-hint">Der Export läuft in Echtzeit. Bildschirm anlassen und die App nicht verlassen.</p>
             <div class="vid-sheet-row"><button class="ghost-btn" id="vidExportCancel" type="button">Abbrechen</button><button class="sheet-action" id="vidExportGo" type="button">STARTEN</button></div>
           </div>

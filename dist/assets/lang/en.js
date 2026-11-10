@@ -292,5 +292,6 @@
   "Über dem Video": "Over the video",
   "am Ende": "at the end",
   "Ergebnis": "Result",
-  "Ø Split": "Avg split"
+  "Ø Split": "Avg split",
+  "Ansehen": "Preview"
 };

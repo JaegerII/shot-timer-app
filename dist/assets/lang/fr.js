@@ -292,5 +292,6 @@
   "Über dem Video": "Sur la vidéo",
   "am Ende": "à la fin",
   "Ergebnis": "Résultat",
-  "Ø Split": "Split moyen"
+  "Ø Split": "Split moyen",
+  "Ansehen": "Aperçu"
 };

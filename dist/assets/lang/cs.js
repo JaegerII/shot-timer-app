@@ -292,5 +292,6 @@
   "Über dem Video": "Přes video",
   "am Ende": "na konci",
   "Ergebnis": "Výsledek",
-  "Ø Split": "Prům. split"
+  "Ø Split": "Prům. split",
+  "Ansehen": "Náhled"
 };

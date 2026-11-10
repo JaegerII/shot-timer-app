@@ -292,5 +292,6 @@
   "Über dem Video": "Over de video",
   "am Ende": "aan het einde",
   "Ergebnis": "Resultaat",
-  "Ø Split": "Gem. split"
+  "Ø Split": "Gem. split",
+  "Ansehen": "Bekijken"
 };

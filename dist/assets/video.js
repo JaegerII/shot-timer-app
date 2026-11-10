@@ -30,7 +30,8 @@ window.FTVideo = function (api) {
     res: 'orig',         // Export: 'orig', '2160', '1440', '1080' oder '720'
     fps: 0,              // erkannte Bildrate der Quelle (0 = unbekannt)
     fpsOut: 0,           // gewünschte Export-Bildrate: 60, 30 oder 24 (0 = wie das Video)
-    endCard: 'black'     // Endkarte: 'off', 'black' (angehängt) oder 'over' (über dem Video)
+    endCard: 'black',    // Endkarte: 'off', 'black' (angehängt) oder 'over' (über dem Video)
+    cardAt: null         // 'over': selbst gesetzter Beginn der Karte in s (null = kurz nach dem letzten Schuss)
   };
   try {
     const c = localStorage.getItem('ft-video-corner'); if (c) S.corner = c;
@@ -353,7 +354,7 @@ window.FTVideo = function (api) {
   function unload(toEmpty) {
     video.pause();
     if (S.url) URL.revokeObjectURL(S.url);
-    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null, view: 0, cut: null, fps: 0 });
+    Object.assign(S, { file: null, url: null, pcm: null, env: null, beep: null, beepEnd: null, shots: [], sel: null, result: null, view: 0, cut: null, fps: 0, cardAt: null });
     edit = null;
     cutting = null;
     video.removeAttribute('src');
@@ -765,7 +766,8 @@ window.FTVideo = function (api) {
   // Ab wann die Karte im Modus 'over' über dem Video liegt (null = keine Karte).
   function cardStart(D) {
     const st = endStats(D);
-    return st ? st.last + CARD_DELAY : null;
+    if (!st) return null;
+    return S.cardAt != null ? clamp(S.cardAt, 0, S.dur || S.cardAt) : st.last + CARD_DELAY;
   }
 
   function drawOverlay(ctx, W, H, time, keep, D, corner) {
@@ -969,10 +971,17 @@ window.FTVideo = function (api) {
     if (!S.w) return;
     const tm = nowT();
     const oc = over.getContext('2d');
-    drawOverlay(oc, over.width, over.height, tm);
-    if (S.endCard === 'over') {
-      const cs = cardStart();
-      if (cs != null && tm >= cs) drawEndCard(oc, over.width, over.height, ease((tm - cs) / 0.45), 'over');
+    const cs = S.endCard === 'over' ? cardStart() : null;
+    const ca = cs != null && tm >= cs ? ease((tm - cs) / 0.45) : 0;
+    // Wie im Export: sobald die Karte ganz da ist, verschwindet die Ecken-Einblendung.
+    if (ca < 1) drawOverlay(oc, over.width, over.height, tm);
+    else oc.clearRect(0, 0, over.width, over.height);
+    if (ca > 0) {
+      drawEndCard(oc, over.width, over.height, ca, 'over');
+    } else if (S.endCard === 'black' && !cutting && endStats()) {
+      // Vorschau des Abspanns: ab dem Ende des Ausschnitts (danach folgt er im Export).
+      const b = range().b;
+      if (tm >= b - 0.001) drawEndCard(oc, over.width, over.height, ease((tm - b) / 0.4 + 0.35), 'black');
     }
     $('#vidClock').textContent = clock(tm);
     $('#vidRemain').textContent = '-' + clock(S.dur - tm);
@@ -1112,6 +1121,10 @@ window.FTVideo = function (api) {
     };
     if (S.beep != null) mk('beep', S.beep);
     S.shots.forEach((v, i) => mk(i, v));
+    // Endkarte über dem Video: eigener, verschiebbarer Marker „E“.
+    const csm = S.endCard === 'over' ? cardStart() : null;
+    if (csm != null) marks.push({ id: 'card', time: csm, txt: 'E', start: false, out: false, card: true });
+    marks.sort((a, b) => a.time - b.time);
     const PW = 22, PH = 32;
     let lastX = -1e9, lastLab = -1e9, up = false;
     const draws = [];
@@ -1129,7 +1142,7 @@ window.FTVideo = function (api) {
     draws.sort((a, b) => (a.sel ? 1 : 0) - (b.sel ? 1 : 0));
     draws.forEach(({ m, x, y, sel, lab }) => {
       const beep = m.start;
-      const fill = beep ? '#ffc83d' : col.accent;
+      const fill = m.card ? '#f4f4ee' : beep ? '#ffc83d' : col.accent;
       ctx.globalAlpha = (edit && !sel) || (m.out && !sel) ? 0.35 : 1;
       rrect(ctx, x - PW / 2, y - PH / 2, PW, PH, PW / 2);
       if (sel) {
@@ -1143,7 +1156,7 @@ window.FTVideo = function (api) {
       ctx.textBaseline = 'alphabetic';
       hits.push({ id: m.id, x0: x - PW / 2 - 4, x1: x + PW / 2 + 4, y0: y - PH / 2 - 6, y1: y + PH / 2 + 6, sel });
       // Zeit: Schuss ab Signal, Start als „Start“
-      const label = beep ? t('Start') : m.out ? '–' : sec(m.time - (L.beep ?? 0)) + 's';
+      const label = m.card ? t('Endkarte') : beep ? t('Start') : m.out ? '–' : sec(m.time - (L.beep ?? 0)) + 's';
       if (lab) {
         ctx.font = '700 10px Montserrat, system-ui, sans-serif';
         const lw = ctx.measureText(label).width + 10;
@@ -1296,14 +1309,15 @@ window.FTVideo = function (api) {
   }
 
   /* ---------- Marker bearbeiten ---------- */
-  const markTime = (id) => (id === 'beep' ? S.beep : S.shots[id]);
+  const markTime = (id) => (id === 'beep' ? S.beep : id === 'card' ? cardStart() : S.shots[id]);
   function setMark(id, time) {
     if (id === 'beep') S.beep = time;
+    else if (id === 'card') S.cardAt = time;
     else S.shots[id] = time;
   }
   // Nach dem Verschieben sortieren; die Auswahl wandert mit.
   function sortShots() {
-    if (S.sel == null || S.sel === 'beep') { S.shots.sort((a, b) => a - b); return; }
+    if (S.sel == null || S.sel === 'beep' || S.sel === 'card') { S.shots.sort((a, b) => a - b); return; }
     const v = S.shots[S.sel];
     S.shots.sort((a, b) => a - b);
     S.sel = S.shots.indexOf(v);
@@ -1330,7 +1344,9 @@ window.FTVideo = function (api) {
     changed();
   }
   function deleteSel() {
-    if (typeof S.sel !== 'number') { if (S.sel === 'beep' && edit && edit.orig == null) S.beep = null; else return; }
+    // Endkarte „löschen“ heißt: zurück auf automatisch (kurz nach dem letzten Schuss).
+    if (S.sel === 'card') S.cardAt = null;
+    else if (typeof S.sel !== 'number') { if (S.sel === 'beep' && edit && edit.orig == null) S.beep = null; else return; }
     else S.shots.splice(S.sel, 1);
     edit = null; S.sel = null;
     changed();
@@ -1345,7 +1361,7 @@ window.FTVideo = function (api) {
   function renderEditBar() {
     const id = S.sel;
     const L = live(), l = L.lab.get(id);
-    $('#vidEditName').textContent = !l ? t('Außerhalb des Ausschnitts') : l.start ? t('Start') : t('Schuss {0}', l.n) + ' · ' + sec(markTime(id) - (L.beep ?? 0)) + ' s';
+    $('#vidEditName').textContent = id === 'card' ? t('Endkarte') : !l ? t('Außerhalb des Ausschnitts') : l.start ? t('Start') : t('Schuss {0}', l.n) + ' · ' + sec(markTime(id) - (L.beep ?? 0)) + ' s';
     $('#vidEditTime').textContent = clock(markTime(id));
   }
   function renderTools() {
@@ -1354,7 +1370,7 @@ window.FTVideo = function (api) {
     $('#vidCutBar').hidden = !cutting;
     $('#vidInfo').hidden = $('#vidScrubRow').hidden = $('#vidTransport').hidden = on || !!cutting;
     if (cutting) renderCutBar();
-    $('#vidDel').disabled = !(typeof S.sel === 'number' || (S.sel === 'beep' && edit && edit.orig == null));
+    $('#vidDel').disabled = !(typeof S.sel === 'number' || S.sel === 'card' || (S.sel === 'beep' && edit && edit.orig == null));
     if (on) renderEditBar();
     paint();
   }
@@ -1377,7 +1393,10 @@ window.FTVideo = function (api) {
     btn.addEventListener('click', (e) => { if (e.detail === 0) fn(); }); // Tastatur
   }
   // Springen: voriger/nächster Marker, eine Sekunde zurück/vor
-  function allMarks() { return (S.beep != null ? [S.beep] : []).concat(S.shots).sort((a, b) => a - b); }
+  function allMarks() {
+    const cs = S.endCard === 'over' ? cardStart() : null;
+    return (S.beep != null ? [S.beep] : []).concat(S.shots, cs != null ? [cs] : []).sort((a, b) => a - b);
+  }
   $('#vidPrev').onclick = () => { video.pause(); const m = allMarks().filter((v) => v < S.view - 0.005); seek(m.length ? m[m.length - 1] : 0, true); };
   $('#vidNext').onclick = () => { video.pause(); const m = allMarks().find((v) => v > S.view + 0.005); seek(m != null ? m : S.dur, true); };
   holdRepeat($('#vidBack'), () => { video.pause(); seek(S.view - 1, true); });
@@ -1658,8 +1677,18 @@ window.FTVideo = function (api) {
     S.endCard = b.dataset.card;
     try { localStorage.setItem('ft-video-endcard', S.endCard); } catch (err) {}
     renderCardOpt();
+    renderTrack();
     paint();
   });
+  // „Ansehen“: Fenster zu und zur Stelle springen, an der die Karte erscheint.
+  $('#vidCardPreview').onclick = () => {
+    $('#vidExportSheet').hidden = true;
+    if (S.endCard === 'off') { S.endCard = 'black'; try { localStorage.setItem('ft-video-endcard', 'black'); } catch (err) {} }
+    video.pause();
+    const at = S.endCard === 'over' ? cardStart() + 0.6 : range().b + 0.4;
+    seek(Math.min(S.dur, at), true);
+    renderTrack();
+  };
   function openExport() {
     const r = range();
     $('#vidRange').textContent = (S.cut ? '' : (S.beep != null && S.shots.length ? t('Stage') + ': ' : '')) + rangeText(r);
@@ -1700,7 +1729,7 @@ window.FTVideo = function (api) {
     // Endkarte: 'over' ab kurz nach dem letzten Schuss über dem Video (bei
     // Bedarf mit stehendem letztem Bild verlängert), 'black' als Abspann.
     const card = S.endCard !== 'off' && endStats() ? S.endCard : 'off';
-    const cs = card === 'over' ? Math.min(cardStart(), to) : null;
+    const cs = card === 'over' ? clamp(cardStart(), from, to) : null;
     const tailSec = card === 'black' ? CARD_SEC : card === 'over' ? Math.max(0, CARD_SEC - (to - cs)) : 0;
     const total = (to - from) + tailSec;
     const drawFrame = (extra) => {
@@ -1870,6 +1899,8 @@ window.FTVideo = function (api) {
       }
       ctx.stroke();
     }
+    const pick = cv.closest('.vid-pick');
+    if (pick) pick.dataset.corner = S.corner;
     drawOverlay(ctx, W, H, 3.3, true, DEMO);
   }
   window.addEventListener('resize', drawDemo);

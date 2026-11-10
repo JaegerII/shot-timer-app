@@ -292,5 +292,6 @@
   "Über dem Video": "Över videon",
   "am Ende": "i slutet",
   "Ergebnis": "Resultat",
-  "Ø Split": "Snittsplit"
+  "Ø Split": "Snittsplit",
+  "Ansehen": "Förhandsvisa"
 };

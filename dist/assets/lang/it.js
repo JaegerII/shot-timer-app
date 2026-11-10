@@ -292,5 +292,6 @@
   "Über dem Video": "Sul video",
   "am Ende": "alla fine",
   "Ergebnis": "Risultato",
-  "Ø Split": "Split medio"
+  "Ø Split": "Split medio",
+  "Ansehen": "Anteprima"
 };
