@@ -275,5 +275,7 @@
   "Länge {0} s": "Durata {0} s",
   "Original": "Originale",
   "kleiner": "più leggero",
-  "Start mit dem ersten Schuss": "Parte dal primo colpo"
+  "Start mit dem ersten Schuss": "Parte dal primo colpo",
+  "Ecke für Timer und Splits": "Angolo per timer e split",
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Segnale di partenza o primo colpo, ad es. in 1R1"
 };

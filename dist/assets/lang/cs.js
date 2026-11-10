@@ -275,5 +275,7 @@
   "Länge {0} s": "Délka {0} s",
   "Original": "Originál",
   "kleiner": "menší",
-  "Start mit dem ersten Schuss": "Start prvním výstřelem"
+  "Start mit dem ersten Schuss": "Start prvním výstřelem",
+  "Ecke für Timer und Splits": "Roh pro timer a splity",
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startovní signál nebo první výstřel, např. u 1R1"
 };

@@ -275,5 +275,7 @@
   "Länge {0} s": "Duración {0} s",
   "Original": "Original",
   "kleiner": "más ligero",
-  "Start mit dem ersten Schuss": "Empieza con el primer disparo"
+  "Start mit dem ersten Schuss": "Empieza con el primer disparo",
+  "Ecke für Timer und Splits": "Esquina para timer y splits",
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Señal de inicio o primer disparo, p. ej. en 1R1"
 };

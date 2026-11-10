@@ -275,5 +275,7 @@
   "Länge {0} s": "Length {0} s",
   "Original": "Original",
   "kleiner": "smaller",
-  "Start mit dem ersten Schuss": "Starts with the first shot"
+  "Start mit dem ersten Schuss": "Starts with the first shot",
+  "Ecke für Timer und Splits": "Corner for timer and splits",
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Start signal or first shot, e.g. for 1R1"
 };

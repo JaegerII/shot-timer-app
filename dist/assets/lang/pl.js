@@ -275,5 +275,7 @@
   "Länge {0} s": "Długość {0} s",
   "Original": "Oryginał",
   "kleiner": "mniejszy",
-  "Start mit dem ersten Schuss": "Start od pierwszego strzału"
+  "Start mit dem ersten Schuss": "Start od pierwszego strzału",
+  "Ecke für Timer und Splits": "Róg dla timera i splitów",
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Sygnał startu lub pierwszy strzał, np. przy 1R1"
 };

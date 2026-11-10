@@ -275,5 +275,7 @@
   "Länge {0} s": "Längd {0} s",
   "Original": "Original",
   "kleiner": "mindre",
-  "Start mit dem ersten Schuss": "Startar med första skottet"
+  "Start mit dem ersten Schuss": "Startar med första skottet",
+  "Ecke für Timer und Splits": "Hörn för timer och splittider",
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startsignal eller första skottet, t.ex. vid 1R1"
 };

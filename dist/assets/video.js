@@ -56,7 +56,7 @@ window.FTVideo = function (api) {
     e.target.value = '';
     if (f) load(f);
   });
-  $('#vidNew').onclick = () => { if (!S.busy) { $('#vidSetSheet').hidden = true; $('#vidFile').click(); } };
+  $('#vidNew').onclick = () => { if (!S.busy) { api.closeModals(); $('#vidFile').click(); } };
 
   async function load(file) {
     if (S.busy) return;
@@ -313,7 +313,7 @@ window.FTVideo = function (api) {
       $('#vidNew').hidden = true;
       $('#vidExport').hidden = true;
       $('#vidClose').hidden = true;
-      $('#vidSetSheet').hidden = true;
+      if ($('#vidSetModal').classList.contains('show')) api.closeModals();
       $('#vidExportSheet').hidden = true;
       $('#vidDone').hidden = true;
       requestAnimationFrame(drawDemo);
@@ -549,11 +549,13 @@ window.FTVideo = function (api) {
   function drawOverlay(ctx, W, H, time, keep, D, corner) {
     D = D || S;
     corner = corner || S.corner;
+    // Start per Schuss: der Start-Schuss ist Schuss 1 und steht als #01 in der Liste.
+    const shotStart = D.startMode === 'shot' && D.beep != null;
+    if (shotStart) D = { beep: D.beep, shots: [D.beep].concat(D.shots) };
     if (!keep) ctx.clearRect(0, 0, W, H);
     if (D.beep == null && !D.shots.length) return;
     const u = Math.min(W, H) / 100;
     const st = phaseAt(time, D), shots = D.shots, beep = D.beep ?? 0;
-    const off = D.startMode === 'shot' ? 1 : 0;   // erster Schuss = Start, zählt mit
     const acc = st.phase === 'ready' ? C.ready : C.live;
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'left';
@@ -561,13 +563,13 @@ window.FTVideo = function (api) {
     // --- Maße ---
     const pad = 2.4 * u, BIG = 11.5 * u, SMALL = 6 * u, ROW = 3.9 * u, RF = 2.7 * u;
     const K = Math.min(W > H ? 4 : 5, shots.length);          // sichtbare Zeilen
-    const label = st.phase === 'ready' ? t('BEREIT') : st.phase === 'go' ? (st.n ? t('SCHUSS {0}', st.n + off) : t('LÄUFT')) : t('ZEIT');
+    const label = st.phase === 'ready' ? t('BEREIT') : st.phase === 'go' ? (st.n ? t('SCHUSS {0}', st.n) : t('LÄUFT')) : t('ZEIT');
     const [whole, frac] = parts(sec(st.el));
     let best = Infinity;
     for (let i = 1; i < shots.length; i++) best = Math.min(best, shots[i] - shots[i - 1]);
     // Breite immer mit den Kennzahlen vom Ende rechnen, damit das Feld nicht springt.
     const statsAll = shots.length
-      ? [[t('Schüsse'), String(shots.length + off)]].concat(off ? [] : [[t('Erster Schuss'), sec(shots[0] - beep)]], best < Infinity || off ? [[t('Bester Split'), sec(off ? Math.min(best, shots[0] - beep) : best)]] : [])
+      ? [[t('Schüsse'), String(shots.length)]].concat(shotStart ? [] : [[t('Erster Schuss'), sec(shots[0] - beep)]], best < Infinity ? [[t('Bester Split'), sec(best)]] : [])
       : [];
     const stats = st.phase === 'done' ? statsAll : [];
     ctx.font = font(800, BIG);
@@ -663,14 +665,14 @@ window.FTVideo = function (api) {
         ctx.globalAlpha = nw ? 0.25 + 0.75 * a : 1;
         ctx.font = font(700, RF);
         ctx.fillStyle = 'rgba(244,244,238,.55)';
-        ctx.fillText('#' + String(i + 1 + off).padStart(2, '0'), L, ry);
+        ctx.fillText('#' + String(i + 1).padStart(2, '0'), L, ry);
         ctx.fillStyle = nw ? C.live : C.ink;
         ctx.font = font(800, RF);
         ctx.textAlign = 'right';
         tabRight(ctx, sec(shots[i] - beep), L + colN + 2.5 * u + colV, ry);
         ctx.fillStyle = nw ? C.live : best < Infinity && i && Math.abs(split - best) < 1e-6 && st.phase === 'done' ? C.ready : 'rgba(244,244,238,.8)';
         ctx.font = font(700, RF);
-        tabRight(ctx, (i ? '+' : '') + sec(split), R, ry);
+        if (i || !shotStart) tabRight(ctx, (i ? '+' : '') + sec(split), R, ry);
         ctx.textAlign = 'left';
       }
       ctx.restore();
@@ -875,7 +877,7 @@ window.FTVideo = function (api) {
     // Marker als Pillen mit Zeit darunter
     hits = [];
     const marks = [];
-    if (S.beep != null) marks.push({ id: 'beep', time: S.beep, txt: 'S' });
+    if (S.beep != null) marks.push({ id: 'beep', time: S.beep, txt: S.startMode === 'shot' ? '1' : 'S' });
     S.shots.forEach((s, i) => marks.push({ id: i, time: s, txt: String(i + 1 + (S.startMode === 'shot' ? 1 : 0)) }));
     const PW = 22, PH = 32;
     let lastX = -1e9, lastLab = -1e9, up = false;
@@ -1169,6 +1171,7 @@ window.FTVideo = function (api) {
   let sensTimer = 0;
   $('#vidSens').addEventListener('input', (e) => {
     S.sens = Number(e.target.value);
+    $('#vidSensValue').textContent = S.sens + ' %';
     clearTimeout(sensTimer);
     sensTimer = setTimeout(async () => { await detect(false); changed(); fitStage(); }, 180);
   });
@@ -1180,6 +1183,7 @@ window.FTVideo = function (api) {
     document.querySelectorAll('#vidCorners button').forEach((b) => {
       const on = b.dataset.corner === S.corner;
       b.classList.toggle('on', on);
+      b.classList.toggle('selected', on);
       b.setAttribute('aria-checked', on ? 'true' : 'false');
     });
   }
@@ -1193,8 +1197,8 @@ window.FTVideo = function (api) {
     drawDemo();
   });
   renderCorner();
-  $('#vidSettings').onclick = () => { if (!S.busy) { video.pause(); $('#vidSetSheet').hidden = false; } };
-  $('#vidSetClose').onclick = () => { $('#vidSetSheet').hidden = true; };
+  $('#vidSettings').onclick = () => { if (!S.busy) { video.pause(); api.openModal('vidSetModal'); } };
+  $('#vidSetClose').onclick = () => api.closeModals();
   document.querySelectorAll('#vidNudges button').forEach((b) => {
     const d = Number(b.dataset.nudge);
     b.querySelector('small').textContent = (d > 0 ? '+' : '−') + Math.abs(d).toFixed(2).replace('.', api.DEC);
@@ -1252,6 +1256,7 @@ window.FTVideo = function (api) {
     document.querySelectorAll('#vidStartMode button').forEach((b) => {
       const on = b.dataset.mode === S.startMode;
       b.classList.toggle('on', on);
+      b.classList.toggle('selected', on);
       b.setAttribute('aria-checked', on ? 'true' : 'false');
     });
   }
@@ -1308,6 +1313,7 @@ window.FTVideo = function (api) {
     renderTools();
     renderSummary();
     $('#vidSens').value = S.sens;
+    $('#vidSensValue').textContent = S.sens + ' %';
     $('#vidRate').textContent = rateLabel();
     $('#vidExport').disabled = !S.dur;
   }

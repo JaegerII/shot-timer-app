@@ -228,6 +228,10 @@
     .vid-stage .vid-sheet .vid-pos>span,.vid-stage .vid-sheet .vid-sens>span{flex:0 0 112px}
     .vid-stage .vid-sheet .vid-pos>div{flex:1;justify-content:space-between}
     .vid-seg button{white-space:nowrap}
+    #vidCorners button{display:grid;place-items:center;min-height:38px}
+    #vidCorners svg{width:24px;height:24px}
+    #vidStartMode button{min-height:38px;font-size:.8rem}
+    #vidSetModal .range-line{margin-top:14px}
     #vidNew{flex:0 0 auto}
     #videoSub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .vid-empty{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px}
@@ -858,13 +862,6 @@
             <p class="vid-hint">Der Export läuft in Echtzeit. Bildschirm anlassen und die App nicht verlassen.</p>
             <div class="vid-sheet-row"><button class="ghost-btn" id="vidExportCancel" type="button">Abbrechen</button><button class="sheet-action" id="vidExportGo" type="button">STARTEN</button></div>
           </div>
-          <div class="vid-sheet" id="vidSetSheet" hidden>
-            <h3>Einstellungen</h3>
-            <div class="vid-pos"><span>Einblendung</span><div class="vid-corners" id="vidCorners" role="radiogroup" aria-label="Einblendung"><button type="button" role="radio" data-corner="tl" aria-label="Oben links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="tr" aria-label="Oben rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="bl" aria-label="Unten links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="br" aria-label="Unten rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button></div></div>
-            <div class="vid-pos"><span>Start</span><div class="vid-seg" id="vidStartMode" role="radiogroup" aria-label="Start"><button type="button" role="radio" data-mode="beep">Signal</button><button type="button" role="radio" data-mode="shot">Erster Schuss</button></div></div>
-            <div class="vid-sens"><span>Empfindlichkeit</span><input type="range" id="vidSens" min="0" max="100" value="50" aria-label="Empfindlichkeit"></div>
-            <div class="vid-sheet-row"><button class="ghost-btn" id="vidNew" type="button">Anderes Video</button><button class="sheet-action" id="vidSetClose" type="button">FERTIG</button></div>
-          </div>
           <div class="vid-sheet" id="vidDone" hidden>
             <h3>Video fertig</h3>
             <p class="vid-hint" id="vidDoneSize"></p>
@@ -1043,6 +1040,24 @@
         <button class="ghost-btn wide" id="dryInfoCalibrate" type="button">Erkennung einstellen und kalibrieren</button>
       </div>
       <button class="sheet-action" id="dryInfoOk" type="button">VERSTANDEN</button>
+    </div>
+  </div>
+  <div class="modal" id="vidSetModal" role="dialog" aria-modal="true" aria-labelledby="vidSetTitle">
+    <div class="sheet">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head"><div><h2 id="vidSetTitle">Einstellungen</h2><small>Video</small></div><button id="vidSetClose" aria-label="Schließen">×</button></div>
+      <div class="sheet-body">
+        <div class="set-list">
+          <div class="set-row col"><span class="set-txt"><b>Einblendung</b><small>Ecke für Timer und Splits</small></span><div class="seg-mini" id="vidCorners" role="radiogroup" aria-label="Einblendung"><button type="button" role="radio" data-corner="tl" aria-label="Oben links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="tr" aria-label="Oben rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="7" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="bl" aria-label="Unten links"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="5" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button><button type="button" role="radio" data-corner="br" aria-label="Unten rechts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="12" y="12" width="6" height="4.5" rx="1" fill="currentColor" stroke="none"/></svg></button></div></div>
+          <div class="set-row col"><span class="set-txt"><b>Start</b><small>Startsignal oder erster Schuss, z. B. bei 1R1</small></span><div class="seg-mini" id="vidStartMode" role="radiogroup" aria-label="Start"><button type="button" role="radio" data-mode="beep">Signal</button><button type="button" role="radio" data-mode="shot">Erster Schuss</button></div></div>
+        </div>
+        <div class="range-line">
+          <div class="range-head"><span>Empfindlichkeit</span><b id="vidSensValue">50 %</b></div>
+          <input id="vidSens" type="range" min="0" max="100" value="50" aria-label="Empfindlichkeit">
+          <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
+        </div>
+        <button class="ghost-btn wide" id="vidNew" type="button" style="margin-top:12px">Anderes Video</button>
+      </div>
     </div>
   </div>
   <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
@@ -1881,7 +1896,7 @@
 
       /* ---------- Sheets ---------- */
       const FOCUSABLE='button:not([disabled]),select:not([disabled]),input:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])';
-      const ALL_MODALS=['settingsModal','runModal','runDetailModal','dryInfoModal','moreModal','helpModal','shooterModal','progressModal'];
+      const ALL_MODALS=['settingsModal','runModal','runDetailModal','dryInfoModal','moreModal','helpModal','shooterModal','progressModal','vidSetModal'];
       let activeModal=null,lastFocus=null,pendingKey='delay',pendingValue='instant';
 
       function focusModal(id){
@@ -2722,7 +2737,7 @@
         if(videoTool){if(name==='video')videoTool.shown();else if(vorher==='video')videoTool.hidden()}
       }
       /* Video-Analyse (assets/video.js): eigener Reiter, eigene Logik. */
-      const videoTool=window.FTVideo?window.FTVideo({t,de,DEC,showToast,
+      const videoTool=window.FTVideo?window.FTVideo({t,de,DEC,showToast,openModal:id=>openModalById(id),closeModals:()=>closeModals(),
         keepAwake:()=>{if(KEEP_AWAKE)KEEP_AWAKE.keepAwake().catch(()=>{});else requestWakeLock()},
         allowSleep:()=>releaseWakeLock()}):null;
       $('#videoBtn').onclick=()=>{closeModals();showView('video')};

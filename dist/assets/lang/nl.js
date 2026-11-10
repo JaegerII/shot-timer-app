@@ -275,5 +275,7 @@
   "Länge {0} s": "Lengte {0} s",
   "Original": "Origineel",
   "kleiner": "kleiner",
-  "Start mit dem ersten Schuss": "Start bij het eerste schot"
+  "Start mit dem ersten Schuss": "Start bij het eerste schot",
+  "Ecke für Timer und Splits": "Hoek voor timer en splits",
+  "Startsignal oder erster Schuss, z. B. bei 1R1": "Startsignaal of eerste schot, bijv. bij 1R1"
 };
