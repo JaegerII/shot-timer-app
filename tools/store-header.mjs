@@ -11,9 +11,11 @@ import ffmpeg from 'ffmpeg-static';
 
 const PORT = 8140;
 const VIDEO = process.argv.includes('--video');
-const ONLY = process.argv.find((a) => a === 'wide' || a === 'tall');
+const ONLY = process.argv.find((a) => a === 'wide' || a === 'tall' || a === 'play');
 const FPS = 30, LOOP = 8;
-const FORMATS = [{ name: 'wide', w: 1920, h: 823 }, { name: 'tall', w: 2622, h: 1475 }].filter((f) => !ONLY || f.name === ONLY);
+// play = Vorstellungsgrafik für Google Play (1024 x 500, ohne Vergrößerung); nur auf Anfrage.
+const FORMATS = [{ name: 'wide', w: 1920, h: 823 }, { name: 'tall', w: 2622, h: 1475 }, { name: 'play', w: 1024, h: 500, scale: 1 }]
+  .filter((f) => (ONLY ? f.name === ONLY : f.name !== 'play'));
 
 function encoder(file) {
   const p = spawn(ffmpeg, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',
@@ -40,11 +42,11 @@ const browser = await puppeteer.launch({ executablePath: CHROME, headless: true,
 try {
   for (const f of FORMATS) {
     const page = await browser.newPage();
-    await page.setViewport({ width: f.w, height: f.h, deviceScaleFactor: 2 });
+    await page.setViewport({ width: f.w, height: f.h, deviceScaleFactor: f.scale || 2 });
     await page.goto(`http://localhost:${PORT}/store/header.html?format=${f.name}${VIDEO ? '&anim=1' : ''}`, { waitUntil: 'networkidle0' });
     await page.waitForFunction('window.READY === true', { timeout: 30000 });
     await new Promise((r) => setTimeout(r, 400));
-    const base = `${out}header-${f.w * 2}x${f.h * 2}`;
+    const base = `${out}header-${f.w * (f.scale || 2)}x${f.h * (f.scale || 2)}`;
     if (VIDEO) {
       const enc = encoder(`${base}.mp4`);
       const frames = FPS * LOOP;

@@ -54,6 +54,9 @@
   if (q.get('bare')) {
     document.head.insertAdjacentHTML('beforeend', '<style>body{background:transparent!important}.head{display:none}.phone{top:20px!important}</style>');
   }
+  // ?play=1: Fassung für Google Play – neutraler Telefonrahmen ohne Dynamic Island, Texte ohne „iPhone“.
+  const PLAY = !!q.get('play');
+  if (PLAY) document.head.insertAdjacentHTML('beforeend', '<style>.island,.phone2 .isl{display:none}</style>');
   const SHOT = Number(q.get('shot') || 1);
   const LANG = q.get('lang') || 'de';
 
@@ -70,7 +73,7 @@
   ];
   const [KEY, TITLE, SUB] = MOTIFS[SHOT - 1];
   document.getElementById('title').innerHTML = TITLE;
-  document.getElementById('sub').textContent = SUB;
+  document.getElementById('sub').textContent = PLAY ? SUB.replace(/iPhone/g, 'phone') : SUB;
   /* ---------- Beispieldaten im Speicher der App ---------- */
   const day = (d, h) => new Date(Date.now() - d * 864e5 - h * 36e5).toISOString();
   const entry = (n, pf, time, a, c, d, m) => ({ id: n + Math.random().toString(36).slice(2, 6), shooterId: 's-' + n, name: n, pf, time, a, c, d, m, ns: 0, pe: 0 });

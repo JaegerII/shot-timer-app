@@ -10,10 +10,13 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer-core';
 
+// --play: Google-Play-Fassung in 1080 x 2160 (Play erlaubt höchstens 1:2), Ausgabe <sprache>-play.
+const PLAY = process.argv.includes('--play');
+process.argv = process.argv.filter((a) => a !== '--play');
 const LANGS = (process.argv[2] || 'en').split(',');
 const SHOTS = process.argv[3] ? process.argv[3].split(',').map(Number) : [1, 2, 3, 4, 5, 6, 7, 8];
 // Die Vorlage ist 440 x 956 gebaut; kleinere Größen werden per Zoom verkleinert.
-const SIZES = [{ name: '6.9', w: 440, h: 956 }, { name: '6.3', w: 402, h: 874 }];
+const SIZES = PLAY ? [{ name: 'play', w: 440, h: 880, scale: 1080 / 440 }] : [{ name: '6.9', w: 440, h: 956 }, { name: '6.3', w: 402, h: 874 }];
 const PORT = 8139;
 const CHROME = [
   process.env.CHROME_PATH,
@@ -36,10 +39,10 @@ try {
       mkdirSync(out, { recursive: true });
       for (const shot of SHOTS) {
         const page = await browser.newPage();
-        await page.setViewport({ width: size.w, height: size.h, deviceScaleFactor: 3 });
-        await page.goto(`http://localhost:${PORT}/store/shots.html?shot=${shot}&lang=${lang}`, { waitUntil: 'networkidle0' });
+        await page.setViewport({ width: size.w, height: size.h, deviceScaleFactor: size.scale || 3 });
+        await page.goto(`http://localhost:${PORT}/store/shots.html?shot=${shot}&lang=${lang}${PLAY ? '&play=1' : ''}`, { waitUntil: 'networkidle0' });
         await page.waitForFunction('window.READY === true', { timeout: 40000 });
-        if (size.w !== 440) {
+        if (size.w !== 440 && !PLAY) {
           await page.evaluate((z) => { document.documentElement.style.zoom = z; document.documentElement.style.background = '#0b0c0c'; }, size.w / 440);
           await new Promise((r) => setTimeout(r, 200));
         }

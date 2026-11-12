@@ -35,7 +35,11 @@
   const FORMAT = new URLSearchParams(location.search).get('format') || 'wide';
   // CSS-Pixel; der Generator fotografiert mit Faktor 2.
   // u = Grundeinheit für Schrift und Abstände; im hohen Format kleiner, damit Text und iPhones nebeneinander passen.
-  const F = FORMAT === 'tall' ? { w: 2622, h: 1475, s: 1.25, pad: 150, textw: 860, u: 11 } : { w: 1920, h: 823, s: .98, pad: 110, textw: 760, u: 8.23 };
+  const F = FORMAT === 'tall' ? { w: 2622, h: 1475, s: 1.25, pad: 150, textw: 860, u: 11 }
+    : FORMAT === 'play' ? { w: 1024, h: 500, s: .56, pad: 52, textw: 400, u: 4.6 }
+    : { w: 1920, h: 823, s: .98, pad: 110, textw: 760, u: 8.23 };
+  // Google Play: Vorstellungsgrafik ohne iPhone-Bezug.
+  if (FORMAT === 'play') document.querySelector('.text p').textContent = "Every shot, every split – timed with your phone's microphone. Par time, Hit Factor, match results and your stage video.";
   const root = document.documentElement.style;
   root.setProperty('--w', F.w + 'px'); root.setProperty('--h', F.h + 'px');
   root.setProperty('--s', F.s); root.setProperty('--pad', F.pad + 'px'); root.setProperty('--textw', F.textw + 'px');
@@ -80,7 +84,7 @@
       f.style.left = (p.x * step) + 'px';
       f.style.zIndex = p.z;
       f.style.transform = 'scale(' + F.s + ')' + (p.x === 1 ? '' : ' translateY(' + 30 + 'px)');
-      f.src = 'shots.html?bare=1&lang=en&shot=' + p.shot + (ANIM ? '&anim=1&par=3' + (p.extra || '') : '');
+      f.src = 'shots.html?bare=1&lang=en&shot=' + p.shot + (FORMAT === 'play' ? '&play=1' : '') + (ANIM ? '&anim=1&par=3' + (p.extra || '') : '');
       document.getElementById('phones').appendChild(f);
       await new Promise(res => { const t = setInterval(() => { if (f.contentWindow && f.contentWindow.READY) { clearInterval(t); res(); } }, 100); });
     }

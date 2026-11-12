@@ -202,3 +202,136 @@ Maximilian Weil
 Den Fragebogen ehrlich ausfüllen. Die App zeigt keine Gewalt und keine Waffen
 im Bild, hat aber Schießsport zum Thema; Apple fragt je nach Version gezielt nach
 Waffen. Im Zweifel die höhere Stufe wählen, damit die Prüfung nicht daran hängt.
+
+---
+
+# Google Play
+
+Konto: Organisationskonto (kein Pflicht-Test mit 12 Testern). Paketname `de.forthtrace.timer`.
+
+## Grafiken
+
+| Feld | Datei |
+|---|---|
+| App-Symbol (512 × 512) | `store/play/icon-512.png` |
+| Vorstellungsgrafik (1024 × 500) | `store/header/header-1024x500.png` |
+| Screenshots Smartphone (1080 × 2160, 2–8 Stück) | `store/screenshots/en-play/1–8.png` – Reihenfolge 1, 7, 8, 2, 3, 4, 5, 6 |
+
+Neu erzeugen: `node tools/store-shots.mjs en --play` und `node tools/store-header.mjs play`.
+
+## Store-Eintrag – English (en-US, Standardsprache)
+
+**App name (30)**
+```
+FORTH TRACE Shot Timer
+```
+
+**Short description (80)**
+```
+Shot timer for live & dry fire: draw, splits, par time, Hit Factor, stage video.
+```
+
+**Full description (4000)**
+```
+Turn your phone into a shot timer. FORTH TRACE Shot Timer listens for the beep-to-shot moment, catches every shot or trigger click and shows your draw and splits instantly – at the range or in dry practice at home. No extra hardware, no account, no ads.
+
+TIMER
+• Standby, then the start beep – instant, random 1–4 s or your own fixed delay
+• Par time in tenths of a second with a double beep when you're over
+• Multiple runs back to back
+• Live Fire for loud shots, Dry Fire for quiet trigger clicks – each with its own sensitivity and calibration
+• Glowing screen edge you can see from the corner of your eye: yellow on standby, green while timing, red after par
+• Draw, splits and total time at a glance, with vibration on the start signal
+
+MATCHES & HIT FACTOR
+• Create matches with as many stages as you need
+• Score every shooter: time and hit zones (A, C, D, Miss, No-Shoot, Procedural), Major or Minor
+• Live Hit Factor, stage percentages and overall match points
+• Pull the time straight from the timer with one tap
+• Track each shooter's progress across all matches
+
+STAGE VIDEO
+• Pick a video of your run – the start beep and every shot are found in the audio
+• Fine-tune markers on the waveform, add or delete shots, start on the beep or on the first shot
+• Trim the clip and export it with running time and splits in the corner of your choice
+• Export in original quality, 1080p or 720p and save or share it right away
+
+HISTORY
+• Every run is saved automatically with all times and splits
+
+PRIVATE BY DESIGN
+• The microphone is analysed live and never recorded
+• Videos are processed on your phone and never uploaded
+• No account, no tracking, no ads – your data stays on your phone
+
+10 languages: English, German, French, Spanish, Italian, Dutch, Polish, Czech, Portuguese and Swedish.
+
+Good to know: phone-microphone detection varies with device and environment – check your times against a reference before relying on them. Range rules and firearm safety are your responsibility; always dry fire with an unloaded firearm and no ammunition nearby.
+
+More training and tips: @wax_meils on Instagram and YouTube.
+```
+
+## Store-Eintrag – Deutsch (de-DE)
+
+**Kurzbeschreibung (80)**
+```
+Shot Timer für Live & Dry Fire: Draw, Splits, Par Time, Hit Factor, Stage-Video.
+```
+
+**Vollständige Beschreibung (4000)**
+```
+Mach dein Smartphone zum Shot Timer. FORTH TRACE Shot Timer hört nach dem Startsignal mit, erkennt jeden Schuss oder Trigger-Klick und zeigt Draw-Zeit und Splits sofort an – direkt am Stand oder beim Trockentraining zu Hause. Ohne Zusatzgerät, ohne Konto, ohne Werbung.
+
+TIMER
+• Standby, dann der Startpiep – sofort, zufällig 1–4 s oder mit eigener fester Verzögerung
+• Par Time in Zehntelsekunden, mit Doppelpiep, sobald du drüber bist
+• Mehrere Durchgänge automatisch hintereinander
+• Live Fire für laute Schüsse, Dry Fire für leise Trigger-Klicks – jeweils mit eigener Empfindlichkeit und Kalibrierung
+• Leuchtender Bildschirmrand, den du aus dem Augenwinkel siehst: gelb bei Standby, grün während der Messung, rot nach der Par Time
+• Draw, Splits und Gesamtzeit auf einen Blick, mit Vibration beim Startsignal
+
+MATCHES & HIT FACTOR
+• Matches mit beliebig vielen Stages anlegen
+• Jeden Schützen werten: Zeit und Trefferzonen (A, C, D, Miss, No-Shoot, Prozedurfehler), Major oder Minor
+• Hit Factor, Stage-Prozente und Gesamtwertung live
+• Zeit mit einem Tipp aus dem Timer übernehmen
+• Fortschritt jedes Schützen über alle Matches
+
+STAGE-VIDEO
+• Video deines Durchgangs wählen – Startpiep und jeder Schuss werden aus der Tonspur erkannt
+• Marker auf der Tonspur verschieben, Schüsse ergänzen oder löschen, Start per Piep oder erstem Schuss
+• Video zuschneiden und mit laufender Zeit und Splits in der Ecke deiner Wahl exportieren
+• Export in Originalqualität, 1080p oder 720p, direkt sichern oder teilen
+
+VERLAUF
+• Jeder Durchgang wird automatisch gespeichert – mit allen Zeiten und Splits
+
+DATENSCHUTZ
+• Das Mikrofon wird nur live ausgewertet, nie aufgenommen
+• Videos werden auf deinem Smartphone verarbeitet und nirgends hochgeladen
+• Kein Konto, kein Tracking, keine Werbung – deine Daten bleiben auf deinem Smartphone
+
+10 Sprachen: Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch, Polnisch, Tschechisch, Portugiesisch und Schwedisch.
+
+Gut zu wissen: Die Erkennung über das Telefonmikrofon hängt von Gerät und Umgebung ab – prüfe die Zeiten vor wichtigen Einsätzen gegen eine Referenz. Regeln des Standes und Waffensicherheit liegen in deiner Verantwortung; beim Dry Fire immer mit entladener Waffe und ohne Munition in der Nähe trainieren.
+
+Mehr Training und Tipps: @wax_meils auf Instagram und YouTube.
+```
+
+## Einrichtung („App einrichten“ im Dashboard)
+
+| Aufgabe | Antwort |
+|---|---|
+| Datenschutzerklärung | https://jaegerii.github.io/shot-timer-app/privacy.html |
+| App-Zugriff | Alle Funktionen ohne Einschränkung verfügbar (kein Login) |
+| Werbung | Nein, die App enthält keine Werbung |
+| Einstufung des Inhalts | Kategorie „Alle anderen App-Typen“ bzw. Hilfsprogramm; Gewalt, Sex, Drogen, Glücksspiel: Nein. Nutzerinteraktion/Inhalte teilen: Nein (Teilen nur über das System-Teilen-Menü). Standortfreigabe: Nein. Digitale Käufe: Nein |
+| Zielgruppe | 18 Jahre und älter (Schießsport); App spricht keine Kinder an |
+| Datensicherheit | Es werden keine Nutzerdaten erhoben oder geteilt. Mikrofon und Videos werden nur auf dem Gerät verarbeitet, nichts wird gesendet |
+| Behörden-App | Nein |
+| Finanzfunktionen | Keine |
+| Gesundheit | Keine Gesundheitsfunktionen |
+| Nachrichten-App | Nein |
+| App-Kategorie | Sport |
+| Kontaktdaten | E-Mail wie im App Store, Website optional (Support-Seite) |
+| Länder | Alle bzw. wie im App Store |
