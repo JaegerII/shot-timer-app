@@ -300,5 +300,6 @@
   "Schüsse werden erkannt …": "Wykrywanie strzałów …",
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Ponownie szuka sygnału startu i strzałów w wybranym fragmencie z ustawioną czułością. Cofnij strzałką u góry.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Najpierw przytnij wideo do swojego stage. Strzały są szukane tylko w tej części.",
-  "SCHÜSSE ERKENNEN": "WYKRYJ STRZAŁY"
+  "SCHÜSSE ERKENNEN": "WYKRYJ STRZAŁY",
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Zwłaszcza na sucho wykrywanie jest przybliżeniem: kliknięcie spustu jest ciche i brzmi jak wiele innych dźwięków. Nie każde kliknięcie zostanie pewnie wykryte, a inne dźwięki mogą się liczyć. Traktuj czasy jako przybliżoną wskazówkę dla draw i splitów, a nie dokładny pomiar."
 };

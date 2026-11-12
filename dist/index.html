@@ -1052,6 +1052,7 @@
       <div class="sheet-head"><div><h2 id="dryInfoTitle">Dry-Fire-Erkennung</h2></div><button id="closeDryInfo" aria-label="Schließen">×</button></div>
       <div class="sheet-body">
         <p class="help-text">Die Schusserkennung läuft über das Mikrofon deines Geräts. Umgebungsgeräusche, Holsterbewegungen, Manipulationen an der Waffe oder andere Geräusche können ebenfalls als Treffer gewertet werden. Die gemessenen Zeiten können daher je nach Gerät und Umgebung abweichen.</p>
+        <p class="help-text">Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.</p>
         <p class="help-text">Kalibriere einmal, solange es ruhig ist, und prüfe die Zeiten gegen eine Referenz, bevor du dich auf sie verlässt. Ein eigenständiger Shot Timer arbeitet unter allen Bedingungen genauer.</p>
         <button class="ghost-btn wide" id="dryInfoCalibrate" type="button">Erkennung einstellen und kalibrieren</button>
       </div>
@@ -1249,7 +1250,10 @@
             :DEFAULTS.delay,
           delayRandom:typeof stored.delayRandom==='boolean'?stored.delayRandom:DEFAULTS.delayRandom,
           delayManual:num(stored.delayManual,DEFAULTS.delayManual,DELAY_MIN,DELAY_MAX),
-          par:num(stored.par,DEFAULTS.par,0,20),
+          // Par Time startet mit „Aus“. Ältere Installationen hatten oft einen
+          // gemerkten Testwert; der wird einmalig zurückgesetzt (parReset).
+          par:stored.parReset===true?num(stored.par,DEFAULTS.par,0,20):DEFAULTS.par,
+          parReset:true,
           reps:Math.round(num(stored.reps,DEFAULTS.reps,1,99)),
           lang:LANG,
           langChosen:stored.langChosen===true,

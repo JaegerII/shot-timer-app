@@ -300,5 +300,6 @@
   "Schüsse werden erkannt …": "A detetar tiros …",
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Procura de novo o sinal de início e os tiros no excerto escolhido, com a sensibilidade definida. Desfazer com a seta em cima.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Primeiro corta o vídeo para a tua stage. Os tiros só são procurados nessa parte.",
-  "SCHÜSSE ERKENNEN": "DETETAR TIROS"
+  "SCHÜSSE ERKENNEN": "DETETAR TIROS",
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Sobretudo em dry fire, a deteção é uma aproximação: um clique do gatilho é suave e soa como muitos outros ruídos. Nem todos os cliques são detetados com segurança e outros sons podem contar. Usa os tempos como referência aproximada para o draw e os splits, não como medição exata."
 };

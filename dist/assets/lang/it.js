@@ -300,5 +300,6 @@
   "Schüsse werden erkannt …": "Rilevamento colpi …",
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Cerca di nuovo segnale di partenza e colpi nello spezzone scelto, con la sensibilità impostata. Annulla con la freccia in alto.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Prima taglia il video sulla tua stage. I colpi vengono cercati solo in questa parte.",
-  "SCHÜSSE ERKENNEN": "RILEVA COLPI"
+  "SCHÜSSE ERKENNEN": "RILEVA COLPI",
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Soprattutto in dry fire il rilevamento è un’approssimazione: un clic del grilletto è leggero e somiglia a molti altri rumori. Non ogni clic viene rilevato con certezza e altri suoni possono contare. Usa i tempi come riferimento indicativo per draw e split, non come misura esatta."
 };

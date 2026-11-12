@@ -121,7 +121,7 @@ window.FTVideo = function (api) {
       S.busy = false;
       setBusy(null);
       S.view = 0;
-      S.beep = null; S.beepEnd = null; S.shots = [];
+      S.beep = null; S.beepEnd = null; S.shots = []; S.sigBeep = null;
       hist.past = []; hist.future = [];
       renderAll();
       // Schritt 1: zuerst auf die Stage zuschneiden, erst danach wird – nur dort – erkannt.
@@ -1555,13 +1555,33 @@ window.FTVideo = function (api) {
   $('#vidStartMode').addEventListener('click', async (e) => {
     const b = e.target.closest('button[data-mode]');
     if (!b || S.busy || b.dataset.mode === S.startMode) return;
-    S.startMode = b.dataset.mode === 'shot' ? 'shot' : 'beep';
+    if (edit) commitEdit(true);
+    // Nur umdeuten, nicht neu erkennen: gelöschte und verschobene Marker bleiben so.
+    const before = snap();
+    switchStart(b.dataset.mode === 'shot' ? 'shot' : 'beep');
+    pushPast(before);
+    changed();
+    renderTrack();
+    if (S.startMode === 'beep' && S.beep == null && S.shots.length) showToast(t('Kein Startsignal erkannt – setze den Start-Marker selbst.'));
+  });
+  /* Signal ↔ erster Schuss: Beim Wechsel auf „erster Schuss“ wird der früheste
+     Schuss zum Start und das Signal gemerkt; zurück wird es wieder eingesetzt. */
+  function switchStart(mode) {
+    if (mode === S.startMode) return;
+    if (mode === 'shot') {
+      const all = S.shots.slice().sort((a, b) => a - b);
+      S.sigBeep = S.beep;
+      S.beep = all.length ? all[0] : null;
+      S.shots = all.slice(1);
+    } else {
+      S.shots = (S.beep != null ? [S.beep] : []).concat(S.shots).sort((a, b) => a - b);
+      S.beep = S.sigBeep != null ? S.sigBeep : null;
+      S.sigBeep = null;
+    }
+    S.startMode = mode;
     try { localStorage.setItem('ft-video-start', S.startMode); } catch (err) {}
     renderStartMode();
-    if (edit) commitEdit(true);
-    if (S.pcm) { const b = snap(); await detect(true); pushPast(b); changed(); fitStage(); }
-    else { renderSummary(); paint(); }
-  });
+  }
   renderStartMode();
 
   // Zurück: Video schließen und zur Auswahl.
@@ -1576,7 +1596,7 @@ window.FTVideo = function (api) {
   /* ---------- Rückgängig / Wiederholen ----------
      Gespeichert wird der Stand der Marker und des Ausschnitts vor jeder Änderung. */
   const hist = { past: [], future: [] };
-  const snap = () => JSON.stringify({ beep: S.beep, beepEnd: S.beepEnd, shots: S.shots, cut: S.cut, cardAt: S.cardAt });
+  const snap = () => JSON.stringify({ beep: S.beep, beepEnd: S.beepEnd, shots: S.shots, cut: S.cut, cardAt: S.cardAt, startMode: S.startMode, sigBeep: S.sigBeep });
   function pushPast(st) {
     if (st === snap()) return;
     hist.past.push(st);
@@ -1587,6 +1607,8 @@ window.FTVideo = function (api) {
   function restore(st) {
     Object.assign(S, JSON.parse(st));
     S.sel = null; edit = null; cutting = null;
+    try { localStorage.setItem('ft-video-start', S.startMode); } catch (err) {}
+    renderStartMode();
     changed();
     renderTrack();
   }

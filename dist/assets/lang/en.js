@@ -300,5 +300,6 @@
   "Schüsse werden erkannt …": "Detecting shots …",
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Searches the selected clip again for the start signal and shots, using the current sensitivity. Undo with the arrow at the top.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "First trim the video to your stage. Shots are only searched for in this part.",
-  "SCHÜSSE ERKENNEN": "DETECT SHOTS"
+  "SCHÜSSE ERKENNEN": "DETECT SHOTS",
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "In dry fire especially, detection is an approximation: a trigger click is quiet and sounds like many other noises. Not every click is reliably detected, and other sounds may count too. Use the times as a rough guide for draw and splits, not as an exact measurement."
 };
