@@ -293,5 +293,12 @@
   "am Ende": "à la fin",
   "Ergebnis": "Résultat",
   "Ø Split": "Split moyen",
-  "Ansehen": "Aperçu"
+  "Ansehen": "Aperçu",
+  "Rückgängig": "Annuler",
+  "Wiederholen": "Rétablir",
+  "Schüsse neu erkennen": "Redétecter les tirs",
+  "Schüsse werden erkannt …": "Détection des tirs …",
+  "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Recherche à nouveau le signal de départ et les tirs dans l’extrait choisi, avec la sensibilité réglée. Annuler avec la flèche en haut.",
+  "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Coupe d’abord la vidéo sur ta stage. Les tirs ne sont recherchés que dans cette partie.",
+  "SCHÜSSE ERKENNEN": "DÉTECTER LES TIRS"
 };

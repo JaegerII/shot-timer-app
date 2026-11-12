@@ -293,5 +293,12 @@
   "am Ende": "aan het einde",
   "Ergebnis": "Resultaat",
   "Ø Split": "Gem. split",
-  "Ansehen": "Bekijken"
+  "Ansehen": "Bekijken",
+  "Rückgängig": "Ongedaan maken",
+  "Wiederholen": "Opnieuw",
+  "Schüsse neu erkennen": "Schoten opnieuw herkennen",
+  "Schüsse werden erkannt …": "Schoten worden herkend …",
+  "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Zoekt startsignaal en schoten opnieuw in het gekozen fragment, met de ingestelde gevoeligheid. Ongedaan maken met de pijl bovenaan.",
+  "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Knip de video eerst bij tot je stage. Alleen in dit deel wordt naar schoten gezocht.",
+  "SCHÜSSE ERKENNEN": "SCHOTEN HERKENNEN"
 };

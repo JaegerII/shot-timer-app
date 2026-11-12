@@ -293,5 +293,12 @@
   "am Ende": "alla fine",
   "Ergebnis": "Risultato",
   "Ø Split": "Split medio",
-  "Ansehen": "Anteprima"
+  "Ansehen": "Anteprima",
+  "Rückgängig": "Annulla",
+  "Wiederholen": "Ripeti",
+  "Schüsse neu erkennen": "Rileva di nuovo i colpi",
+  "Schüsse werden erkannt …": "Rilevamento colpi …",
+  "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Cerca di nuovo segnale di partenza e colpi nello spezzone scelto, con la sensibilità impostata. Annulla con la freccia in alto.",
+  "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Prima taglia il video sulla tua stage. I colpi vengono cercati solo in questa parte.",
+  "SCHÜSSE ERKENNEN": "RILEVA COLPI"
 };

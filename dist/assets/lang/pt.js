@@ -293,5 +293,12 @@
   "am Ende": "no fim",
   "Ergebnis": "Resultado",
   "Ø Split": "Split médio",
-  "Ansehen": "Ver"
+  "Ansehen": "Ver",
+  "Rückgängig": "Desfazer",
+  "Wiederholen": "Refazer",
+  "Schüsse neu erkennen": "Detetar tiros de novo",
+  "Schüsse werden erkannt …": "A detetar tiros …",
+  "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Procura de novo o sinal de início e os tiros no excerto escolhido, com a sensibilidade definida. Desfazer com a seta em cima.",
+  "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Primeiro corta o vídeo para a tua stage. Os tiros só são procurados nessa parte.",
+  "SCHÜSSE ERKENNEN": "DETETAR TIROS"
 };

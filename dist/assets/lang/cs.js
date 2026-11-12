@@ -293,5 +293,12 @@
   "am Ende": "na konci",
   "Ergebnis": "Výsledek",
   "Ø Split": "Prům. split",
-  "Ansehen": "Náhled"
+  "Ansehen": "Náhled",
+  "Rückgängig": "Zpět",
+  "Wiederholen": "Znovu",
+  "Schüsse neu erkennen": "Znovu rozpoznat výstřely",
+  "Schüsse werden erkannt …": "Rozpoznávání výstřelů …",
+  "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Znovu hledá startovní signál a výstřely ve zvoleném výřezu s nastavenou citlivostí. Zpět šipkou nahoře.",
+  "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Nejdřív ořízni video na svou stage. Výstřely se hledají jen v této části.",
+  "SCHÜSSE ERKENNEN": "ROZPOZNAT VÝSTŘELY"
 };

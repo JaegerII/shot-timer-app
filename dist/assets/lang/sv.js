@@ -293,5 +293,12 @@
   "am Ende": "i slutet",
   "Ergebnis": "Resultat",
   "Ø Split": "Snittsplit",
-  "Ansehen": "Förhandsvisa"
+  "Ansehen": "Förhandsvisa",
+  "Rückgängig": "Ångra",
+  "Wiederholen": "Gör om",
+  "Schüsse neu erkennen": "Hitta skott igen",
+  "Schüsse werden erkannt …": "Skott hittas …",
+  "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Söker startsignal och skott igen i det valda klippet med inställd känslighet. Ångra med pilen överst.",
+  "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Klipp först videon till din stage. Skott söks bara i den delen.",
+  "SCHÜSSE ERKENNEN": "HITTA SKOTT"
 };

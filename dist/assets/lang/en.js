@@ -293,5 +293,12 @@
   "am Ende": "at the end",
   "Ergebnis": "Result",
   "Ø Split": "Avg split",
-  "Ansehen": "Preview"
+  "Ansehen": "Preview",
+  "Rückgängig": "Undo",
+  "Wiederholen": "Redo",
+  "Schüsse neu erkennen": "Detect shots again",
+  "Schüsse werden erkannt …": "Detecting shots …",
+  "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Searches the selected clip again for the start signal and shots, using the current sensitivity. Undo with the arrow at the top.",
+  "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "First trim the video to your stage. Shots are only searched for in this part.",
+  "SCHÜSSE ERKENNEN": "DETECT SHOTS"
 };

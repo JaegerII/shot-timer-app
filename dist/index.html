@@ -2,7 +2,7 @@
 <html lang="de" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" id="themeColor" content="#0f1010">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -236,6 +236,12 @@
     .vid-xrow[hidden]{display:none}
     .vid-seg button small{line-height:1.3}
     .vid-xhead{display:flex;align-items:center;gap:12px}
+    .vid-hist{display:flex;gap:6px;flex:0 0 auto}
+    .vid-hist .vid-ico{width:38px;height:38px}
+    .vid-ico:disabled{opacity:.3;cursor:default}
+    .vid-cut-first p{margin:0;font-size:.78rem;line-height:1.45;color:var(--muted);text-align:center}
+    .vid-cut-go{margin-top:2px}
+    .vid-cut-go[hidden]{display:none}
     .vid-xhead>span{flex:1;min-width:0}
     /* Startseite: Knopf auf die Seite gegenüber der Demo-Einblendung */
     .vid-pick[data-corner="tr"] .vid-pick-cta,.vid-pick[data-corner="br"] .vid-pick-cta{right:auto;left:14px}
@@ -880,8 +886,7 @@
 
         <div class="vid-info" id="vidInfo">
           <div class="vid-info-text"><b id="vidCount"></b><span id="vidSum"></span></div>
-          <button class="vid-ico" id="vidCut" type="button" aria-label="Video schneiden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 7.6 20 18M8.6 16.4 20 6"/></svg></button>
-          <button class="vid-ico" id="vidSettings" type="button" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+          <div class="vid-hist"><button class="vid-ico" id="vidUndo" type="button" aria-label="Rückgängig" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button><button class="vid-ico" id="vidRedo" type="button" aria-label="Wiederholen" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button></div>
         </div>
         <div class="vid-scrub-row" id="vidScrubRow">
           <span class="vid-time" id="vidClock">00:00,00</span>
@@ -890,10 +895,10 @@
         </div>
         <div class="vid-transport" id="vidTransport">
           <button class="vid-tr" id="vidPrev" type="button" aria-label="Voriger Marker"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M19 5.5v13L8.5 12z"/></svg></button>
-          <button class="vid-tr" id="vidBack" type="button" aria-label="1 s zurück"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 6v12L3 12z"/><path d="M21 6v12l-8.5-6z"/></svg></button>
           <button class="vid-play" id="vidPlay" type="button" aria-label="Abspielen"><svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg></button>
-          <button class="vid-tr" id="vidFwd" type="button" aria-label="1 s vor"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 6v12L21 12z"/><path d="M3 6v12l8.5-6z"/></svg></button>
           <button class="vid-tr" id="vidNext" type="button" aria-label="Nächster Marker"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="17.4" y="5" width="2.6" height="14" rx="1"/><path d="M5 5.5v13L15.5 12z"/></svg></button>
+          <button class="vid-tr" id="vidCut" type="button" aria-label="Video schneiden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 7.6 20 18M8.6 16.4 20 6"/></svg></button>
+          <button class="vid-tr" id="vidSettings" type="button" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
         </div>
         <div class="vid-editbar" id="vidEditBar" hidden>
           <div class="vid-edit-top">
@@ -910,7 +915,9 @@
             <div class="vid-edit-time"><b id="vidCutTime">00:00,00</b><small id="vidCutLen"></small></div>
             <button class="vid-tr ok" id="vidCutOk" type="button" aria-label="Übernehmen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>
           </div>
+          <div class="vid-cut-first" id="vidCutFirst" hidden><p>Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.</p></div>
           <div class="vid-cutbtns"><button type="button" id="vidCutA"><b>[</b>Anfang hier</button><button type="button" id="vidCutAll">Ganzes Video</button><button type="button" id="vidCutB">Ende hier<b>]</b></button></div>
+          <button class="sheet-action vid-cut-go" id="vidCutDetect" type="button" hidden>SCHÜSSE ERKENNEN</button>
         </div>
         <div class="vid-track" id="vidTrack">
           <canvas id="vidWave"></canvas>
@@ -1065,7 +1072,8 @@
           <input id="vidSens" type="range" min="0" max="100" value="50" aria-label="Empfindlichkeit">
           <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
         </div>
-        <button class="ghost-btn wide" id="vidNew" type="button" style="margin-top:12px">Anderes Video</button>
+        <button class="ghost-btn wide" id="vidRedetect" type="button" style="margin-top:12px">Schüsse neu erkennen</button>
+        <p class="tip">Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.</p>
       </div>
     </div>
   </div>
@@ -1430,16 +1438,20 @@
       /* Vibration. Auf dem iPhone kennt der Browser navigator.vibrate nicht; in der
          App übernimmt das Haptics-Plugin von Capacitor die Taptic Engine. */
       const HAPTICS=window.Capacitor?.Plugins?.Haptics||null;
+      // Safari ignoriert user-scalable=no: Zoom-Gesten hier abfangen, damit die App nicht versehentlich vergrößert.
+      ['gesturestart','gesturechange'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
       const CAN_VIBRATE=!!HAPTICS||typeof navigator.vibrate==='function';
       function vibrate(kind){
         if(!settings.vibration||!CAN_VIBRATE)return;
         if(HAPTICS){
-          const stoss=style=>HAPTICS.impact({style}).catch(()=>{});
-          if(kind==='tap')stoss('LIGHT');
-          else{stoss('HEAVY');if(kind==='double')setTimeout(()=>stoss('HEAVY'),BEEP_MS+PAR_GAP_MS)}
+          // Leichter Stoß nur fürs Antippen; Signale vibrieren richtig (deutlich stärker als ein Taptic-Stoß).
+          if(kind==='tap'){HAPTICS.impact({style:'LIGHT'}).catch(()=>{});return}
+          const brumm=ms=>HAPTICS.vibrate({duration:ms}).catch(()=>HAPTICS.impact({style:'HEAVY'}).catch(()=>{}));
+          brumm(kind==='double'?160:300);
+          if(kind==='double')setTimeout(()=>brumm(160),BEEP_MS+PAR_GAP_MS+60);
           return;
         }
-        navigator.vibrate(kind==='tap'?8:kind==='double'?[35,80,35]:35);
+        navigator.vibrate(kind==='tap'?8:kind==='double'?[120,90,120]:250);
       }
       /* Gibt den performance.now()-Zeitpunkt zurück, an dem der Ton hörbar wird. */
       function playCue(type){
