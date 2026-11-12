@@ -215,7 +215,7 @@ Konto: Organisationskonto (kein Pflicht-Test mit 12 Testern). Paketname `de.fort
 |---|---|
 | App-Symbol (512 × 512) | `store/play/icon-512.png` |
 | Vorstellungsgrafik (1024 × 500) | `store/header/header-1024x500.png` |
-| Screenshots Smartphone (1080 × 2160, 2–8 Stück) | `store/screenshots/en-play/1–8.png` – Reihenfolge 1, 7, 8, 2, 3, 4, 5, 6 |
+| Screenshots Smartphone (1080 × 1920, 9:16, 2–8 Stück) | `store/screenshots/en-play/1–8.png` – Reihenfolge 1, 7, 8, 2, 3, 4, 5, 6 |
 
 Neu erzeugen: `node tools/store-shots.mjs en --play` und `node tools/store-header.mjs play`.
 

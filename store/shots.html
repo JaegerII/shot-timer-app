@@ -56,7 +56,9 @@
   }
   // ?play=1: Fassung für Google Play – neutraler Telefonrahmen ohne Dynamic Island, Texte ohne „iPhone“.
   const PLAY = !!q.get('play');
-  if (PLAY) document.head.insertAdjacentHTML('beforeend', '<style>.island,.phone2 .isl{display:none}</style>');
+  // 9:16 (1080 x 1920): Kopf etwas höher, Telefon verkleinert, damit es ganz ins Bild passt.
+  if (PLAY) document.head.insertAdjacentHTML('beforeend', '<style>.island,.phone2 .isl{display:none}' +
+    (q.get('bare') ? '' : '.head{top:44px}.phone{top:226px;transform:translateX(-50%) scale(.74);transform-origin:50% 0}.phone2{top:548px;transform:rotate(-5deg) scale(.86)}') + '</style>');
   const SHOT = Number(q.get('shot') || 1);
   const LANG = q.get('lang') || 'de';
 
