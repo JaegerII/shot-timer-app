@@ -301,5 +301,12 @@
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Recherche à nouveau le signal de départ et les tirs dans l’extrait choisi, avec la sensibilité réglée. Annuler avec la flèche en haut.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Coupe d’abord la vidéo sur ta stage. Les tirs ne sont recherchés que dans cette partie.",
   "SCHÜSSE ERKENNEN": "DÉTECTER LES TIRS",
-  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "En dry fire surtout, la détection est une approximation : un clic de détente est discret et ressemble à beaucoup d’autres bruits. Tous les clics ne sont pas détectés à coup sûr et d’autres bruits peuvent compter. Utilise les temps comme repère approximatif pour le draw et les splits, pas comme mesure exacte."
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "En dry fire surtout, la détection est une approximation : un clic de détente est discret et ressemble à beaucoup d’autres bruits. Tous les clics ne sont pas détectés à coup sûr et d’autres bruits peuvent compter. Utilise les temps comme repère approximatif pour le draw et les splits, pas comme mesure exacte.",
+  "Mikrofon wird gestartet …": "Démarrage du micro …",
+  "Pegel": "Niveau",
+  "Schwelle": "Seuil",
+  "Kein Signal": "Aucun signal",
+  "Erkannt": "Détecté",
+  "Mikrofon liefert kein Signal": "Le micro ne transmet aucun signal",
+  "Kalibriert – Schwelle {0} %": "Calibré – seuil {0} %"
 };

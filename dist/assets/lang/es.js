@@ -301,5 +301,12 @@
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Vuelve a buscar la señal de inicio y los disparos en el fragmento elegido con la sensibilidad ajustada. Deshacer con la flecha de arriba.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Primero recorta el vídeo a tu stage. Los disparos solo se buscan en esa parte.",
   "SCHÜSSE ERKENNEN": "DETECTAR DISPAROS",
-  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Sobre todo en dry fire, la detección es una aproximación: un clic del gatillo es suave y suena como muchos otros ruidos. No todos los clics se detectan con seguridad y otros sonidos pueden contar. Usa los tiempos como orientación aproximada para el draw y los splits, no como medición exacta."
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Sobre todo en dry fire, la detección es una aproximación: un clic del gatillo es suave y suena como muchos otros ruidos. No todos los clics se detectan con seguridad y otros sonidos pueden contar. Usa los tiempos como orientación aproximada para el draw y los splits, no como medición exacta.",
+  "Mikrofon wird gestartet …": "Iniciando micrófono …",
+  "Pegel": "Nivel",
+  "Schwelle": "Umbral",
+  "Kein Signal": "Sin señal",
+  "Erkannt": "Detectado",
+  "Mikrofon liefert kein Signal": "El micrófono no envía señal",
+  "Kalibriert – Schwelle {0} %": "Calibrado – umbral {0} %"
 };

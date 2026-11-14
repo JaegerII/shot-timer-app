@@ -301,5 +301,12 @@
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Znovu hledá startovní signál a výstřely ve zvoleném výřezu s nastavenou citlivostí. Zpět šipkou nahoře.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Nejdřív ořízni video na svou stage. Výstřely se hledají jen v této části.",
   "SCHÜSSE ERKENNEN": "ROZPOZNAT VÝSTŘELY",
-  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Hlavně při dry fire je rozpoznání přibližné: cvaknutí spouště je tiché a zní podobně jako mnoho jiných zvuků. Ne každé cvaknutí se spolehlivě rozpozná a započítat se mohou i jiné zvuky. Ber časy jako hrubé vodítko pro draw a splity, ne jako přesné měření."
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Hlavně při dry fire je rozpoznání přibližné: cvaknutí spouště je tiché a zní podobně jako mnoho jiných zvuků. Ne každé cvaknutí se spolehlivě rozpozná a započítat se mohou i jiné zvuky. Ber časy jako hrubé vodítko pro draw a splity, ne jako přesné měření.",
+  "Mikrofon wird gestartet …": "Spouštím mikrofon …",
+  "Pegel": "Úroveň",
+  "Schwelle": "Práh",
+  "Kein Signal": "Žádný signál",
+  "Erkannt": "Rozpoznáno",
+  "Mikrofon liefert kein Signal": "Mikrofon nedává žádný signál",
+  "Kalibriert – Schwelle {0} %": "Kalibrováno – práh {0} %"
 };

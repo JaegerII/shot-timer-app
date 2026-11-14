@@ -301,5 +301,12 @@
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Söker startsignal och skott igen i det valda klippet med inställd känslighet. Ångra med pilen överst.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Klipp först videon till din stage. Skott söks bara i den delen.",
   "SCHÜSSE ERKENNEN": "HITTA SKOTT",
-  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Särskilt vid torrträning är detekteringen en uppskattning: ett avtryckarklick är tyst och låter som många andra ljud. Alla klick upptäcks inte säkert och andra ljud kan räknas med. Använd tiderna som en grov vägledning för draw och splittider, inte som exakt mätning."
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Särskilt vid torrträning är detekteringen en uppskattning: ett avtryckarklick är tyst och låter som många andra ljud. Alla klick upptäcks inte säkert och andra ljud kan räknas med. Använd tiderna som en grov vägledning för draw och splittider, inte som exakt mätning.",
+  "Mikrofon wird gestartet …": "Startar mikrofonen …",
+  "Pegel": "Nivå",
+  "Schwelle": "Tröskel",
+  "Kein Signal": "Ingen signal",
+  "Erkannt": "Upptäckt",
+  "Mikrofon liefert kein Signal": "Mikrofonen ger ingen signal",
+  "Kalibriert – Schwelle {0} %": "Kalibrerad – tröskel {0} %"
 };

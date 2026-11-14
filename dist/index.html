@@ -504,6 +504,14 @@
     .range-head{display:flex;justify-content:space-between;font-size:.79rem;margin-bottom:8px}
     .range-head span{color:var(--muted)}
     input[type=range]{width:100%;accent-color:var(--accent-fill)}
+    .level{margin-top:16px}
+    .level-bar{position:relative;height:12px;border-radius:6px;background:var(--sunken);border:1px solid var(--line);overflow:hidden}
+    .level-bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--line-strong);transition:background .1s}
+    .level.hit .level-bar i{background:var(--accent-fill)}
+    .level-bar b{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--danger)}
+    .level-txt{display:flex;justify-content:space-between;gap:10px;font-size:.7rem;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+    .level-txt strong{color:var(--accent);font-weight:700}
+    .level.dead .level-txt strong{color:var(--danger)}
     .range-legend{display:flex;justify-content:space-between;gap:10px;color:var(--faint);font-size:.67rem;margin-top:5px}
     .tip{display:flex;gap:9px;color:var(--muted);font-size:.74rem;line-height:1.45;margin:14px 0 0;padding-top:13px;border-top:1px solid var(--line)}
     .tip svg{flex:0 0 auto;color:var(--warm)}
@@ -1031,6 +1039,11 @@
             <input id="sensitivity" type="range" min="10" max="95" value="42" aria-label="Empfindlichkeit">
             <div class="range-legend"><span>weniger Fehlauslöser</span><span>erkennt Leiseres</span></div>
           </div>
+          <!-- Zum Ausprobieren: schnipsen oder klicken; der Balken leuchtet, wenn ausgelöst würde. -->
+          <div class="level" id="level">
+            <div class="level-bar"><i id="levelFill"></i><b id="levelThr"></b></div>
+            <div class="level-txt"><span id="levelInfo">Mikrofon wird gestartet …</span><strong id="levelState"></strong></div>
+          </div>
           <button class="ghost-btn wide" id="calibrateText" type="button" style="margin-top:12px">Jetzt kalibrieren</button>
           <p class="tip"><span data-i18n-html><b>Kalibrieren</b> misst 1,5 Sekunden lang den Umgebungslärm und legt die Auslöseschwelle knapp darüber. Einmal am Stand antippen, solange es ruhig ist – danach lösen Lüftung und Nachbarstände nicht mehr versehentlich aus.</span></p>
         </div>
@@ -1382,7 +1395,8 @@
         return neu;
       }
       async function resumeAudio(){
-        if(rt.audio&&rt.audio.state!=='running'){try{await rt.audio.resume()}catch(e){}}
+        // resume() kann ohne Tipp ewig hängen – nie länger als 400 ms darauf warten.
+        if(rt.audio&&rt.audio.state!=='running'){try{await Promise.race([rt.audio.resume(),new Promise(r=>setTimeout(r,400))])}catch(e){}}
       }
       // Audio-Elemente einmalig fuer die Wiedergabe freischalten.
       // iOS ignoriert das Setzen von .volume, beachtet aber .muted - mit
@@ -1509,33 +1523,52 @@
       }
 
       /* ---------- Mikrofon ---------- */
-      async function ensureMic(){
-        if(rt.stream){
+      /* Der AudioContext entsteht und startet synchron im Tipp, noch vor dem
+         ersten await. iOS lässt einen Kontext, der erst nach dem Warten auf
+         getUserMedia angelegt wird, sonst angehalten – das Mikrofon lieferte
+         dann nur Stille, Kalibrieren maß nichts und nichts wurde erkannt. */
+      function ensureContext(){
+        const Ctx=window.AudioContext||window.webkitAudioContext;
+        if(!Ctx)return;
+        if(!rt.audio||rt.audio.state==='closed'){rt.audio=new Ctx();rt.analyser=null;rt.micSrc=null}
+        if(rt.audio.state!=='running'){try{rt.audio.resume().catch(()=>{})}catch(e){}}
+      }
+      // Nie zwei Verbindungsversuche gleichzeitig (Wächter und START).
+      function ensureMic(force=false){
+        ensureContext();
+        if(!rt.micBusy)rt.micBusy=verbindeMic(force).finally(()=>{rt.micBusy=null});
+        return rt.micBusy;
+      }
+      async function verbindeMic(force){
+        if(rt.stream&&!force){
           // Hat iOS die Aufnahme beendet oder stummgeschaltet (Anruf, andere App,
           // umgestellte Audiositzung), das Mikrofon neu verbinden statt still zu bleiben.
           const spur=rt.stream.getAudioTracks()[0];
-          const tot=!spur||spur.readyState==='ended'||spur.muted||(rt.audio&&rt.audio.state==='closed');
-          if(!tot){await resumeAudio();if(!rt.audio||rt.audio.state==='running')return true}
-          dropMic();
-          try{rt.audio&&rt.audio.close()}catch(e){}
-          rt.audio=null;
+          const tot=!spur||spur.readyState==='ended'||spur.muted||rt.micSilent||!rt.analyser;
+          if(!tot){await resumeAudio();if(rt.audio.state==='running'){startMonitor();return true}}
         }
-        if(!navigator.mediaDevices?.getUserMedia){
+        if(!navigator.mediaDevices?.getUserMedia||!rt.audio){
           setMicState('blocked',t('Kein Mikrofonzugriff auf diesem Gerät'));
           return false;
         }
+        // Alte Spur sauber trennen, den Kontext aber behalten.
+        stopMonitor();
+        rt.stream?.getTracks?.().forEach(tr=>{tr.onended=null;tr.stop()});
+        try{rt.micSrc&&rt.micSrc.disconnect()}catch(e){}
+        rt.stream=null;rt.analyser=null;rt.micSrc=null;
         try{
           rt.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-          const Ctx=window.AudioContext||window.webkitAudioContext;
-          rt.audio=new Ctx();
+          ensureContext();
           await resumeAudio();
           loadBuffers();
-          const src=rt.audio.createMediaStreamSource(rt.stream);
+          rt.micSrc=rt.audio.createMediaStreamSource(rt.stream);
           rt.analyser=rt.audio.createAnalyser();
-          rt.analyser.fftSize=1024;
-          rt.analyser.smoothingTimeConstant=.12;
-          src.connect(rt.analyser);
-          rt.stream.getAudioTracks().forEach(t=>t.addEventListener('ended',dropMic));
+          // 2048 Werte ≈ 43 ms: länger als ein Bild (17 ms), so fällt kein Knall zwischen zwei Messungen.
+          rt.analyser.fftSize=2048;
+          rt.analyser.smoothingTimeConstant=0;
+          rt.micSrc.connect(rt.analyser);
+          rt.stream.getAudioTracks().forEach(tr=>{tr.onended=dropMic});
+          rt.micSilent=false;rt.lastLive=performance.now();rt.lastSum=null;
           setMicState('ready','');
           startMonitor();
           return true;
@@ -1548,7 +1581,8 @@
       function dropMic(){
         stopMonitor();
         rt.stream?.getTracks?.().forEach(t=>t.stop());
-        rt.stream=null;rt.analyser=null;
+        try{rt.micSrc&&rt.micSrc.disconnect()}catch(e){}
+        rt.stream=null;rt.analyser=null;rt.micSrc=null;
         setMicState('off','');
       }
 
@@ -1558,17 +1592,18 @@
          Grundwert davor, den das Kalibrieren nur anheben konnte – an einem
          leisen Stand hatte es deshalb gar keine Wirkung. */
       const FAKTOR_MAX=14, FAKTOR_MIN=1.8;
-      function currentThreshold(){
-        const s=settings.sensitivity[settings.mode];                 // 10..95
+      function currentThreshold(mode=settings.mode){
+        const s=settings.sensitivity[mode];                          // 10..95
         const anteil=(s-10)/85;                                      // 0..1
         const faktor=FAKTOR_MAX-anteil*(FAKTOR_MAX-FAKTOR_MIN);
-        const floor=settings.noiseFloor[settings.mode];
-        const minimum=settings.mode==='dry'?.012:.03;
+        const floor=settings.noiseFloor[mode];
+        const minimum=mode==='dry'?.012:.03;
         return Math.max(minimum,Math.min(.95,floor*faktor));
       }
       function startMonitor(){
         if(rt.monitoring||!rt.analyser)return;
         rt.monitoring=true;
+        rt.lastLive=performance.now();
         rt.raf=requestAnimationFrame(monitor);
       }
       function stopMonitor(){
@@ -1578,10 +1613,23 @@
       }
       function monitor(){
         if(!rt.monitoring||!rt.analyser){rt.monitoring=false;return}
-        const data=new Uint8Array(rt.analyser.fftSize);
-        rt.analyser.getByteTimeDomainData(data);
-        let peak=0;
-        for(const v of data){const n=Math.abs((v-128)/128);if(n>peak)peak=n}
+        // Nächste Messung zuerst anmelden: was unten auch passiert, das Mithören läuft weiter.
+        rt.raf=requestAnimationFrame(monitor);
+        const data=rt.micBuf&&rt.micBuf.length===rt.analyser.fftSize?rt.micBuf:(rt.micBuf=new Float32Array(rt.analyser.fftSize));
+        rt.analyser.getFloatTimeDomainData(data);
+        let peak=0,sum=0;
+        for(let i=0;i<data.length;i++){const n=data[i]<0?-data[i]:data[i];if(n>peak)peak=n;if(i<64)sum+=data[i]}
+        const jetztMs=performance.now();
+        // Ein echtes Mikrofon rauscht immer. Exakt gleiche Werte über 1,5 s
+        // heißen: Spur stumm oder Kontext angehalten – dann neu verbinden.
+        if(peak>0&&sum!==rt.lastSum&&rt.audio&&rt.audio.state==='running'){rt.lastLive=jetztMs;rt.micSilent=false}
+        rt.lastSum=sum;
+        if(jetztMs-(rt.lastLive||jetztMs)>1500){
+          rt.micSilent=true;
+          // Höchstens zweimal von selbst; START versucht es danach erneut.
+          if((rt.repairs||0)<2&&(!rt.repairAt||jetztMs-rt.repairAt>5000)){rt.repairs=(rt.repairs||0)+1;rt.repairAt=jetztMs;ensureMic(true)}
+        }
+        if(rt.meterOn)drawLevel(peak,jetztMs);
         if(settings.debug){
           if(peak>rt.peakMax)rt.peakMax=peak;
           const jetzt=performance.now();
@@ -1596,33 +1644,69 @@
           const lock=settings.mode==='dry'?170:85;
           const now=performance.now();
           if(now>rt.ignoreUntil&&peak>rt.threshold&&now-rt.lastDetected>lock){
-            recordShot(now,peak);
             rt.lastDetected=now;
+            // Ein Fehler in der Anzeige darf das Mithören nie beenden.
+            try{recordShot(now,peak)}catch(e){console.error(e)}
           }
         }
-        rt.raf=requestAnimationFrame(monitor);
       }
+      /* Pegelanzeige auf der Erkennungsseite: Balken in dB (−60 … 0 dBFS),
+         roter Strich = Auslöseschwelle des gewählten Modus. Überschreitet ein
+         Geräusch die Schwelle, leuchtet der Balken kurz – genau dann würde
+         während eines Durchgangs ein Schuss gezählt. */
+      const dbPos=v=>Math.max(0,Math.min(100,(20*Math.log10(Math.max(v,1e-6))+60)/60*100));
+      function drawLevel(peak,now){
+        const thr=currentThreshold(detectMode);
+        if(peak>(rt.meterPeak||0)||now-(rt.meterAt||0)>250){rt.meterPeak=peak;rt.meterAt=now}
+        if(peak>thr)rt.meterHit=now;
+        if(now-(rt.meterDraw||0)<50)return;
+        rt.meterDraw=now;
+        const box=$('#level');
+        $('#levelFill').style.width=dbPos(rt.meterPeak)+'%';
+        $('#levelThr').style.left=dbPos(thr)+'%';
+        const hit=now-(rt.meterHit||0)<400;
+        box.classList.toggle('hit',hit);
+        box.classList.toggle('dead',!!rt.micSilent);
+        const pct=v=>(v*100).toFixed(1).replace('.',DEC)+' %';
+        $('#levelInfo').textContent=t('Pegel')+' '+pct(rt.meterPeak)+' · '+t('Schwelle')+' '+pct(thr);
+        $('#levelState').textContent=rt.micSilent?t('Kein Signal'):hit?t('Erkannt'):'';
+      }
+      async function meterOn(){
+        rt.meterOn=true;
+        $('#levelInfo').textContent=t('Mikrofon wird gestartet …');
+        $('#levelState').textContent='';
+        rt.repairs=0;
+        if(!rt.running)await ensureMic();
+      }
+      function meterOff(){rt.meterOn=false}
       // Kalibriert den Grundpegel für einen Modus; ohne Angabe den aktiven.
       async function calibrate(mode=settings.mode){
         if(rt.running){showToast(t('Erst den Durchgang beenden'));return}
         if(!await ensureMic())return;
+        // Erst messen, wenn wirklich Werte kommen (nach einem Neustart bis zu 1 s).
+        for(let i=0;i<10&&rt.micSilent;i++)await new Promise(r=>setTimeout(r,100));
+        if(rt.micSilent){showToast(t('Mikrofon liefert kein Signal'));return}
         $('#stateLabel').textContent=t('RUHE BITTE');
         showToast(t('Jetzt 1,5 s ruhig sein'));
         const samples=[];
         const take=()=>{
           if(!rt.analyser)return;
-          const d=new Uint8Array(rt.analyser.fftSize);
-          rt.analyser.getByteTimeDomainData(d);
-          let s=0;for(const v of d){const n=(v-128)/128;s+=n*n}
+          const d=new Float32Array(rt.analyser.fftSize);
+          rt.analyser.getFloatTimeDomainData(d);
+          let s=0;for(const n of d)s+=n*n;
           samples.push(Math.sqrt(s/d.length));
         };
         const id=setInterval(take,50);
         later(()=>{
           clearInterval(id);
-          settings.noiseFloor[mode]=Math.max(.006,samples.reduce((a,b)=>a+b,0)/(samples.length||1));
+          // Median statt Mittelwert: ein einzelnes Geräusch beim Messen verdirbt die Schwelle nicht.
+          samples.sort((a,b)=>a-b);
+          const median=samples.length?samples[samples.length>>1]:.01;
+          settings.noiseFloor[mode]=Math.max(.002,Math.min(.5,median));
           saveSettings();
+          if(rt.counting&&mode===settings.mode)rt.threshold=currentThreshold();
           $('#stateLabel').textContent=t('BEREIT');
-          showToast(t('Kalibriert'));
+          showToast(t('Kalibriert – Schwelle {0} %',(currentThreshold(mode)*100).toFixed(1).replace('.',DEC)));
         },1500);
       }
 
@@ -1634,6 +1718,7 @@
       async function start(){
         if(rt.running){stop();return}
         unlockCues();
+        rt.repairs=0;
         await ensureMic();
         await resumeAudio();
         await loadBuffers();
@@ -1695,19 +1780,22 @@
       }
       function recordShot(now=performance.now(),peak=null){
         if(!rt.counting)return;
-        const t=(now-rt.startAt)/1000;
-        if(t<.05)return;
+        // Nicht „t“ nennen: das ist die Übersetzungsfunktion. Früher hieß die Zeit
+        // hier t – der Aufruf t('Erster Schuss') warf dann einen Fehler und
+        // beendete die Mithör-Schleife nach dem ersten erkannten Schuss.
+        const zeit=(now-rt.startAt)/1000;
+        if(zeit<.05)return;
         if(settings.debug){
           $('#dbgHit').textContent=peak===null?t('manuell'):Math.round(peak*100)+' %';
-          $('#dbgTime').textContent=t.toFixed(3)+' s';
+          $('#dbgTime').textContent=zeit.toFixed(3)+' s';
         }
         const prev=rt.shots.length?rt.shots[rt.shots.length-1].time:0;
-        const split=t-prev;
-        rt.shots.push({time:t,split});
-        renderTime(t);
+        const split=zeit-prev;
+        rt.shots.push({time:zeit,split});
+        renderTime(zeit);
         renderShots();
         $('#lastSplit').innerHTML=rt.shots.length===1
-          ?t('Erster Schuss')+' <strong>'+format(t).full+' s</strong>'
+          ?t('Erster Schuss')+' <strong>'+format(zeit).full+' s</strong>'
           :t('Split')+' <strong>'+format(split).full+' s</strong>';
         if(rt.drillStop&&rt.shots.length>=rt.drillStop)finishRep(rt.runId);
       }
@@ -2077,6 +2165,7 @@
       }
       function closeModals(){
         ALL_MODALS.forEach(x=>$('#'+x).classList.remove('show'));
+        rt.meterOn=false;
         setNav(VIEW_NAV[currentView]||'timerBtn');
         releaseModal();
       }
@@ -2177,6 +2266,7 @@
       function showSettingsPage(name){
         $$('#moreBody .set-page').forEach(p=>p.hidden=p.dataset.page!==name);
         const page=$('#moreBody .set-page[data-page="'+name+'"]');
+        if(name==='detect')meterOn(); else meterOff();
         $('#moreTitle').textContent=page.dataset.title||t('Einstellungen');
         $('#moreBack').hidden=name==='root';
         $('#moreBody').scrollTop=0;

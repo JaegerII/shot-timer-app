@@ -301,5 +301,12 @@
   "Sucht Startsignal und Schüsse im gewählten Ausschnitt neu – mit der eingestellten Empfindlichkeit. Rückgängig geht mit dem Pfeil oben.": "Zoekt startsignaal en schoten opnieuw in het gekozen fragment, met de ingestelde gevoeligheid. Ongedaan maken met de pijl bovenaan.",
   "Schneide das Video zuerst auf deine Stage zu. Nur in diesem Bereich werden danach Schüsse gesucht.": "Knip de video eerst bij tot je stage. Alleen in dit deel wordt naar schoten gezocht.",
   "SCHÜSSE ERKENNEN": "SCHOTEN HERKENNEN",
-  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Vooral bij dry fire is de herkenning een benadering: een trekkerklik is zacht en lijkt op veel andere geluiden. Niet elke klik wordt zeker herkend en andere geluiden kunnen meetellen. Gebruik de tijden als ruwe richtlijn voor draw en splits, niet als exacte meting."
+  "Gerade beim Dry Fire ist die Erkennung eine Annäherung: Ein Trigger-Klick ist leise und klingt ähnlich wie viele andere Geräusche. Nicht jeder Klick wird sicher erkannt, und andere Geräusche können mitzählen. Nutze die Zeiten als grobe Orientierung für Draw und Splits, nicht als exakte Messung.": "Vooral bij dry fire is de herkenning een benadering: een trekkerklik is zacht en lijkt op veel andere geluiden. Niet elke klik wordt zeker herkend en andere geluiden kunnen meetellen. Gebruik de tijden als ruwe richtlijn voor draw en splits, niet als exacte meting.",
+  "Mikrofon wird gestartet …": "Microfoon wordt gestart …",
+  "Pegel": "Niveau",
+  "Schwelle": "Drempel",
+  "Kein Signal": "Geen signaal",
+  "Erkannt": "Herkend",
+  "Mikrofon liefert kein Signal": "Microfoon levert geen signaal",
+  "Kalibriert – Schwelle {0} %": "Gekalibreerd – drempel {0} %"
 };

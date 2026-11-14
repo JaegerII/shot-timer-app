@@ -11,16 +11,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Vibration auch, während das Mikrofon mithört: iOS schaltet Haptik und
         // Systemtöne sonst ab, sobald aufgenommen wird – dann vibrierte das
         // Startsignal nicht, nur das Ende des Durchgangs.
+        // Nur einmal setzen und nur, wenn noch nicht an: jedes Umstellen der
+        // Audiositzung während der Aufnahme kann WebKit das Mikrofon stumm schalten.
         allowHapticsWhileRecording()
-        NotificationCenter.default.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.allowHapticsWhileRecording()
-        }
         return true
     }
 
     func allowHapticsWhileRecording() {
         if #available(iOS 13.0, *) {
-            try? AVAudioSession.sharedInstance().setAllowHapticsAndSystemSoundsDuringRecording(true)
+            let session = AVAudioSession.sharedInstance()
+            if !session.allowHapticsAndSystemSoundsDuringRecording {
+                try? session.setAllowHapticsAndSystemSoundsDuringRecording(true)
+            }
         }
     }
 
