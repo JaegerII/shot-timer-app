@@ -9,7 +9,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Codemagic zählt die Builds hoch; Google Play verlangt bei jedem Upload einen höheren versionCode.
         versionCode Integer.valueOf(System.getenv("BUILD_NUMBER") ?: "1")
-        versionName "1.0"
+        versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
